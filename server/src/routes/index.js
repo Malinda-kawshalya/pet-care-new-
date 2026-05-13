@@ -1,0 +1,40 @@
+import express from "express";
+import AdoptionPost from "../models/AdoptionPost.js";
+import Appointment from "../models/Appointment.js";
+import Blog from "../models/Blog.js";
+import MatchRequest from "../models/MatchRequest.js";
+import MedicalRecord from "../models/MedicalRecord.js";
+import Message from "../models/Message.js";
+import Notification from "../models/Notification.js";
+import Order from "../models/Order.js";
+import Pet from "../models/Pet.js";
+import Product from "../models/Product.js";
+import Review from "../models/Review.js";
+import Vaccination from "../models/Vaccination.js";
+import adminRoutes from "./adminRoutes.js";
+import aiRoutes from "./aiRoutes.js";
+import authRoutes from "./authRoutes.js";
+import crudRoutes from "./crudRoutes.js";
+import uploadRoutes from "./uploadRoutes.js";
+import { createResourceController } from "../controllers/resourceController.js";
+
+const router = express.Router();
+
+router.use("/auth", authRoutes);
+router.use("/uploads", uploadRoutes);
+router.use("/pets", crudRoutes(createResourceController(Pet, ["owner"])));
+router.use("/medical-records", crudRoutes(createResourceController(MedicalRecord, ["pet", "veterinarian"])));
+router.use("/vaccinations", crudRoutes(createResourceController(Vaccination, ["pet"])));
+router.use("/appointments", crudRoutes(createResourceController(Appointment, ["pet", "owner", "provider"])));
+router.use("/products", crudRoutes(createResourceController(Product, ["seller"])));
+router.use("/orders", crudRoutes(createResourceController(Order, ["user", "items.product"])));
+router.use("/match-requests", crudRoutes(createResourceController(MatchRequest, ["requesterPet", "targetPet"])));
+router.use("/adoptions", crudRoutes(createResourceController(AdoptionPost, ["pet", "postedBy", "requests.user"])));
+router.use("/blogs", crudRoutes(createResourceController(Blog, ["author", "comments.user"])));
+router.use("/notifications", crudRoutes(createResourceController(Notification, ["user"])));
+router.use("/reviews", crudRoutes(createResourceController(Review, ["user"])));
+router.use("/messages", crudRoutes(createResourceController(Message, ["sender", "receiver", "relatedPet"])));
+router.use("/admin", adminRoutes);
+router.use("/ai", aiRoutes);
+
+export default router;
