@@ -98,6 +98,129 @@ img { display: block; max-width: 100%; }
   border-radius: 50%;
   background: var(--rose);
 }
+
+/* User Menu Dropdown */
+.user-menu-container {
+  position: relative;
+}
+.user-button {
+  background: #f3f1f7;
+  transition: all 0.2s ease;
+}
+.user-button:hover {
+  background: #e8e4f3;
+  color: var(--teal);
+}
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 34px rgba(22, 15, 42, 0.15);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+.user-menu-container:hover .user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: all;
+}
+.user-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: all;
+}
+.user-info {
+  padding: 12px 16px;
+}
+.user-info strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.user-info small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  word-break: break-word;
+}
+.dropdown-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 8px 0;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dropdown-item:hover {
+  background: #f7f5fb;
+  color: var(--teal);
+}
+.logout-btn {
+  color: var(--rose);
+}
+.logout-btn:hover {
+  background: #ffe3ed;
+  color: var(--red);
+}
+
+/* Demo Login Section */
+.demo-login-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.demo-eyebrow {
+  margin-bottom: 12px;
+}
+.demo-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 8px;
+}
+.demo-button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  background: #f8faf9;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.demo-button:hover {
+  border-color: var(--teal);
+  background: #def8ef;
+  color: var(--teal);
+}
+.demo-button:active {
+  transform: scale(0.98);
+}
+
 .mobile-menu { display: none; }
 
 .full-screen-section { min-height: calc(100vh - 73px); }

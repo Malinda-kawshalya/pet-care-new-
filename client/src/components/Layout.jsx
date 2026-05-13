@@ -1,27 +1,61 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
-import { Bell, Menu, PawPrint, Search, ShoppingCart, UserRound } from "lucide-react";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Bell, Menu, PawPrint, Search, ShoppingCart, UserRound, LogOut } from "lucide-react";
+import { useAuth, useUserRole } from "../hooks/useAuth";
+import { getDashboardPath } from "../utils/roleHelper";
 
 export default function Layout() {
-  const navItems = [
+  const { user, isAuthenticated, logout } = useAuth();
+  const { userRole } = useUserRole();
+  const navigate = useNavigate();
+
+  // Public navigation items (visible to all)
+  const publicNavItems = [
     { to: "/", label: "Home" },
-    { to: "/dashboard", label: "Dashboard" },
+    { to: "/modules/marketplace", label: "Shop" }
+  ];
+
+  // Dashboard item - only show if authenticated
+  const dashboardItem = isAuthenticated ? {
+    to: getDashboardPath(userRole),
+    label: "Dashboard"
+  } : null;
+
+  // Additional items - only show if authenticated
+  const authenticatedNavItems = isAuthenticated ? [
     { to: "/modules/pets", label: "Pets" },
     { to: "/modules/health", label: "Health" },
-    { to: "/modules/appointments", label: "Bookings" },
-    { to: "/modules/marketplace", label: "Shop" },
-    { to: "/modules/admin", label: "Admin" }
+    { to: "/modules/appointments", label: "Bookings" }
+  ] : [];
+
+  // Admin item - only show for admins
+  const adminItem = isAuthenticated && userRole === 'admin' ? {
+    to: "/dashboard/admin",
+    label: "Admin"
+  } : null;
+
+  // Build navigation array
+  const navItems = [
+    ...publicNavItems,
+    ...(dashboardItem ? [dashboardItem] : []),
+    ...authenticatedNavItems,
+    ...(adminItem ? [adminItem] : [])
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand" aria-label="Happy Pet home">
+        <Link to="/" className="brand" aria-label="Pet Care home">
           <span className="brand-mark"><PawPrint size={18} /></span>
           <span>Pet Care</span>
         </Link>
         <nav className="nav-links" aria-label="Main navigation">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to}>
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? "active" : ""}>
               {item.label}
             </NavLink>
           ))}
@@ -30,15 +64,40 @@ export default function Layout() {
           <Link to="/modules/locations" className="icon-button" aria-label="Search nearby services">
             <Search size={18} />
           </Link>
-          <Link to="/modules/notifications" className="icon-button notification-dot" aria-label="Notifications">
-            <Bell size={18} />
-          </Link>
+          {isAuthenticated && (
+            <Link to="/modules/notifications" className="icon-button notification-dot" aria-label="Notifications">
+              <Bell size={18} />
+            </Link>
+          )}
           <Link to="/modules/marketplace" className="icon-button" aria-label="Cart">
             <ShoppingCart size={18} />
           </Link>
-          <Link to="/login" className="icon-button" aria-label="Account">
-            <UserRound size={18} />
-          </Link>
+          
+          {isAuthenticated ? (
+            <div className="user-menu-container">
+              <button className="icon-button user-button" aria-label="User menu" title={user?.firstName}>
+                <UserRound size={18} />
+              </button>
+              <div className="user-dropdown">
+                <div className="user-info">
+                  <strong>{user?.firstName} {user?.lastName}</strong>
+                  <small>{user?.email}</small>
+                </div>
+                <div className="dropdown-divider"></div>
+                <Link to="/auth/profile" className="dropdown-item">My Profile</Link>
+                <Link to="/auth/settings" className="dropdown-item">Settings</Link>
+                <div className="dropdown-divider"></div>
+                <button onClick={handleLogout} className="dropdown-item logout-btn">
+                  <LogOut size={16} /> Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link to="/login" className="icon-button" aria-label="Login">
+              <UserRound size={18} />
+            </Link>
+          )}
+          
           <button className="icon-button mobile-menu" aria-label="Menu">
             <Menu size={19} />
           </button>

@@ -37,3 +37,19 @@ export function authorize(...roles) {
     return next();
   };
 }
+
+export function roleMiddleware(allowedRoles) {
+  return (req, res, next) => {
+    if (!req.user) {
+      res.status(401);
+      return next(new Error("Not authorized, user not found"));
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403);
+      return next(new Error(`Forbidden. Required roles: ${allowedRoles.join(", ")}`));
+    }
+
+    return next();
+  };
+}

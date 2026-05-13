@@ -216,6 +216,34 @@ export default function AuthPage() {
               <label>Password<input required type="password" value={loginForm.password} onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })} /></label>
               <button className="primary-button" disabled={loading} type="submit"><LogIn size={17} /> Login</button>
             </form>
+            
+            {/* Demo Login Options */}
+            <div className="demo-login-section">
+              <p className="eyebrow demo-eyebrow">Try demo accounts</p>
+              <div className="demo-buttons">
+                {[
+                  { role: "petOwner", email: "owner@demo.com", label: "Pet Owner" },
+                  { role: "veterinarian", email: "vet@demo.com", label: "Veterinarian" },
+                  { role: "petShop", email: "shop@demo.com", label: "Pet Shop" },
+                  { role: "groomer", email: "groomer@demo.com", label: "Groomer" },
+                  { role: "admin", email: "admin@demo.com", label: "Admin" }
+                ].map(({ role, email, label }) => (
+                  <button
+                    key={role}
+                    type="button"
+                    className="demo-button"
+                    onClick={async () => {
+                      setLoginForm({ email, password: "demo123" });
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                      await submitLogin({ preventDefault: () => {} });
+                    }}
+                    title={`Login as ${label}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </>
         )}
 

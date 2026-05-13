@@ -1,12 +1,19 @@
 import { ArrowRight, Check, MapPin, Play, ShieldCheck, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ModuleCard from "../components/ModuleCard.jsx";
 import SectionHeader from "../components/SectionHeader.jsx";
 import { advancedFeatures, databaseTables, modules, products, roles } from "../data/platformData.js";
+import { useAuth, useUserRole } from "../hooks/useAuth";
+import { getDashboardPath } from "../utils/roleHelper";
 
 const heroDog = "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=85";
 const careImage = "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=1200&q=85";
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
+  const { userRole } = useUserRole();
+  const navigate = useNavigate();
+
   return (
     <>
       <section className="hero full-screen-section">
@@ -22,9 +29,18 @@ export default function Home() {
             <a className="primary-button" href="#modules">
               View full system <ArrowRight size={18} />
             </a>
-            <a className="round-link" href="/dashboard">
-              <Play size={16} /> Open dashboard
-            </a>
+            {isAuthenticated ? (
+              <button 
+                className="round-link" 
+                onClick={() => navigate(getDashboardPath(userRole))}
+              >
+                <Play size={16} /> Go to Dashboard
+              </button>
+            ) : (
+              <a href="/login" className="round-link">
+                <Play size={16} /> Get Started
+              </a>
+            )}
           </div>
         </div>
         <div className="hero-visual" aria-label="Pet Care platform preview">

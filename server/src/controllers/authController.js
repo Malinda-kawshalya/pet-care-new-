@@ -191,7 +191,7 @@ export async function resendVerification(req, res, next) {
   }
 }
 
-export function sanitizeUser(user) {
+export async function sanitizeUser(user) {
   return {
     id: user._id,
     name: user.name,
@@ -215,4 +215,244 @@ function createToken() {
 
 function expiresInHours(hours) {
   return new Date(Date.now() + hours * 60 * 60 * 1000);
+}
+
+// Demo accounts seeding
+export async function seedDemoAccounts(req, res, next) {
+  try {
+    const demoAccounts = [
+      { name: "Pet Owner Demo", email: "owner@demo.com", password: "demo123", role: "petOwner" },
+      { name: "Veterinarian Demo", email: "vet@demo.com", password: "demo123", role: "veterinarian" },
+      { name: "Pet Shop Demo", email: "shop@demo.com", password: "demo123", role: "petShop" },
+      { name: "Groomer Demo", email: "groomer@demo.com", password: "demo123", role: "groomer" },
+      { name: "Admin Demo", email: "admin@demo.com", password: "demo123", role: "admin" }
+    ];
+
+    const results = [];
+    for (const account of demoAccounts) {
+      const existing = await User.findOne({ email: account.email });
+      if (existing) {
+        results.push({ ...account, status: "exists", userId: existing._id });
+      } else {
+        const user = await User.create({
+          name: account.name,
+          email: account.email,
+          password: account.password,
+          role: account.role,
+          isEmailVerified: true,
+          approvalStatus: "approved",
+          phone: `${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+          address: "123 Demo Street, Demo City",
+          providerProfile: account.role !== "petOwner" ? {
+            businessName: `${account.name} Business`,
+            licenseNumber: `DEMO-${account.role.toUpperCase()}-${Math.random().toString().slice(2, 8)}`,
+            serviceArea: "Demo City",
+            specialties: ["General Care"]
+          } : undefined
+        });
+        results.push({ ...account, status: "created", userId: user._id });
+      }
+    }
+
+    res.json({
+      message: "Demo accounts processed",
+      accounts: results
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Get all users
+export async function getAllUsers(req, res, next) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments();
+    const users = await User.find()
+      .select("-password")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      users: users.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        approvalStatus: user.approvalStatus,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        lastLoginAt: user.lastLoginAt
+      })),
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Get single user
+export async function getUser(req, res, next) {
+  try {
+    const user = await User.findById(req.params.userId).select("-password");
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    res.json({ user: await sanitizeUser(user) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Update user approval status
+export async function updateUserApprovalStatus(req, res, next) {
+  try {
+    const { userId } = req.params;
+    const { approvalStatus } = req.body;
+
+    const validStatuses = ["pending", "approved", "blocked", "rejected"];
+    if (!validStatuses.includes(approvalStatus)) {
+      res.status(400);
+      throw new Error(`Invalid approval status. Must be one of: ${validStatuses.join(", ")}`);
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { approvalStatus },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.json({
+      message: `User ${approvalStatus} successfully`,
+      user: await sanitizeUser(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Update user role
+export async function updateUserRole(req, res, next) {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    const validRoles = ["petOwner", "veterinarian", "petShop", "groomer", "admin"];
+    if (!validRoles.includes(role)) {
+      res.status(400);
+      throw new Error(`Invalid role. Must be one of: ${validRoles.join(", ")}`);
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    user.role = role;
+    
+    // Reset approval status for service providers
+    const providerRoles = ["veterinarian", "petShop", "groomer"];
+    if (providerRoles.includes(role) && user.approvalStatus === "approved") {
+      user.approvalStatus = "pending";
+    }
+
+    await user.save();
+    
+    res.json({
+      message: "User role updated successfully",
+      user: await sanitizeUser(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Delete user
+export async function deleteUser(req, res, next) {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Admin: Get user statistics
+export async function getUserStatistics(req, res, next) {
+  try {
+    const stats = {
+      totalUsers: await User.countDocuments(),
+      byRole: {},
+      byApprovalStatus: {}
+    };
+
+    // Count by role
+    for (const role of ["petOwner", "veterinarian", "petShop", "groomer", "admin"]) {
+      stats.byRole[role] = await User.countDocuments({ role });
+    }
+
+    // Count by approval status
+    for (const status of ["pending", "approved", "blocked", "rejected"]) {
+      stats.byApprovalStatus[status] = await User.countDocuments({ approvalStatus: status });
+    }
+
+    // Get verification stats
+    stats.emailVerified = await User.countDocuments({ isEmailVerified: true });
+    stats.emailUnverified = await User.countDocuments({ isEmailVerified: false });
+
+    res.json(stats);
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Get pending provider approvals
+export async function getPendingApprovals(req, res, next) {
+  try {
+    const pendingUsers = await User.find({
+      approvalStatus: "pending",
+      role: { $in: ["veterinarian", "petShop", "groomer"] }
+    })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: pendingUsers.length,
+      users: pendingUsers.map(user => ({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        businessName: user.providerProfile?.businessName,
+        licenseNumber: user.providerProfile?.licenseNumber,
+        createdAt: user.createdAt
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
 }
