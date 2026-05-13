@@ -17,12 +17,13 @@ import authRoutes from "./authRoutes.js";
 import crudRoutes from "./crudRoutes.js";
 import uploadRoutes from "./uploadRoutes.js";
 import { createResourceController } from "../controllers/resourceController.js";
+import petRoutes from "./petRoutes.js";
 
 const router = express.Router();
 
 router.use("/auth", authRoutes);
 router.use("/uploads", uploadRoutes);
-router.use("/pets", crudRoutes(createResourceController(Pet, ["owner"])));
+router.use("/pets", petRoutes);
 router.use("/medical-records", crudRoutes(createResourceController(MedicalRecord, ["pet", "veterinarian"])));
 router.use("/vaccinations", crudRoutes(createResourceController(Vaccination, ["pet"])));
 router.use("/appointments", crudRoutes(createResourceController(Appointment, ["pet", "owner", "provider"])));

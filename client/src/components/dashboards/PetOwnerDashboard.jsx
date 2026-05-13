@@ -1,140 +1,167 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BadgeCheck, CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList } from 'lucide-react';
+import api from '../../services/api.js';
+import { useAuth } from '../../hooks/useAuth.js';
 import './Dashboard.css';
 
 const PetOwnerDashboard = () => {
-  const [pets, setPets] = useState([
-    { id: 1, name: 'Max', breed: 'Golden Retriever', age: '3 years', vaccinated: true },
-    { id: 2, name: 'Bella', breed: 'Labrador', age: '2 years', vaccinated: true }
-  ]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [appointments, setAppointments] = useState([
-    { id: 1, service: 'Veterinary Checkup', date: '2025-05-20', time: '10:00 AM', status: 'Confirmed' },
-    { id: 2, service: 'Grooming', date: '2025-05-22', time: '2:00 PM', status: 'Pending' }
-  ]);
+  useEffect(() => {
+    let active = true;
+
+    async function loadDashboard() {
+      setLoading(true);
+      setError('');
+      try {
+        const [meResponse, petsResponse] = await Promise.all([
+          api.get('/auth/me'),
+          api.get('/pets')
+        ]);
+
+        if (!active) return;
+
+        const currentUser = meResponse.data.user || meResponse.data;
+        const allPets = petsResponse.data.items || petsResponse.data.pets || [];
+        const myPets = allPets.filter((pet) => {
+          const ownerId = pet.owner?._id || pet.owner?.id || pet.owner;
+          return ownerId === currentUser.id || ownerId === currentUser._id;
+        });
+
+        setPets(myPets);
+      } catch (dashboardError) {
+        if (!active) return;
+        setError(dashboardError.response?.data?.message || 'Unable to load your dashboard.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadDashboard();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const summary = useMemo(() => {
+    const vaccinationDue = pets.filter((pet) => ['dueSoon', 'overdue', 'unknown'].includes(pet.vaccinationStatus)).length;
+    return {
+      totalPets: pets.length,
+      vaccinationDue,
+      profileReady: user?.isEmailVerified ? 'Verified' : 'Pending verification'
+    };
+  }, [pets, user]);
+
+  const actions = [
+    { label: 'Manage Pets', icon: PawPrint, to: '/pets', detail: 'Add, edit, and delete pet profiles.' },
+    { label: 'Update Profile', icon: UserRoundCog, to: '/login?mode=profile', detail: 'Edit contact and account details.' },
+    { label: 'Change Password', icon: ShieldCheck, to: '/login?mode=profile', detail: 'Open your secure account panel.' },
+    { label: 'Email Verification', icon: BadgeCheck, to: '/login?mode=profile', detail: 'Verify or resend your email token.' },
+    { label: 'Reset Password', icon: RotateCcw, to: '/login?mode=forgot', detail: 'Request a password reset token.' },
+    { label: 'Book Appointment', icon: CalendarClock, to: '/modules/appointments', detail: 'Schedule care for your pets.' }
+  ];
 
   return (
     <div className="dashboard-container">
-      <h1>Pet Owner Dashboard</h1>
+      <div className="dashboard-hero" style={{ marginBottom: '1.5rem' }}>
+        <div>
+          <p className="eyebrow">Pet owner workspace</p>
+          <h1>Welcome{user?.name ? `, ${user.name}` : ''}</h1>
+          <p>Use this dashboard to manage your pets, keep your profile current, and jump into account actions quickly.</p>
+        </div>
+        <div className="dashboard-actions">
+          <button className="btn-primary" onClick={() => navigate('/pets')} type="button"><PawPrint size={16} /> Go to pets</button>
+          <Link className="btn-small" to="/login?mode=profile">Open profile</Link>
+        </div>
+      </div>
+
+      {error && <div className="form-alert error">{error}</div>}
 
       <div className="dashboard-grid">
-        {/* Stats Cards */}
         <div className="stats-section">
           <div className="stat-card">
-            <h3>4</h3>
-            <p>Total Pets</p>
+            <h3>{loading ? '...' : summary.totalPets}</h3>
+            <p>Total pets</p>
           </div>
           <div className="stat-card">
-            <h3>2</h3>
-            <p>Upcoming Appointments</p>
+            <h3>{loading ? '...' : summary.vaccinationDue}</h3>
+            <p>Vaccinations due</p>
           </div>
           <div className="stat-card">
-            <h3>3</h3>
-            <p>Vaccinations Due</p>
+            <h3>{user?.approvalStatus || 'approved'}</h3>
+            <p>Account status</p>
           </div>
           <div className="stat-card">
-            <h3>$245</h3>
-            <p>Total Spent</p>
+            <h3>{summary.profileReady}</h3>
+            <p>Email verification</p>
           </div>
         </div>
 
-        {/* My Pets Widget */}
+        <div className="widget quick-actions">
+          <div className="widget-header">
+            <h2>Account options</h2>
+            <span className="link">Fast access</span>
+          </div>
+          <div className="actions-grid">
+            {actions.map(({ label, icon: Icon, to, detail }) => (
+              <Link key={label} className="action-btn" to={to} style={{ textDecoration: 'none' }}>
+                <Icon size={18} />
+                <strong style={{ display: 'block', marginTop: 8 }}>{label}</strong>
+                <span style={{ display: 'block', opacity: 0.9, fontSize: 12, marginTop: 4 }}>{detail}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <div className="widget">
           <div className="widget-header">
-            <h2>My Pets</h2>
-            <button className="btn-primary">+ Add Pet</button>
+            <h2>My pets</h2>
+            <Link className="link" to="/pets">View all</Link>
           </div>
           <div className="pets-list">
-            {pets.map(pet => (
-              <div key={pet.id} className="pet-card">
+            {pets.length === 0 && !loading && <p>No pets yet. Start by adding your first pet profile.</p>}
+            {pets.map((pet) => (
+              <div key={pet._id} className="pet-card">
                 <div className="pet-info">
                   <h3>{pet.name}</h3>
-                  <p>{pet.breed} • {pet.age}</p>
-                  <span className={`status ${pet.vaccinated ? 'vaccinated' : 'not-vaccinated'}`}>
-                    {pet.vaccinated ? '✓ Vaccinated' : 'Vaccination Pending'}
+                  <p>{pet.breed || 'Breed not set'} • {pet.age ?? 'Age not set'}</p>
+                  <span className={`status ${pet.vaccinationStatus === 'upToDate' ? 'vaccinated' : 'pending'}`}>
+                    {pet.vaccinationStatus === 'upToDate' ? 'Vaccinated' : 'Vaccination review needed'}
                   </span>
                 </div>
                 <div className="pet-actions">
-                  <button className="btn-small">View Profile</button>
-                  <button className="btn-small">Medical Records</button>
+                  <button className="btn-small" type="button" onClick={() => navigate('/pets')}>Open profile</button>
+                  <button className="btn-small" type="button" onClick={() => navigate('/pets')}>Edit</button>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Appointments Widget */}
         <div className="widget">
           <div className="widget-header">
-            <h2>Upcoming Appointments</h2>
-            <button className="btn-primary">+ Book Appointment</button>
+            <h2>Next steps</h2>
+            <ClipboardList size={18} />
           </div>
-          <div className="appointments-list">
-            {appointments.map(apt => (
-              <div key={apt.id} className="appointment-card">
-                <div className="appointment-info">
-                  <h3>{apt.service}</h3>
-                  <p>📅 {apt.date} at {apt.time}</p>
-                  <span className={`status ${apt.status.toLowerCase()}`}>{apt.status}</span>
-                </div>
-                <div className="appointment-actions">
-                  <button className="btn-small">Details</button>
-                  <button className="btn-small">Reschedule</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="widget quick-actions">
-          <h2>Quick Actions</h2>
-          <div className="actions-grid">
-            <button className="action-btn">📝 Medical Records</button>
-            <button className="action-btn">🛒 Browse Store</button>
-            <button className="action-btn">💑 Find a Mate</button>
-            <button className="action-btn">🏠 Adoption Center</button>
-            <button className="action-btn">💬 Messages</button>
-            <button className="action-btn">📚 Community</button>
-          </div>
-        </div>
-
-        {/* Health Alerts */}
-        <div className="widget">
-          <h2>Health Alerts</h2>
           <div className="alerts-list">
-            <div className="alert alert-warning">
-              <span className="alert-icon">⚠️</span>
-              <div className="alert-content">
-                <h3>Vaccination Due</h3>
-                <p>Max needs rabies vaccination by May 25, 2025</p>
-              </div>
-            </div>
             <div className="alert alert-info">
-              <span className="alert-icon">ℹ️</span>
+              <span className="alert-icon"><HeartPulse size={22} /></span>
               <div className="alert-content">
-                <h3>Appointment Reminder</h3>
-                <p>Bella's grooming appointment tomorrow at 2:00 PM</p>
+                <h3>Keep pet records updated</h3>
+                <p>Update vaccination status and medical history whenever your vet shares new information.</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Recent Orders */}
-        <div className="widget">
-          <div className="widget-header">
-            <h2>Recent Orders</h2>
-            <a href="#" className="link">View All</a>
-          </div>
-          <div className="orders-list">
-            <div className="order-item">
-              <span>Pet Food Bundle</span>
-              <span className="price">$49.99</span>
-              <span className="status">Delivered</span>
-            </div>
-            <div className="order-item">
-              <span>Dog Toys Set</span>
-              <span className="price">$25.50</span>
-              <span className="status">Shipped</span>
+            <div className="alert alert-warning">
+              <span className="alert-icon"><ShieldCheck size={22} /></span>
+              <div className="alert-content">
+                <h3>Secure your account</h3>
+                <p>Use the profile panel to change your password or verify your email if needed.</p>
+              </div>
             </div>
           </div>
         </div>

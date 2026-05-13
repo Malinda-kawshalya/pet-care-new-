@@ -22,7 +22,7 @@ export default function Layout() {
 
   // Additional items - only show if authenticated
   const authenticatedNavItems = isAuthenticated ? [
-    { to: "/modules/pets", label: "Pets" },
+    { to: "/pets", label: "Pets" },
     { to: "/modules/health", label: "Health" },
     { to: "/modules/appointments", label: "Bookings" }
   ] : [];

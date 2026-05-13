@@ -12,6 +12,7 @@ import VetDashboard from "./components/dashboards/VetDashboard.jsx";
 import PetShopDashboard from "./components/dashboards/PetShopDashboard.jsx";
 import GroomerDashboard from "./components/dashboards/GroomerDashboard.jsx";
 import AdminDashboard from "./components/dashboards/AdminDashboard.jsx";
+import PetProfiles from "./pages/PetProfiles.jsx";
 
 export default function App() {
   return (
@@ -80,6 +81,12 @@ export default function App() {
               adminOnly={true}
             />
           } 
+        />
+
+        {/* Pets management for authenticated users */}
+        <Route
+          path="/pets"
+          element={<ProtectedRoute element={<PetProfiles />} />}
         />
       </Route>
     </Routes>

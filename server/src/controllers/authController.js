@@ -191,7 +191,7 @@ export async function resendVerification(req, res, next) {
   }
 }
 
-export async function sanitizeUser(user) {
+export function sanitizeUser(user) {
   return {
     id: user._id,
     name: user.name,

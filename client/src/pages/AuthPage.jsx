@@ -15,6 +15,8 @@ import {
   UserPlus
 } from "lucide-react";
 import api from "../services/api.js";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getDashboardPath } from "../utils/roleHelper.js";
 import { roles } from "../data/platformData.js";
 
 const emptyProfile = {
@@ -32,7 +34,8 @@ const emptyProfile = {
 };
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("register");
+  const location = useLocation();
+  const [mode, setMode] = useState(() => new URLSearchParams(location.search).get("mode") || "register");
   const [form, setForm] = useState(emptyProfile);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [profile, setProfile] = useState(null);
@@ -43,12 +46,20 @@ export default function AuthPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const isProvider = useMemo(() => ["veterinarian", "petShop", "groomer"].includes(form.role), [form.role]);
 
   useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    const nextMode = new URLSearchParams(location.search).get("mode");
+    if (nextMode) {
+      setMode(nextMode);
+    }
+  }, [location.search]);
 
   async function loadProfile() {
     const token = localStorage.getItem("petcare_token");
@@ -65,27 +76,41 @@ export default function AuthPage() {
 
   async function submitRegister(event) {
     event.preventDefault();
+    let redirectRole = null;
     await runAction(async () => {
       const { data } = await api.post("/auth/register", toPayload(form));
       localStorage.setItem("petcare_token", data.token);
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setProfile(data.user);
       setProfileForm(toProfileForm(data.user));
       setVerifyToken(data.verificationToken || "");
       setMode("profile");
+      redirectRole = data.user.role;
       return data.message || "Account created successfully";
     });
+    if (redirectRole) {
+      window.location.assign(getDashboardPath(redirectRole));
+    }
   }
 
-  async function submitLogin(event) {
-    event.preventDefault();
+  async function submitLogin(event, credentials = loginForm) {
+    event?.preventDefault?.();
+    let redirectRole = null;
     await runAction(async () => {
-      const { data } = await api.post("/auth/login", loginForm);
+      const { data } = await api.post("/auth/login", credentials);
       localStorage.setItem("petcare_token", data.token);
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setProfile(data.user);
       setProfileForm(toProfileForm(data.user));
       setMode("profile");
+      redirectRole = data.user.role;
       return "Welcome back";
     });
+    if (redirectRole) {
+      window.location.assign(getDashboardPath(redirectRole));
+    }
   }
 
   async function submitProfile(event) {
@@ -149,6 +174,8 @@ export default function AuthPage() {
 
   function logout() {
     localStorage.removeItem("petcare_token");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
     setProfile(null);
     setMode("login");
     setStatus("Logged out");
@@ -232,11 +259,7 @@ export default function AuthPage() {
                     key={role}
                     type="button"
                     className="demo-button"
-                    onClick={async () => {
-                      setLoginForm({ email, password: "demo123" });
-                      await new Promise(resolve => setTimeout(resolve, 100));
-                      await submitLogin({ preventDefault: () => {} });
-                    }}
+                    onClick={() => submitLogin(null, { email, password: "demo123" })}
                     title={`Login as ${label}`}
                   >
                     {label}
