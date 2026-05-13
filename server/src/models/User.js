@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 
+export const USER_ROLES = ["petOwner", "veterinarian", "petShop", "groomer", "admin"];
+export const APPROVAL_STATUSES = ["pending", "approved", "blocked"];
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -9,16 +12,27 @@ const userSchema = new mongoose.Schema(
     phone: String,
     role: {
       type: String,
-      enum: ["petOwner", "veterinarian", "petShop", "groomer", "admin"],
+      enum: USER_ROLES,
       default: "petOwner"
     },
     avatar: String,
     address: String,
+    bio: String,
     isEmailVerified: { type: Boolean, default: false },
-    approvalStatus: { type: String, enum: ["pending", "approved", "blocked"], default: "pending" },
+    approvalStatus: { type: String, enum: APPROVAL_STATUSES, default: "pending" },
     verificationToken: String,
+    verificationTokenExpires: Date,
     resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetPasswordExpires: Date,
+    lastLoginAt: Date,
+    approvedAt: Date,
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    providerProfile: {
+      businessName: String,
+      licenseNumber: String,
+      serviceArea: String,
+      specialties: [String]
+    }
   },
   { timestamps: true }
 );
