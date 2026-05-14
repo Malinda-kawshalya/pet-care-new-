@@ -52,11 +52,11 @@ export async function listAppointments(req, res, next) {
 export async function listProviders(req, res, next) {
   try {
     const { q = "", serviceType } = req.query;
-    const query = { approvalStatus: "approved" };
+    const query = { approvalStatus: { $ne: "blocked" } };
     if (serviceType === "grooming") query.role = "groomer";
     else if (serviceType === "vet") query.role = "veterinarian";
     else if (serviceType === "training") query.role = { $in: ["veterinarian", "groomer", "petShop"] };
-    const providers = await User.find(query).select("name email role providerProfile address");
+    const providers = await User.find(query).select("name email role approvalStatus providerProfile address");
     const items = providers.filter((provider) => {
       if (serviceType === "training") {
         const specialties = provider.providerProfile?.specialties || [];
@@ -135,7 +135,7 @@ export async function createAppointment(req, res, next) {
     }
 
     const providerDoc = await User.findById(provider);
-    if (!providerDoc || providerDoc.approvalStatus !== "approved" || !isProvider(providerDoc, serviceType)) {
+    if (!providerDoc || providerDoc.approvalStatus === "blocked" || !isProvider(providerDoc, serviceType)) {
       res.status(400);
       throw new Error("Selected provider is not available");
     }
