@@ -72,6 +72,11 @@ export default function Layout() {
               {item.label}
             </NavLink>
           ))}
+          {isAuthenticated && (
+            <NavLink to={getDashboardPath(userRole)} className={({ isActive }) => isActive ? "active" : ""}>
+              Dashboard
+            </NavLink>
+          )}
         </nav>
         <div className="top-actions">
           <Link to="/contact" className="topbar-cta">Let's talk</Link>
@@ -79,13 +84,20 @@ export default function Layout() {
             <Search size={18} />
           </Link>
           {isAuthenticated && (
-            <Link to="/notifications" className="icon-button notification-dot" aria-label="Notifications">
-              <Bell size={18} />
+            <>
+              <Link to="/notifications" className="icon-button notification-dot" aria-label="Notifications">
+                <Bell size={18} />
+              </Link>
+              <Link to="/cart" className="icon-button" aria-label="Cart">
+                <ShoppingCart size={18} />
+              </Link>
+            </>
+          )}
+          {!isAuthenticated && (
+            <Link to="/cart" className="icon-button" aria-label="Cart">
+              <ShoppingCart size={18} />
             </Link>
           )}
-          <Link to="/cart" className="icon-button" aria-label="Cart">
-            <ShoppingCart size={18} />
-          </Link>
 
           {isAuthenticated ? (
             <div
@@ -129,9 +141,12 @@ export default function Layout() {
               )}
             </div>
           ) : (
-            <Link to="/login" className="icon-button" aria-label="Login">
-              <UserRound size={18} />
-            </Link>
+            <>
+              <Link to="/login" className="topbar-cta">Login</Link>
+              <Link to="/login" className="icon-button" aria-label="Login">
+                <UserRound size={18} />
+              </Link>
+            </>
           )}
 
           <button className="icon-button mobile-menu" aria-label="Menu">
