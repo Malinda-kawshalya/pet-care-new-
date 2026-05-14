@@ -1,76 +1,10 @@
 .admin-shell-modern {
-  display: grid;
-  grid-template-columns: 270px 1fr;
+  display: block;
   min-height: calc(100vh - 72px);
   background:
     radial-gradient(circle at 10% 20%, rgba(17, 140, 126, 0.08), transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(40, 107, 200, 0.1), transparent 45%),
     linear-gradient(135deg, #f7fbfa 0%, #eef4fb 100%);
-}
-
-.admin-sidebar-modern {
-  border-right: 1px solid #dce7e5;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
-  padding: 20px;
-}
-
-.admin-brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.admin-brand h2 {
-  margin: 0;
-  font-size: 1.05rem;
-  color: #0f2f2b;
-}
-
-.admin-brand p {
-  margin: 3px 0 0;
-  font-size: 0.8rem;
-  color: #4b6662;
-}
-
-.admin-brand-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #118c7e, #286bc8);
-  box-shadow: 0 0 0 5px rgba(17, 140, 126, 0.15);
-}
-
-.admin-nav-modern {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #dbe6e4;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: #294541;
-  cursor: pointer;
-  text-align: left;
-  font-weight: 600;
-}
-
-.admin-nav-item:hover {
-  border-color: #9ac6be;
-  transform: translateY(-1px);
-}
-
-.admin-nav-item.active {
-  background: linear-gradient(135deg, #0f766b, #286bc8);
-  color: #ffffff;
-  border-color: transparent;
 }
 
 .admin-main-modern {
@@ -318,17 +252,7 @@
 
 @media (max-width: 1024px) {
   .admin-shell-modern {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar-modern {
-    border-right: none;
-    border-bottom: 1px solid #dce7e5;
-  }
-
-  .admin-nav-modern {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: block;
   }
 
   .admin-overview-grid {
@@ -353,10 +277,6 @@
 
   .admin-overview-grid,
   .report-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-nav-modern {
     grid-template-columns: 1fr;
   }
 }

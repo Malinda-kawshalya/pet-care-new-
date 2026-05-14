@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect } from 'react';
-import { getUser, getAuthToken, isAuthenticated, logout } from '../utils/authHelper';
+import { useState, useEffect } from 'react';
+import { getUser, isAuthenticated, logout } from '../utils/authHelper';
 import { getRolePermissions } from '../utils/roleHelper';
 
 // Custom hook for authentication
