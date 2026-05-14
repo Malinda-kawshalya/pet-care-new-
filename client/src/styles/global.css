@@ -387,6 +387,61 @@ img { display: block; max-width: 100%; }
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
+
+/* Home modules showcase specific styling */
+.home-modules-showcase {
+  padding-top: 18px;
+  padding-bottom: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbff 40%, #f7fff7 100%);
+}
+
+.module-showcase-pills {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.module-showcase-pills span {
+  background: #fff;
+  border: 1px solid rgba(17,24,39,0.06);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: #233a56;
+  box-shadow: 0 8px 20px rgba(15,23,42,0.04);
+}
+
+.home-modules-showcase .module-card {
+  min-height: 280px;
+  padding: 28px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,252,255,0.95));
+  box-shadow: 0 22px 60px rgba(15,23,42,0.06);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.home-modules-showcase .module-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+}
+
+.home-modules-showcase .module-card h3 { margin-top: 18px; font-size: 1.28rem; }
+.home-modules-showcase .module-card p { color: var(--muted); line-height: 1.7; }
+
+.home-modules-showcase .module-card:hover { transform: translateY(-8px); box-shadow: 0 36px 90px rgba(15,23,42,0.12); }
+
+/* Tone-specific accents for the small header bar */
+.home-modules-showcase .tone-amber::before { background: linear-gradient(90deg,#f3bf60,#f6d69a); }
+.home-modules-showcase .tone-blue::before { background: linear-gradient(90deg,#2f7be0,#8fb8ff); }
+.home-modules-showcase .tone-mint::before { background: linear-gradient(90deg,#10a37f,#8cd8bd); }
+.home-modules-showcase .tone-rose::before { background: linear-gradient(90deg,#e65b8a,#f3a6c6); }
+.home-modules-showcase .tone-green::before { background: linear-gradient(90deg,#2f9f53,#8fd6a0); }
+.home-modules-showcase .tone-pink::before { background: linear-gradient(90deg,#c255a6,#e89ed1); }
+
 .module-card {
   position: relative;
   min-height: 232px;

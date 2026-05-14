@@ -56,7 +56,7 @@ export default function Home() {
         </div>
         <div className="hero-strip">
           <span>Live modules</span>
-          <strong>Authentication, pets, health, bookings, shop, matching, adoption, community, admin, AI, maps, security.</strong>
+          <strong>Authentication, pets, health, bookings, marketplace, adoption, security.</strong>
           <span className="mini-badge"><ShieldCheck size={18} /> Admin ready</span>
         </div>
       </section>
@@ -80,38 +80,37 @@ export default function Home() {
         <img className="section-photo" src={careImage} alt="Dog receiving care from owner" />
       </section>
 
-      <section className="section role-section">
-        <SectionHeader
-          eyebrow="Role-based access"
-          title="Separate permissions for every user type"
-          text="The presentation shows which functions belong to pet owners, vets, pet shops, groomers, and admins."
-        />
-        <div className="role-grid">
-          {roles.map((role) => (
-            <article className="role-card" key={role.id}>
-              <h3>{role.label}</h3>
-              <p>{role.scope}</p>
-              <div>
-                {role.permissions.map((permission) => (
-                  <span key={permission}>{permission}</span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* Role-based access section removed per user request */}
 
       <section className="section" id="modules">
         <SectionHeader
           eyebrow="System modules"
           title="All core system functions"
-          text="Each module page includes the required functions, workflows, actions, collection mapping, and permission notes."
+          text="Highlighted user-facing modules. (Authentication, Admin, Community and AI hidden on home.)"
           align="center"
         />
-        <div className="module-grid">
-          {modules.map((module) => (
-            <ModuleCard key={module.id} module={module} />
-          ))}
+        <div className="home-modules-showcase">
+          <div className="module-showcase-pills">
+            {[
+              "Pet Profiles",
+              "Health",
+              "Appointments",
+              "Marketplace",
+              "Adoption",
+              "Notifications",
+              "Security",
+              "Find a Mate"
+            ].map((p) => (
+              <span key={p}>{p}</span>
+            ))}
+          </div>
+          <div className="module-grid">
+            {modules
+              .filter((m) => !["auth", "admin", "community", "ai"].includes(m.id))
+              .map((module) => (
+                <ModuleCard key={module.id} module={module} />
+              ))}
+          </div>
         </div>
       </section>
 
@@ -174,22 +173,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="testimonial-section section">
-        <SectionHeader eyebrow="Project readiness" title="A complete presentation-ready product surface" align="center" />
-        <div className="testimonial-grid">
-          {[
-            "Vaccination reminders, vet notes, QR records, and AI risk alerts are all visible.",
-            "Admin approval, blocking, reporting, analytics, and moderation are covered.",
-            "Marketplace, adoption, pet matching, blogs, maps, and notifications are included."
-          ].map((text, index) => (
-            <article key={text} className="testimonial-card">
-              <p>{text}</p>
-              <strong>{["Health module", "Admin module", "Service modules"][index]}</strong>
-              <span><MapPin size={14} /> Pet Care platform</span>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* Testimonial 'A complete presentation-ready product surface' removed per user request */}
 
       <footer className="footer">
         <div>
