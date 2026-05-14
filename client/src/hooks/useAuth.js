@@ -65,7 +65,7 @@ export const useUserRole = () => {
     userRole: user?.role,
     hasRole,
     isPetOwner: user?.role === 'petOwner',
-    isVet: user?.role === 'vet',
+    isVet: user?.role === 'veterinarian',
     isPetShop: user?.role === 'petShop',
     isGroomer: user?.role === 'groomer',
     isAdmin: user?.role === 'admin'

@@ -1,7 +1,7 @@
 // Role-based helper functions
 export const USER_ROLES = {
   PET_OWNER: 'petOwner',
-  VETERINARIAN: 'vet',
+  VETERINARIAN: 'veterinarian',
   PET_SHOP: 'petShop',
   GROOMER: 'groomer',
   ADMIN: 'admin'
@@ -9,7 +9,7 @@ export const USER_ROLES = {
 
 export const ROLE_NAMES = {
   petOwner: 'Pet Owner',
-  vet: 'Veterinarian',
+  veterinarian: 'Veterinarian',
   petShop: 'Pet Shop Owner',
   groomer: 'Groomer',
   admin: 'Administrator'

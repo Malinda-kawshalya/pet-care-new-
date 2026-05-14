@@ -15,6 +15,14 @@ const petSchema = new mongoose.Schema(
     location: {
       city: String,
       coordinates: { lat: Number, lng: Number }
+    },
+    matchProfile: {
+      isLooking: { type: Boolean, default: false },
+      preferredBreed: String,
+      preferredGender: { type: String, enum: ["male", "female", "any"], default: "any" },
+      preferredAgeMin: Number,
+      preferredAgeMax: Number,
+      notes: String
     }
   },
   { timestamps: true }

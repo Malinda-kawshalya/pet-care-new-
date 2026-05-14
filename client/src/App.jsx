@@ -13,6 +13,12 @@ import Checkout from "./pages/Checkout.jsx";
 import Orders, { OrderView } from "./pages/Orders.jsx";
 import MedicalRecords from "./pages/MedicalRecords.jsx";
 import Vaccinations from "./pages/Vaccinations.jsx";
+import Appointments from "./pages/Appointments.jsx";
+import Matchmaking from "./pages/Matchmaking.jsx";
+import Adoption from "./pages/Adoption.jsx";
+import Messages from "./pages/Messages.jsx";
+import Notifications from "./pages/Notifications.jsx";
+import AI from "./pages/AI.jsx";
 
 // Dashboard Components
 import PetOwnerDashboard from "./components/dashboards/PetOwnerDashboard.jsx";
@@ -55,7 +61,7 @@ export default function App() {
           element={
             <ProtectedRoute 
               element={<VetDashboard />} 
-              requiredRole="vet" 
+              requiredRole="veterinarian" 
             />
           } 
         />
@@ -109,6 +115,12 @@ export default function App() {
         <Route path="/orders/:id" element={<ProtectedRoute element={<OrderView />} />} />
         <Route path="/medical-records" element={<ProtectedRoute element={<MedicalRecords />} />} />
         <Route path="/vaccinations" element={<ProtectedRoute element={<Vaccinations />} />} />
+        <Route path="/appointments" element={<ProtectedRoute element={<Appointments />} />} />
+        <Route path="/matchmaking" element={<ProtectedRoute element={<Matchmaking />} />} />
+        <Route path="/adoption" element={<ProtectedRoute element={<Adoption />} />} />
+        <Route path="/messages" element={<ProtectedRoute element={<Messages />} />} />
+        <Route path="/notifications" element={<ProtectedRoute element={<Notifications />} />} />
+        <Route path="/ai" element={<ProtectedRoute element={<AI />} />} />
       </Route>
     </Routes>
   );

@@ -23,9 +23,13 @@ export default function Layout() {
   // Additional items - only show if authenticated
   const authenticatedNavItems = isAuthenticated ? [
     { to: "/pets", label: "Pets" },
-    { to: "/modules/health", label: "Health" },
-    { to: "/modules/appointments", label: "Bookings" },
-    { to: "/community", label: "Community" }
+    { to: "/medical-records", label: "Health" },
+    { to: "/appointments", label: "Bookings" },
+    { to: "/community", label: "Community" },
+    { to: "/matchmaking", label: "Match" },
+    { to: "/adoption", label: "Adoption" },
+    { to: "/messages", label: "Messages" },
+    { to: "/ai", label: "AI" }
   ] : [];
 
   // Admin item - only show for admins
@@ -66,7 +70,7 @@ export default function Layout() {
             <Search size={18} />
           </Link>
           {isAuthenticated && (
-            <Link to="/modules/notifications" className="icon-button notification-dot" aria-label="Notifications">
+            <Link to="/notifications" className="icon-button notification-dot" aria-label="Notifications">
               <Bell size={18} />
             </Link>
           )}
