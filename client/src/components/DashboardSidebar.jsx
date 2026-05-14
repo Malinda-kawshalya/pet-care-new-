@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   PawPrint,
   Heart,
@@ -16,7 +16,8 @@ import {
   FileText,
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Menu
 } from "lucide-react";
 import { useAuth, useUserRole } from "../hooks/useAuth.js";
 
@@ -61,66 +62,91 @@ const menuItems = {
 };
 
 export default function DashboardSidebar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { userRole } = useUserRole();
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const currentMenuItems = menuItems[userRole] || menuItems.petOwner;
 
   const handleLogout = () => {
     logout();
+    setIsMobileOpen(false);
     navigate("/login");
   };
 
+  const closeMobile = () => setIsMobileOpen(false);
+
   return (
-    <aside className={`dashboard-sidebar ${isExpanded ? "expanded" : "collapsed"}`}>
-      <div className="sidebar-header">
-        <div className={`brand-mini ${!isExpanded ? "hidden" : ""}`}>
-          <span className="brand-icon"><PawPrint size={20} /></span>
-          {isExpanded && <span className="brand-text">Pet Care</span>}
-        </div>
-        <button
-          className="sidebar-toggle"
-          onClick={() => setIsExpanded(!isExpanded)}
-          title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          <ChevronDown size={18} />
-        </button>
-      </div>
+    <>
+      <button
+        className="dashboard-mobile-trigger"
+        type="button"
+        aria-label="Open dashboard navigation"
+        onClick={() => setIsMobileOpen(true)}
+      >
+        <Menu size={18} />
+      </button>
 
-      <nav className="sidebar-nav">
-        {currentMenuItems.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="sidebar-nav-item"
-            title={item.label}
+      <div
+        className={`dashboard-sidebar-overlay ${isMobileOpen ? "show" : ""}`}
+        onClick={closeMobile}
+        aria-hidden={!isMobileOpen}
+      />
+
+      <aside className={`dashboard-sidebar ${isExpanded ? "expanded" : "collapsed"} ${isMobileOpen ? "mobile-open" : ""}`}>
+        <div className="sidebar-header">
+          <div className={`brand-mini ${!isExpanded ? "hidden" : ""}`}>
+            <span className="brand-icon"><PawPrint size={20} /></span>
+            {isExpanded && <span className="brand-text">Pet Care</span>}
+          </div>
+          <button
+            className="sidebar-toggle"
+            onClick={() => setIsExpanded(!isExpanded)}
+            title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            type="button"
           >
-            <item.icon size={18} />
-            {isExpanded && <span>{item.label}</span>}
-          </Link>
-        ))}
-      </nav>
+            <ChevronDown size={18} />
+          </button>
+        </div>
 
-      <div className="sidebar-footer">
-        <Link
-          to="/account"
-          className="sidebar-nav-item account-link"
-          title="Account Settings"
-        >
-          <Settings size={18} />
-          {isExpanded && <span>Settings</span>}
-        </Link>
-        <button
-          className="sidebar-nav-item logout-link"
-          onClick={handleLogout}
-          title="Logout"
-        >
-          <LogOut size={18} />
-          {isExpanded && <span>Logout</span>}
-        </button>
-      </div>
-    </aside>
+        <nav className="sidebar-nav">
+          {currentMenuItems.map((item) => (
+            <NavLink
+              key={`${item.to}-${item.label}`}
+              to={item.to}
+              className={({ isActive }) => `sidebar-nav-item ${isActive ? "active" : ""}`}
+              title={item.label}
+              onClick={closeMobile}
+            >
+              <item.icon size={18} />
+              {isExpanded && <span>{item.label}</span>}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <Link
+            to="/account"
+            className="sidebar-nav-item account-link"
+            title="Account Settings"
+            onClick={closeMobile}
+          >
+            <Settings size={18} />
+            {isExpanded && <span>Settings</span>}
+          </Link>
+          <button
+            className="sidebar-nav-item logout-link"
+            onClick={handleLogout}
+            title="Logout"
+            type="button"
+          >
+            <LogOut size={18} />
+            {isExpanded && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

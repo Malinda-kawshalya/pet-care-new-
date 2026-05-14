@@ -1,8 +1,8 @@
 /* Dashboard Container */
 .dashboard-container {
-  padding: 2rem;
+  padding: clamp(18px, 3vw, 32px);
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 73px);
 }
 
 .dashboard-container h1 {
@@ -15,17 +15,17 @@
 /* Grid Layout */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-  max-width: 1600px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  max-width: 1680px;
   margin: 0 auto;
 }
 
 /* Stats Section */
 .stats-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
   grid-column: 1 / -1;
 }
 
@@ -71,7 +71,7 @@
 .widget {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
+  padding: clamp(16px, 2.4vw, 24px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -484,9 +484,9 @@
 
 .groomer-shell-modern {
   width: 100%;
-  padding: 2rem;
+  padding: clamp(18px, 3vw, 32px);
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 73px);
 }
 
 .action-btn-link {
@@ -1032,6 +1032,40 @@
   .widget-form-grid-3,
   .modal-actions {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero .dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  @media (max-width: 980px) {
+    .widget-form-grid-2,
+    .widget-form-grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .pet-card,
+    .appointment-card,
+    .patient-card,
+    .inventory-item,
+    .order-row,
+    .schedule-item,
+    .service-card,
+    .approval-item,
+    .report-item {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .pet-actions,
+    .patient-actions,
+    .product-actions,
+    .service-actions,
+    .appointment-actions {
+      justify-content: flex-start;
+    }
   }
 
   .btn-primary {

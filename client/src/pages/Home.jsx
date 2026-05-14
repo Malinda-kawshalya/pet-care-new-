@@ -8,6 +8,7 @@ import ToastContainer from "../components/ToastContainer.jsx";
 import CartModal from "../components/CartModal.jsx";
 import api from "../services/api.js";
 import { useCart } from "../contexts/CartContext.jsx";
+import { getUploadUrl } from "../utils/media.js";
 import { advancedFeatures, databaseTables, modules, roles } from "../data/platformData.js";
 import { useAuth, useUserRole } from "../hooks/useAuth";
 import { getDashboardPath } from "../utils/roleHelper";
@@ -70,6 +71,11 @@ export default function Home() {
   const [loadingAdoptions, setLoadingAdoptions] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const resolveAdoptionImage = (post) => {
+    const image = post?.pet?.images?.[0] || post?.images?.[0] || post?.photo;
+    return getUploadUrl(image, adoptionImage);
+  };
 
   const addToast = (message, type = 'success', duration = 4000) => {
     const id = Date.now();
@@ -294,13 +300,17 @@ export default function Home() {
           <div className="pet-grid">
             {adoptionItems.map((post) => (
               <article key={post._id} className="pet-card card">
-                <div style={{width:120, height:90, overflow:'hidden', borderRadius:8}}>
-                  <img src={post.pet?.photo || post.photo || 'https://via.placeholder.com/160'} alt={post.pet?.name || post.title} />
+                <div style={{ width: 120, height: 90, overflow: "hidden", borderRadius: 8, flexShrink: 0 }}>
+                  <img
+                    src={resolveAdoptionImage(post)}
+                    alt={post.pet?.name || post.title}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 </div>
-                <div style={{flex:1, marginLeft:12}}>
+                <div style={{ flex: 1, marginLeft: 12 }}>
                   <h3>{post.pet?.name || post.title}</h3>
-                  <p className="muted">{post.location || post.pet?.breed || ''}</p>
-                  <div style={{marginTop:8}}>
+                  <p className="muted">{post.location || post.pet?.breed || ""}</p>
+                  <div style={{ marginTop: 8 }}>
                     <a href="/adoption" className="btn btn-outline">View</a>
                   </div>
                 </div>

@@ -56,11 +56,11 @@ body {
 .footer,
 main {
   position: relative;
-  z-index: 10000;
+  z-index: 1;
 }
 
 .topbar {
-  z-index: 50;
+  z-index: 1200;
   top: 0;
   padding: 20px clamp(18px, 3vw, 44px);
   background: rgba(255, 255, 255, 0.94);

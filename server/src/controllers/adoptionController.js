@@ -9,7 +9,7 @@ async function canManagePost(post, user) {
 
 export async function listAdoptions(req, res, next) {
   try {
-    const { q = "", status = "open" } = req.query;
+    const { q = "", status = "open", limit } = req.query;
     const filter = {};
     if (req.user.role !== "admin") filter.status = status;
     if (req.user.role !== "admin") {
@@ -29,7 +29,10 @@ export async function listAdoptions(req, res, next) {
         .some((field) => String(field).toLowerCase().includes(search));
     });
 
-    res.json({ items: normalized });
+    const parsedLimit = Number.parseInt(limit, 10);
+    const hasLimit = Number.isFinite(parsedLimit) && parsedLimit > 0;
+
+    res.json({ items: hasLimit ? normalized.slice(0, parsedLimit) : normalized });
   } catch (error) {
     next(error);
   }

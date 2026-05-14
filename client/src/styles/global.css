@@ -1978,38 +1978,43 @@ input, select, textarea {
 
 /* Dashboard Sidebar */
 .dashboard-with-sidebar {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0;
+  position: relative;
   min-height: calc(100vh - 73px);
-  /* reserve space for fixed sidebar so content doesn't overlap */
-  padding-left: 280px;
 }
 
 .dashboard-sidebar {
   position: fixed;
   top: 73px;
   left: 0;
-  z-index: 9999;
+  z-index: 1300;
   flex-shrink: 0;
   width: 280px;
   height: calc(100vh - 73px);
-  background: #f8faf9;
-  border-right: 1px solid var(--line);
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.24);
   display: flex;
   flex-direction: column;
   padding: 0;
-  transition: width 0.3s ease, left 0.3s ease;
+  transition: width 0.28s ease, transform 0.28s ease;
+  box-shadow: 10px 0 32px rgba(15, 23, 42, 0.08);
 }
 
 .dashboard-sidebar.collapsed {
   width: 74px;
-  /* when collapsed, shrink reserved area for content */
 }
 
-/* ensure content area adjusts when sidebar is collapsed */
-.dashboard-with-sidebar.collapsed {
-  padding-left: 74px;
+.dashboard-sidebar + .dashboard-container,
+.dashboard-sidebar + .admin-shell-modern,
+.dashboard-sidebar + .groomer-shell-modern {
+  margin-left: 280px;
+  min-height: calc(100vh - 73px);
+  transition: margin-left 0.28s ease;
+}
+
+.dashboard-sidebar.collapsed + .dashboard-container,
+.dashboard-sidebar.collapsed + .admin-shell-modern,
+.dashboard-sidebar.collapsed + .groomer-shell-modern {
+  margin-left: 74px;
 }
 
 .sidebar-header {
@@ -2058,6 +2063,10 @@ input, select, textarea {
   background: transparent;
   color: var(--muted);
   transition: all 0.2s ease;
+}
+
+.dashboard-sidebar.collapsed .sidebar-toggle svg {
+  transform: rotate(180deg);
 }
 
 .sidebar-toggle:hover {
@@ -2123,4 +2132,73 @@ input, select, textarea {
   min-width: 0;
   overflow-y: auto;
   padding: clamp(20px, 4vw, 40px);
+}
+
+.dashboard-sidebar-overlay,
+.dashboard-mobile-trigger {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-sidebar {
+    width: min(320px, 86vw);
+    transform: translateX(-105%);
+  }
+
+  .dashboard-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .dashboard-sidebar.collapsed {
+    width: min(320px, 86vw);
+  }
+
+  .dashboard-sidebar + .dashboard-container,
+  .dashboard-sidebar + .admin-shell-modern,
+  .dashboard-sidebar + .groomer-shell-modern,
+  .dashboard-sidebar.collapsed + .dashboard-container,
+  .dashboard-sidebar.collapsed + .admin-shell-modern,
+  .dashboard-sidebar.collapsed + .groomer-shell-modern {
+    margin-left: 0;
+  }
+
+  .dashboard-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 73px 0 0;
+    background: rgba(2, 8, 23, 0.38);
+    backdrop-filter: blur(2px);
+    z-index: 1200;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+  }
+
+  .dashboard-sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .dashboard-mobile-trigger {
+    position: fixed;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    left: 14px;
+    top: 84px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--ink);
+    z-index: 1201;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+  }
+
+  .dashboard-container,
+  .admin-shell-modern,
+  .groomer-shell-modern {
+    padding-top: 62px;
+  }
 }
