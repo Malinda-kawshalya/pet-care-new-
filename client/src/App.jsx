@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Home from "./pages/Home.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ModulePage from "./pages/ModulePage.jsx";
+<<<<<<< Updated upstream
 import AuthPage from "./pages/AuthPage.jsx";
 import Community from "./pages/Community.jsx";
 import Marketplace from "./pages/Marketplace.jsx";
@@ -19,6 +20,11 @@ import Adoption from "./pages/Adoption.jsx";
 import Messages from "./pages/Messages.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import AI from "./pages/AI.jsx";
+=======
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
+import AccountPage from "./pages/AccountPage.jsx";
+>>>>>>> Stashed changes
 
 // Dashboard Components
 import PetOwnerDashboard from "./components/dashboards/PetOwnerDashboard.jsx";
@@ -34,8 +40,19 @@ export default function App() {
       <Route element={<Layout />}>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<AuthPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/modules/:moduleId" element={<ModulePage />} />
+
+        <Route
+          path="/account"
+          element={<ProtectedRoute element={<AccountPage />} />}
+        />
+
+        <Route
+          path="/auth/profile"
+          element={<ProtectedRoute element={<AccountPage />} />}
+        />
         
         {/* Protected Routes - Dashboard redirect (legacy) */}
         <Route 

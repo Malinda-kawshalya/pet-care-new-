@@ -80,17 +80,17 @@ export default function Layout() {
           
           {isAuthenticated ? (
             <div className="user-menu-container">
-              <button className="icon-button user-button" aria-label="User menu" title={user?.firstName}>
+              <button className="icon-button user-button" aria-label="User menu" title={user?.name || "User"}>
                 <UserRound size={18} />
               </button>
               <div className="user-dropdown">
                 <div className="user-info">
-                  <strong>{user?.firstName} {user?.lastName}</strong>
+                  <strong>{user?.name || "User"}</strong>
                   <small>{user?.email}</small>
                 </div>
                 <div className="dropdown-divider"></div>
-                <Link to="/auth/profile" className="dropdown-item">My Profile</Link>
-                <Link to="/auth/settings" className="dropdown-item">Settings</Link>
+                <Link to="/account" className="dropdown-item">My Profile</Link>
+                <Link to="/account" className="dropdown-item">Settings</Link>
                 <div className="dropdown-divider"></div>
                 <button onClick={handleLogout} className="dropdown-item logout-btn">
                   <LogOut size={16} /> Logout

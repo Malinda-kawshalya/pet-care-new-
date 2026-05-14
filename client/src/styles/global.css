@@ -747,6 +747,32 @@ img { display: block; max-width: 100%; }
   color: var(--ink);
   background: #fff;
 }
+.password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-input-group input {
+  width: 100%;
+  padding-right: 44px;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.password-toggle:hover {
+  color: var(--ink);
+}
 .auth-form textarea {
   width: 100%;
   min-height: 92px;
@@ -771,6 +797,150 @@ img { display: block; max-width: 100%; }
   background: #f8faf9;
 }
 .auth-side p { margin: 4px 0 0; }
+
+.auth-portal {
+  position: relative;
+  display: grid;
+  align-items: center;
+  padding: clamp(36px, 6vw, 82px) clamp(18px, 5vw, 86px);
+  background: linear-gradient(125deg, #f5fbff 0%, #eef6f2 45%, #fef8ed 100%);
+  overflow: hidden;
+}
+.auth-register {
+  background: linear-gradient(125deg, #f8fbff 0%, #f3f8ff 42%, #f9fef7 100%);
+}
+.auth-portal-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.34;
+}
+.orb-a {
+  width: 360px;
+  height: 360px;
+  left: -90px;
+  top: -70px;
+  background: radial-gradient(circle at 30% 30%, #79d2df, transparent 70%);
+}
+.orb-b {
+  width: 420px;
+  height: 420px;
+  right: -110px;
+  top: 24%;
+  background: radial-gradient(circle at 50% 50%, #8fdab7, transparent 72%);
+}
+.orb-c {
+  width: 320px;
+  height: 320px;
+  right: 28%;
+  bottom: -100px;
+  background: radial-gradient(circle at 50% 50%, #ffdca4, transparent 72%);
+}
+.auth-portal-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 22px;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+}
+.register-grid {
+  grid-template-columns: 1.1fr 0.9fr;
+}
+.auth-hero-panel,
+.auth-form-panel {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 22px 55px rgba(23, 35, 40, 0.12);
+}
+.auth-hero-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: clamp(24px, 3vw, 38px);
+}
+.auth-hero-panel h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 4vw, 4.8rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.auth-hero-panel p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.auth-hero-tags {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.auth-hero-tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #edf7f3;
+  color: #1a6f63;
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+.auth-form-panel {
+  padding: clamp(24px, 3vw, 38px);
+}
+.auth-panel-head h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  text-transform: uppercase;
+}
+.auth-panel-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+.auth-inline-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #165a85;
+  background: transparent;
+  font-weight: 800;
+}
+.auth-reset-box {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(249, 251, 252, 0.9);
+}
+
+.account-shell {
+  max-width: 980px;
+  margin: 0 auto;
+}
+.account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
 
 .account-page {
   grid-template-columns: minmax(360px, 700px) 1fr;
@@ -1007,6 +1177,10 @@ img { display: block; max-width: 100%; }
   .nav-links { display: none; }
   .mobile-menu { display: grid; }
   .hero, .split-section, .database-section, .dashboard-layout, .auth-page {
+    grid-template-columns: 1fr;
+  }
+  .auth-portal-grid,
+  .register-grid {
     grid-template-columns: 1fr;
   }
   .hero { min-height: auto; }

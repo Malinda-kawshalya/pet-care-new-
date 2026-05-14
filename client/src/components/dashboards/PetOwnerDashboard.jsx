@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BadgeCheck, CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList } from 'lucide-react';
+import { CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import './Dashboard.css';
@@ -50,19 +50,19 @@ const PetOwnerDashboard = () => {
 
   const summary = useMemo(() => {
     const vaccinationDue = pets.filter((pet) => ['dueSoon', 'overdue', 'unknown'].includes(pet.vaccinationStatus)).length;
+    const profileReady = user?.name && user?.email ? 'Ready' : 'Needs update';
     return {
       totalPets: pets.length,
       vaccinationDue,
-      profileReady: user?.isEmailVerified ? 'Verified' : 'Pending verification'
+      profileReady
     };
   }, [pets, user]);
 
   const actions = [
     { label: 'Manage Pets', icon: PawPrint, to: '/pets', detail: 'Add, edit, and delete pet profiles.' },
-    { label: 'Update Profile', icon: UserRoundCog, to: '/login?mode=profile', detail: 'Edit contact and account details.' },
-    { label: 'Change Password', icon: ShieldCheck, to: '/login?mode=profile', detail: 'Open your secure account panel.' },
-    { label: 'Email Verification', icon: BadgeCheck, to: '/login?mode=profile', detail: 'Verify or resend your email token.' },
-    { label: 'Reset Password', icon: RotateCcw, to: '/login?mode=forgot', detail: 'Request a password reset token.' },
+    { label: 'Update Profile', icon: UserRoundCog, to: '/account', detail: 'Edit contact and account details.' },
+    { label: 'Change Password', icon: ShieldCheck, to: '/account', detail: 'Open your secure account panel.' },
+    { label: 'Reset Password', icon: RotateCcw, to: '/login', detail: 'Open password reset from login.' },
     { label: 'Book Appointment', icon: CalendarClock, to: '/modules/appointments', detail: 'Schedule care for your pets.' }
   ];
 
@@ -76,7 +76,7 @@ const PetOwnerDashboard = () => {
         </div>
         <div className="dashboard-actions">
           <button className="btn-primary" onClick={() => navigate('/pets')} type="button"><PawPrint size={16} /> Go to pets</button>
-          <Link className="btn-small" to="/login?mode=profile">Open profile</Link>
+          <Link className="btn-small" to="/account">Open profile</Link>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ const PetOwnerDashboard = () => {
           </div>
           <div className="stat-card">
             <h3>{summary.profileReady}</h3>
-            <p>Email verification</p>
+            <p>Profile readiness</p>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ const PetOwnerDashboard = () => {
               <span className="alert-icon"><ShieldCheck size={22} /></span>
               <div className="alert-content">
                 <h3>Secure your account</h3>
-                <p>Use the profile panel to change your password or verify your email if needed.</p>
+                <p>Use the account page to update your password and keep profile details current.</p>
               </div>
             </div>
           </div>

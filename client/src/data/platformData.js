@@ -58,9 +58,9 @@ export const modules = [
     icon: ShieldCheck,
     tone: "violet",
     collection: "Users",
-    summary: "Registration, login, verification, approval, roles, and secure account settings.",
-    features: ["User registration", "Login / logout", "Forgot password", "Email verification", "Profile management", "Change password", "Admin approval", "Role management"],
-    workflows: ["Register with role", "Verify email", "Wait for provider approval", "Login with JWT", "Update profile and password"],
+    summary: "Registration, login, approval, roles, and secure account settings.",
+    features: ["User registration", "Login / logout", "Forgot password", "Profile management", "Change password", "Admin approval", "Role management"],
+    workflows: ["Register with role", "Wait for provider approval", "Login with JWT", "Update profile and password"],
     actions: ["Create account", "Approve provider", "Block user", "Reset password"],
     permissions: ["Public registration", "Owner self-service", "Admin-only approval"]
   },
