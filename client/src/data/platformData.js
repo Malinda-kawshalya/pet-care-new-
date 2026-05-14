@@ -214,7 +214,7 @@ export const products = [
   {
     name: "MocSup Dry Food",
     category: "Dog food",
-    price: "$26.00",
+    price: 26.0,
     stock: "148 in stock",
     rating: "4.9",
     image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=700&q=80"
@@ -222,7 +222,7 @@ export const products = [
   {
     name: "Chicken Gravy",
     category: "Cat nutrition",
-    price: "$18.00",
+    price: 18.0,
     stock: "82 in stock",
     rating: "4.8",
     image: "https://images.unsplash.com/photo-1571566882372-1598d88abd90?auto=format&fit=crop&w=700&q=80"
@@ -230,7 +230,7 @@ export const products = [
   {
     name: "Wellness Treats",
     category: "Training treats",
-    price: "$12.00",
+    price: 12.0,
     stock: "Low stock",
     rating: "4.7",
     image: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=700&q=80"
@@ -238,7 +238,7 @@ export const products = [
   {
     name: "Smart Pet Collar",
     category: "Health device",
-    price: "$44.00",
+    price: 44.0,
     stock: "35 in stock",
     rating: "4.9",
     image: "https://images.unsplash.com/photo-1591946614720-90a587da4a36?auto=format&fit=crop&w=700&q=80"

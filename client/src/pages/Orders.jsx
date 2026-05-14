@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api.js';
 import { useParams, Link } from 'react-router-dom';
-
-function formatCurrency(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
-}
+import { formatLKR } from '../utils/currency.js';
 
 export function OrderView() {
   const { id } = useParams();
@@ -49,11 +46,11 @@ export function OrderView() {
       <ul className="orders-list-clean">
         {order.items.map((item) => (
           <li key={item._id}>
-            {item.product?.name || item.product} x {item.quantity} - {formatCurrency(item.price)}
+            {item.product?.name || item.product} x {item.quantity} - {formatLKR(item.price)}
           </li>
         ))}
       </ul>
-      <h3>Total: {formatCurrency(order.total)}</h3>
+      <h3>Total: {formatLKR(order.total)}</h3>
     </section>
   );
 }

@@ -8,9 +8,7 @@ function customerName(user) {
   return user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || 'Customer';
 }
 
-function formatCurrency(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
-}
+import { formatLKR } from '../../utils/currency.js';
 
 function orderProductNames(order) {
   return order.items
@@ -248,7 +246,7 @@ const PetShopDashboard = () => {
             <p>Total Orders</p>
           </div>
           <div className="stat-card">
-            <h3>{loading ? '...' : formatCurrency(dashboard.summary.revenue)}</h3>
+            <h3>{loading ? '...' : formatLKR(dashboard.summary.revenue)}</h3>
             <p>Order Value</p>
           </div>
         </div>
@@ -331,7 +329,7 @@ const PetShopDashboard = () => {
                     <p>
                       <span className="status pending">COD pending</span>
                       {' '}
-                      <strong>{formatCurrency(order.total)}</strong>
+                      <strong>{formatLKR(order.total)}</strong>
                     </p>
                   </div>
                   <div className="product-actions">
@@ -361,7 +359,7 @@ const PetShopDashboard = () => {
               {dashboard.orders.slice(0, 8).map((order) => (
                 <div key={order._id} className="order-item">
                   <span>{customerName(order.user)}</span>
-                  <span>{formatCurrency(order.total)}</span>
+                  <span>{formatLKR(order.total)}</span>
                   <span className={`status ${order.orderStatus}`}>{order.orderStatus}</span>
                 </div>
               ))}
@@ -383,7 +381,7 @@ const PetShopDashboard = () => {
                 <div key={product._id} className="inventory-item">
                   <div className="order-info">
                     <h3>{product.name}</h3>
-                    <p>{product.category} - {formatCurrency(product.price)}</p>
+                    <p>{product.category} - {formatLKR(product.price)}</p>
                   </div>
                   <div className="product-actions inventory-actions">
                     <span className={`status ${product.stock <= product.lowStockThreshold ? 'low-stock' : 'in-stock'}`}>

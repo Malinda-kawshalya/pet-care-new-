@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
+import { formatLKR } from '../utils/currency.js';
 
 export default function Cart() {
   const { cart, removeItem, updateQty, total } = useCart();
@@ -27,7 +28,7 @@ export default function Cart() {
               <img className="cart-item-image" src={item.image || '/placeholder.png'} alt={item.name} />
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
-                <div className="muted-text">${item.price.toFixed(2)}</div>
+                <div className="muted-text">{formatLKR(item.price)}</div>
               </div>
               <div>
                 <input className="cart-qty-input" type="number" value={item.quantity} min={1} onChange={(e) => updateQty(item.product, Number(e.target.value))} />
@@ -38,7 +39,7 @@ export default function Cart() {
             </article>
           ))}
           <div className="cart-total-row page-card">
-            <strong>Total: ${total.toFixed(2)}</strong>
+            <strong>Total: {formatLKR(total)}</strong>
             <button className="primary-button" onClick={() => navigate('/checkout')}>Checkout</button>
           </div>
         </div>

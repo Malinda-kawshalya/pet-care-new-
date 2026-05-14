@@ -28,6 +28,24 @@ export async function protect(req, res, next) {
   }
 }
 
+export async function optionalAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+  if (!token) return next();
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev_secret_change_me");
+    req.user = await User.findById(decoded.id).select("-password");
+    if (!req.user) return next();
+    if (req.user.approvalStatus === "blocked") {
+      res.status(403);
+      return next(new Error("Account is blocked"));
+    }
+  } catch (_error) {
+    // ignore token errors for optional auth
+  }
+  return next();
+}
+
 export function authorize(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

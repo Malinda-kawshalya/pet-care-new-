@@ -2,6 +2,7 @@ import React from 'react';
 import { ShoppingCart, Trash2, Plus, Minus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getUploadUrl } from '../utils/media.js';
+import { formatLKR } from '../utils/currency.js';
 
 export default function CartModal({ isOpen, onClose, cart, updateQty, removeItem }) {
   const navigate = useNavigate();
@@ -200,7 +201,7 @@ export default function CartModal({ isOpen, onClose, cart, updateQty, removeItem
                     </h4>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '14px', fontWeight: 700, color: '#0ea5e9' }}>
-                        ${item.price.toFixed(2)}
+                        {formatLKR(item.price)}
                       </span>
                       <button
                         onClick={() => removeItem(item.product)}
@@ -304,8 +305,8 @@ export default function CartModal({ isOpen, onClose, cart, updateQty, removeItem
               <span style={{ fontSize: '14px', color: '#64748b', fontWeight: 600 }}>
                 Subtotal
               </span>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f0f1f' }}>
-                ${total.toFixed(2)}
+                <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f0f1f' }}>
+                {formatLKR(total)}
               </span>
             </div>
             <button

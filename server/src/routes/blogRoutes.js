@@ -1,14 +1,14 @@
 import express from "express";
 import Blog from "../models/Blog.js";
-import { protect, authorize } from "../middleware/authMiddleware.js";
+import { protect, authorize, optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.use(protect);
-
-router.get("/", async (req, res, next) => {
+// Public listing: show published posts to unauthenticated users.
+router.get("/", optionalAuth, async (req, res, next) => {
   try {
-    const filter = req.user.role === "admin" ? {} : { status: "published" };
+    const isAdmin = req.user && req.user.role === "admin";
+    const filter = isAdmin ? {} : { status: "published" };
     const items = await Blog.find(filter)
       .populate("author", "name role")
       .sort({ createdAt: -1 });
@@ -18,14 +18,15 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", optionalAuth, async (req, res, next) => {
   try {
     const item = await Blog.findById(req.params.id).populate("author", "name role");
     if (!item) {
       res.status(404);
       throw new Error("Blog not found");
     }
-    if (req.user.role !== "admin" && item.status !== "published") {
+    const isAdmin = req.user && req.user.role === "admin";
+    if (!isAdmin && item.status !== "published") {
       res.status(403);
       throw new Error("Not authorized to view this blog");
     }
@@ -35,7 +36,7 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", authorize("admin"), async (req, res, next) => {
+router.post("/", protect, authorize("admin"), async (req, res, next) => {
   try {
     const item = await Blog.create({
       ...req.body,
@@ -49,7 +50,7 @@ router.post("/", authorize("admin"), async (req, res, next) => {
   }
 });
 
-router.put("/:id", authorize("admin"), async (req, res, next) => {
+router.put("/:id", protect, authorize("admin"), async (req, res, next) => {
   try {
     const item = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
       .populate("author", "name role");
@@ -63,7 +64,7 @@ router.put("/:id", authorize("admin"), async (req, res, next) => {
   }
 });
 
-router.delete("/:id", authorize("admin"), async (req, res, next) => {
+router.delete("/:id", protect, authorize("admin"), async (req, res, next) => {
   try {
     const item = await Blog.findByIdAndDelete(req.params.id);
     if (!item) {
