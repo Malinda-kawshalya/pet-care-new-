@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CreditCard, MapPin, Truck } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import api from '../services/api.js';
+import { formatLKR } from '../utils/currency.js';
 
 const initialShipping = {
   name: '',
@@ -171,13 +172,13 @@ export default function Checkout() {
             {cart.map((item) => (
               <div key={item.product} className="summary-line">
                 <span>{item.name} x {item.quantity}</span>
-                <strong>${((item.price || 0) * item.quantity).toFixed(2)}</strong>
+                <strong>{formatLKR((item.price || 0) * item.quantity)}</strong>
               </div>
             ))}
           </div>
           <div className="summary-total">
             <span>Total</span>
-            <strong>${total.toFixed(2)}</strong>
+            <strong>{formatLKR(total)}</strong>
           </div>
           <button className="primary-button checkout-submit" disabled={loading} type="submit">
             {loading ? 'Placing order...' : paymentMethod === 'cod' ? 'Submit COD order' : 'Pay and place order'}

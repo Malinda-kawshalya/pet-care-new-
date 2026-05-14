@@ -66,6 +66,8 @@ export default function Home() {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [adoptionItems, setAdoptionItems] = useState([]);
+  const [loadingAdoptions, setLoadingAdoptions] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -102,6 +104,18 @@ export default function Home() {
     }
 
     loadFeaturedProducts();
+    // load recent adoption posts for homepage preview
+    (async function loadAdoptions() {
+      setLoadingAdoptions(true);
+      try {
+        const { data } = await api.get('/adoptions', { params: { limit: 4 } });
+        if (active) setAdoptionItems(data.items || []);
+      } catch (err) {
+        // ignore
+      } finally {
+        if (active) setLoadingAdoptions(false);
+      }
+    })();
     return () => {
       active = false;
     };
@@ -264,6 +278,35 @@ export default function Home() {
               onAdd={handleAddToCart}
             />
           ))}
+        </div>
+      </section>
+
+      <section className="section adoption-preview page-muted-surface">
+        <SectionHeader
+          eyebrow="Adopt"
+          title="Recently listed pets"
+          text="Browse the latest pets listed on the platform and reach out to their owners."
+          align="center"
+        />
+        <div className="adoption-grid">
+          {loadingAdoptions && <p>Loading pets...</p>}
+          {!loadingAdoptions && adoptionItems.length === 0 && <p>No recent listings.</p>}
+          <div className="pet-grid">
+            {adoptionItems.map((post) => (
+              <article key={post._id} className="pet-card card">
+                <div style={{width:120, height:90, overflow:'hidden', borderRadius:8}}>
+                  <img src={post.pet?.photo || post.photo || 'https://via.placeholder.com/160'} alt={post.pet?.name || post.title} />
+                </div>
+                <div style={{flex:1, marginLeft:12}}>
+                  <h3>{post.pet?.name || post.title}</h3>
+                  <p className="muted">{post.location || post.pet?.breed || ''}</p>
+                  <div style={{marginTop:8}}>
+                    <a href="/adoption" className="btn btn-outline">View</a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

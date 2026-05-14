@@ -1,6 +1,7 @@
 import React from 'react';
 import { getUploadUrl } from '../utils/media.js';
 import { Star } from 'lucide-react';
+import { formatLKR } from '../utils/currency.js';
 
 export default function ProductCard({ product, onAdd }) {
   const imageUrl = getUploadUrl(product.images?.[0]);
@@ -22,7 +23,7 @@ export default function ProductCard({ product, onAdd }) {
 
         <div className="product-card-footer">
           <span className="product-card-price">
-            ${product.price.toFixed(2)}
+            {formatLKR(product.price)}
           </span>
           {rating > 0 && (
             <span>

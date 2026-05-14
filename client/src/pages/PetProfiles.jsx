@@ -22,8 +22,14 @@ export default function PetProfiles() {
       const userId = me.data.user?._id || me.data._id;
       const resp = await api.get('/pets');
       const items = resp.data.items || resp.data;
-      const myPets = (items || []).filter((p) => p.owner === userId || (p.owner && p.owner._id === userId));
-      setPets(myPets);
+      const meRole = me.data.user?.role || me.data?.role;
+      // Admins should see all pets; otherwise show only owner's pets
+      if (meRole === 'admin') {
+        setPets(items);
+      } else {
+        const myPets = (items || []).filter((p) => p.owner === userId || (p.owner && p.owner._id === userId));
+        setPets(myPets);
+      }
     } catch (err) {
       console.error(err);
     } finally {

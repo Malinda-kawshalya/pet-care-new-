@@ -38,11 +38,21 @@ img { display: block; max-width: 100%; }
 h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
 p { line-height: 1.6; }
 
+/* Apply modern form defaults so pages without explicit classes still look consistent */
+input, select, textarea {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  padding: 0.6rem 0.9rem;
+  color: var(--ink);
+}
+
 .app-shell {
   width: 100%;
   min-height: 100vh;
   background: var(--paper);
-  overflow: hidden;
+  /* allow dropdowns and shadows to escape the shell instead of being clipped */
+  overflow: visible;
 }
 
 .topbar {
@@ -110,7 +120,9 @@ p { line-height: 1.6; }
 /* User Menu Dropdown */
 .user-menu-container {
   position: relative;
-  padding-bottom: 10px;
+  /* avoid extra bottom padding which can create visual overlap when the
+     dropdown appears; keep the container tight to the topbar */
+  padding-bottom: 0;
 }
 .user-button {
   background: #f3f1f7;
@@ -122,7 +134,8 @@ p { line-height: 1.6; }
 }
 .user-dropdown {
   position: absolute;
-  top: calc(100% - 2px);
+  /* give a small gap so the dropdown doesn't visually overlap the button */
+  top: calc(100% + 8px);
   right: 0;
   min-width: 240px;
   background: #fff;
@@ -1969,23 +1982,34 @@ p { line-height: 1.6; }
   grid-template-columns: auto 1fr;
   gap: 0;
   min-height: calc(100vh - 73px);
+  /* reserve space for fixed sidebar so content doesn't overlap */
+  padding-left: 280px;
 }
 
 .dashboard-sidebar {
-  position: relative;
-  z-index: 5;
+  position: fixed;
+  top: 73px;
+  left: 0;
+  z-index: 9999;
   flex-shrink: 0;
   width: 280px;
+  height: calc(100vh - 73px);
   background: #f8faf9;
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   padding: 0;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, left 0.3s ease;
 }
 
 .dashboard-sidebar.collapsed {
   width: 74px;
+  /* when collapsed, shrink reserved area for content */
+}
+
+/* ensure content area adjusts when sidebar is collapsed */
+.dashboard-with-sidebar.collapsed {
+  padding-left: 74px;
 }
 
 .sidebar-header {
