@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DashboardSidebar from '../DashboardSidebar.jsx';
 
 const VetDashboard = () => {
   const [todayAppointments, setTodayAppointments] = useState([
@@ -13,7 +14,9 @@ const VetDashboard = () => {
   ]);
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      <div className="dashboard-container">
       <h1>Veterinarian Dashboard</h1>
 
       <div className="dashboard-grid">
@@ -162,6 +165,7 @@ const VetDashboard = () => {
             <button className="btn-primary">Edit Services</button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

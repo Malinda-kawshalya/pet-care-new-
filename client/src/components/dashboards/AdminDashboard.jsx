@@ -14,6 +14,7 @@ import {
   RefreshCcw
 } from "lucide-react";
 import api from "../../services/api.js";
+import DashboardSidebar from "../DashboardSidebar.jsx";
 import "../../styles/admin.css";
 
 const sections = [
@@ -377,7 +378,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <section className="admin-shell-modern">
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      <section className="admin-shell-modern">
       <aside className="admin-sidebar-modern">
         <div className="admin-brand">
           <span className="admin-brand-dot" />
@@ -627,7 +630,8 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </section>
+      </section>
+    </div>
   );
 }
 

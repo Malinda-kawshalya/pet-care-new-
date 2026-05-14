@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
+import DashboardSidebar from '../DashboardSidebar.jsx';
 import './Dashboard.css';
 
 const PetOwnerDashboard = () => {
@@ -67,7 +68,9 @@ const PetOwnerDashboard = () => {
   ];
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      <div className="dashboard-container">
       <div className="dashboard-hero" style={{ marginBottom: '1.5rem' }}>
         <div>
           <p className="eyebrow">Pet owner workspace</p>
@@ -165,6 +168,7 @@ const PetOwnerDashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,188 +1,175 @@
 import React, { useState } from 'react';
+import DashboardSidebar from '../DashboardSidebar.jsx';
 
-const GroomerDashboard = () => {
-  const [todayAppointments, setTodayAppointments] = useState([
-    { id: 1, petName: 'Max', owner: 'John Doe', time: '9:00 AM', service: 'Full Groom', duration: '2 hours' },
-    { id: 2, petName: 'Bella', owner: 'Jane Smith', time: '11:30 AM', service: 'Bath & Trim', duration: '1.5 hours' },
-    { id: 3, petName: 'Charlie', owner: 'Bob Johnson', time: '2:00 PM', service: 'Nail Trim', duration: '30 mins' }
+const PetShopDashboard = () => {
+  const [todayStats, setTodayStats] = useState({
+    sales: '$1,250',
+    orders: 8,
+    revenue: '$8,750',
+    customers: 156
+  });
+
+  const [products, setProducts] = useState([
+    { id: 1, name: 'Premium Dog Food', stock: 45, price: '$29.99', status: 'In Stock' },
+    { id: 2, name: 'Cat Toys Bundle', stock: 12, price: '$15.99', status: 'Low Stock' },
+    { id: 3, name: 'Pet Vitamins', stock: 0, price: '$39.99', status: 'Out of Stock' }
   ]);
 
-  const [services, setServices] = useState([
-    { id: 1, name: 'Full Groom', price: '$60', description: 'Complete grooming with bath and trim' },
-    { id: 2, name: 'Bath & Trim', price: '$40', description: 'Bath with partial trim' },
-    { id: 3, name: 'Nail Trim', price: '$15', description: 'Nail trimming only' }
+  const [orders, setOrders] = useState([
+    { id: 1, customer: 'John Doe', products: 3, total: '$125.50', status: 'Shipped', date: '2025-05-15' },
+    { id: 2, customer: 'Jane Smith', products: 1, total: '$29.99', status: 'Pending', date: '2025-05-16' },
+    { id: 3, customer: 'Bob Johnson', products: 5, total: '$156.75', status: 'Delivered', date: '2025-05-14' }
   ]);
 
   return (
-    <div className="dashboard-container">
-      <h1>Groomer Dashboard</h1>
-
-      <div className="dashboard-grid">
-        {/* Stats Cards */}
-        <div className="stats-section">
-          <div className="stat-card">
-            <h3>3</h3>
-            <p>Today's Appointments</p>
-          </div>
-          <div className="stat-card">
-            <h3>$115</h3>
-            <p>Today's Earnings</p>
-          </div>
-          <div className="stat-card">
-            <h3>42</h3>
-            <p>Regular Customers</p>
-          </div>
-          <div className="stat-card">
-            <h3>4.9★</h3>
-            <p>Average Rating</p>
-          </div>
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      <section className="petshop-shell-modern">
+        <div className="dashboard-header">
+          <h1>Pet Shop Dashboard</h1>
+          <p>Welcome back! Here's your sales and inventory overview.</p>
         </div>
 
-        {/* Today's Schedule */}
-        <div className="widget">
-          <div className="widget-header">
-            <h2>Today's Schedule</h2>
-            <button className="btn-primary">+ Add Appointment</button>
+        <div className="dashboard-grid">
+          {/* Stats Cards */}
+          <div className="stats-section">
+            <div className="stat-card">
+              <h3>{todayStats.sales}</h3>
+              <p>Today's Sales</p>
+            </div>
+            <div className="stat-card">
+              <h3>{todayStats.orders}</h3>
+              <p>Today's Orders</p>
+            </div>
+            <div className="stat-card">
+              <h3>{todayStats.revenue}</h3>
+              <p>This Week Revenue</p>
+            </div>
+            <div className="stat-card">
+              <h3>{todayStats.customers}</h3>
+              <p>Total Customers</p>
+            </div>
           </div>
-          <div className="schedule-list">
-            {todayAppointments.map(apt => (
-              <div key={apt.id} className="schedule-item">
-                <div className="time-badge">{apt.time}</div>
-                <div className="appointment-details">
-                  <h3>{apt.petName}</h3>
-                  <p>Owner: {apt.owner}</p>
-                  <p>Service: {apt.service} ({apt.duration})</p>
+
+          {/* Inventory Management */}
+          <div className="widget">
+            <div className="widget-header">
+              <h2>Inventory Status</h2>
+              <button className="btn-primary">+ Add Product</button>
+            </div>
+            <div className="inventory-list">
+              {products.map(product => (
+                <div key={product.id} className="inventory-item">
+                  <div className="product-info">
+                    <h3>{product.name}</h3>
+                    <p>Stock: {product.stock} units • Price: {product.price}</p>
+                  </div>
+                  <span className={`status ${product.status.toLowerCase().replace(' ', '-')}`}>
+                    {product.status}
+                  </span>
+                  <div className="product-actions">
+                    <button className="btn-small">Edit</button>
+                    <button className="btn-small">Restock</button>
+                  </div>
                 </div>
-                <div className="appointment-actions">
-                  <button className="btn-small">Start</button>
-                  <button className="btn-small">Reschedule</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Orders */}
+          <div className="widget">
+            <div className="widget-header">
+              <h2>Recent Orders</h2>
+              <a href="#" className="link">View All Orders</a>
+            </div>
+            <div className="orders-table">
+              {orders.map(order => (
+                <div key={order.id} className="order-row">
+                  <div className="order-info">
+                    <h3>#{order.id}</h3>
+                    <p>{order.customer}</p>
+                    <p>{order.products} items • {order.total}</p>
+                  </div>
+                  <span className={`status ${order.status.toLowerCase()}`}>{order.status}</span>
+                  <span className="date">{order.date}</span>
+                  <button className="btn-small">Details</button>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="widget quick-actions">
+            <h2>Quick Actions</h2>
+            <div className="actions-grid">
+              <button className="action-btn">📦 Manage Products</button>
+              <button className="action-btn">📊 Sales Report</button>
+              <button className="action-btn">💳 Pending Orders</button>
+              <button className="action-btn">⭐ Customer Reviews</button>
+              <button className="action-btn">📈 Analytics</button>
+              <button className="action-btn">💬 Messages</button>
+            </div>
+          </div>
+
+          {/* Best Sellers */}
+          <div className="widget">
+            <h2>Best Sellers</h2>
+            <div className="bestsellers-list">
+              <div className="bestseller-item">
+                <span className="rank">1</span>
+                <span className="product">Premium Dog Food</span>
+                <span className="sold">342 sold</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* My Services */}
-        <div className="widget">
-          <div className="widget-header">
-            <h2>My Services</h2>
-            <button className="btn-primary">+ Add Service</button>
-          </div>
-          <div className="services-list">
-            {services.map(service => (
-              <div key={service.id} className="service-card">
-                <div className="service-info">
-                  <h3>{service.name}</h3>
-                  <p>{service.description}</p>
-                  <span className="price">{service.price}</span>
-                </div>
-                <div className="service-actions">
-                  <button className="btn-small">Edit</button>
-                  <button className="btn-small">Delete</button>
-                </div>
+              <div className="bestseller-item">
+                <span className="rank">2</span>
+                <span className="product">Pet Toys Pack</span>
+                <span className="sold">287 sold</span>
               </div>
-            ))}
+              <div className="bestseller-item">
+                <span className="rank">3</span>
+                <span className="product">Cat Litter Premium</span>
+                <span className="sold">215 sold</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="widget quick-actions">
-          <h2>Quick Actions</h2>
-          <div className="actions-grid">
-            <button className="action-btn">📅 Schedule</button>
-            <button className="action-btn">📸 Upload Photos</button>
-            <button className="action-btn">⭐ View Reviews</button>
-            <button className="action-btn">💬 Messages</button>
-            <button className="action-btn">🕐 Manage Hours</button>
-            <button className="action-btn">📊 Analytics</button>
+          {/* Customer Reviews */}
+          <div className="widget">
+            <h2>Recent Reviews</h2>
+            <div className="reviews-list">
+              <div className="review-item">
+                <div className="rating">⭐⭐⭐⭐⭐</div>
+                <p>"Great quality products and fast delivery!"</p>
+                <span className="reviewer">- Sarah M.</span>
+              </div>
+              <div className="review-item">
+                <div className="rating">⭐⭐⭐⭐</div>
+                <p>"Good selection of products, could improve packaging"</p>
+                <span className="reviewer">- Mike T.</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Upcoming Week */}
-        <div className="widget">
-          <h2>Upcoming Appointments</h2>
-          <div className="upcoming-list">
-            <div className="upcoming-item">
-              <span className="date">May 20</span>
-              <span>Max - Full Groom</span>
-              <span>10:00 AM</span>
-            </div>
-            <div className="upcoming-item">
-              <span className="date">May 21</span>
-              <span>Bella - Bath & Trim</span>
-              <span>2:00 PM</span>
-            </div>
-            <div className="upcoming-item">
-              <span className="date">May 22</span>
-              <span>Rocky - Full Groom</span>
-              <span>9:00 AM</span>
-            </div>
-            <div className="upcoming-item">
-              <span className="date">May 23</span>
-              <span>Lucy - Nail Trim</span>
-              <span>11:00 AM</span>
+          {/* Low Stock Alert */}
+          <div className="widget">
+            <h2>⚠️ Low Stock Alert</h2>
+            <div className="alert-list">
+              <div className="alert-item">
+                <span className="product-name">Cat Toys Bundle</span>
+                <span className="stock">12 left</span>
+                <button className="btn-small">Restock Now</button>
+              </div>
+              <div className="alert-item">
+                <span className="product-name">Pet Vitamins</span>
+                <span className="stock">Out of Stock</span>
+                <button className="btn-small">Reorder</button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Gallery / Portfolio */}
-        <div className="widget">
-          <h2>My Portfolio</h2>
-          <div className="gallery-preview">
-            <div className="gallery-item">
-              <div className="gallery-placeholder">📸 Golden Retriever</div>
-            </div>
-            <div className="gallery-item">
-              <div className="gallery-placeholder">📸 Poodle Mix</div>
-            </div>
-            <div className="gallery-item">
-              <div className="gallery-placeholder">📸 Schnauzer</div>
-            </div>
-            <button className="btn-primary">View Full Gallery</button>
-          </div>
-        </div>
-
-        {/* Availability */}
-        <div className="widget">
-          <h2>Availability Settings</h2>
-          <div className="availability-list">
-            <div className="availability-item">
-              <span>Monday - Friday:</span>
-              <span>9:00 AM - 6:00 PM</span>
-              <button className="btn-small">Edit</button>
-            </div>
-            <div className="availability-item">
-              <span>Saturday:</span>
-              <span>10:00 AM - 4:00 PM</span>
-              <button className="btn-small">Edit</button>
-            </div>
-            <div className="availability-item">
-              <span>Sunday:</span>
-              <span>Closed</span>
-              <button className="btn-small">Edit</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Customer Feedback */}
-        <div className="widget">
-          <h2>Recent Reviews</h2>
-          <div className="reviews-list">
-            <div className="review-item">
-              <div className="rating">⭐⭐⭐⭐⭐</div>
-              <p>"Perfect grooming! Max looks amazing!"</p>
-              <span className="reviewer">- John D.</span>
-            </div>
-            <div className="review-item">
-              <div className="rating">⭐⭐⭐⭐⭐</div>
-              <p>"Very professional and caring with my Bella"</p>
-              <span className="reviewer">- Jane S.</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };
 
-export default GroomerDashboard;
+export default PetShopDashboard;

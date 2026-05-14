@@ -14,37 +14,8 @@ export default function Layout() {
     { to: "/modules/marketplace", label: "Shop" }
   ];
 
-  // Dashboard item - only show if authenticated
-  const dashboardItem = isAuthenticated ? {
-    to: getDashboardPath(userRole),
-    label: "Dashboard"
-  } : null;
-
-  // Additional items - only show if authenticated
-  const authenticatedNavItems = isAuthenticated ? [
-    { to: "/pets", label: "Pets" },
-    { to: "/medical-records", label: "Health" },
-    { to: "/appointments", label: "Bookings" },
-    { to: "/community", label: "Community" },
-    { to: "/matchmaking", label: "Match" },
-    { to: "/adoption", label: "Adoption" },
-    { to: "/messages", label: "Messages" },
-    { to: "/ai", label: "AI" }
-  ] : [];
-
-  // Admin item - only show for admins
-  const adminItem = isAuthenticated && userRole === 'admin' ? {
-    to: "/dashboard/admin",
-    label: "Admin"
-  } : null;
-
-  // Build navigation array
-  const navItems = [
-    ...publicNavItems,
-    ...(dashboardItem ? [dashboardItem] : []),
-    ...authenticatedNavItems,
-    ...(adminItem ? [adminItem] : [])
-  ];
+  // Build navigation array - only public items
+  const navItems = publicNavItems;
 
   const handleLogout = () => {
     logout();
@@ -88,6 +59,14 @@ export default function Layout() {
                   <strong>{user?.name || "User"}</strong>
                   <small>{user?.email}</small>
                 </div>
+                <div className="dropdown-divider"></div>
+                <Link to={getDashboardPath(userRole)} className="dropdown-item">
+                  Go to Dashboard
+                </Link>
+                <Link to="/pets" className="dropdown-item">My Pets</Link>
+                <Link to="/medical-records" className="dropdown-item">Health Records</Link>
+                <Link to="/appointments" className="dropdown-item">Appointments</Link>
+                <Link to="/messages" className="dropdown-item">Messages</Link>
                 <div className="dropdown-divider"></div>
                 <Link to="/account" className="dropdown-item">My Profile</Link>
                 <Link to="/account" className="dropdown-item">Settings</Link>

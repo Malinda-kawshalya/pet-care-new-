@@ -1933,3 +1933,136 @@ img { display: block; max-width: 100%; }
     grid-template-columns: 1fr;
   }
 }
+
+/* Dashboard Sidebar */
+.dashboard-with-sidebar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0;
+  min-height: calc(100vh - 73px);
+}
+
+.dashboard-sidebar {
+  position: relative;
+  width: 280px;
+  background: #f8faf9;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  transition: width 0.3s ease;
+}
+
+.dashboard-sidebar.collapsed {
+  width: 74px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.brand-mini.hidden {
+  display: none;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--teal);
+  border-radius: 50%;
+}
+
+.brand-text {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--ink);
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px;
+  overflow-y: auto;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sidebar-nav-item:hover,
+.sidebar-nav-item.active {
+  background: rgba(17, 140, 126, 0.1);
+  color: var(--teal);
+}
+
+.sidebar-nav-item svg {
+  flex: 0 0 20px;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.account-link:hover {
+  background: rgba(17, 140, 126, 0.1);
+  color: var(--teal);
+}
+
+.logout-link:hover {
+  background: rgba(212, 61, 53, 0.1);
+  color: var(--red);
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(20px, 4vw, 40px);
+}
