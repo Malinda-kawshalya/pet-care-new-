@@ -133,11 +133,20 @@ main {
 
 .user-menu-container {
   z-index: 60;
-  padding-bottom: 0;
+  padding-bottom: 8px;
+}
+
+.user-menu-container::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: min(286px, calc(100vw - 36px));
+  height: 10px;
 }
 
 .user-dropdown {
-  top: calc(100% + 12px);
+  top: calc(100% + 4px);
   right: 0;
   width: min(286px, calc(100vw - 36px));
   overflow: hidden;

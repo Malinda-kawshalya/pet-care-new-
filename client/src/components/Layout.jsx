@@ -10,6 +10,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPinned, setMenuPinned] = useState(false);
 
   // Public navigation items (visible to all)
   const publicNavItems = [
@@ -27,6 +28,7 @@ export default function Layout() {
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
+    setMenuPinned(false);
     navigate('/');
   };
 
@@ -34,6 +36,7 @@ export default function Layout() {
     const handleDocumentClick = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
+        setMenuPinned(false);
       }
     };
 
@@ -76,13 +79,27 @@ export default function Layout() {
           </Link>
           
           {isAuthenticated ? (
-            <div className={`user-menu-container ${menuOpen ? "open" : ""}`} ref={menuRef} onMouseEnter={() => setMenuOpen(true)} onMouseLeave={() => setMenuOpen(false)}>
+            <div
+              className={`user-menu-container ${menuOpen ? "open" : ""}`}
+              ref={menuRef}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => {
+                if (!menuPinned) setMenuOpen(false);
+              }}
+            >
               <button
                 className="icon-button user-button"
                 aria-label="User menu"
                 title={user?.name || "User"}
                 type="button"
-                onClick={() => setMenuOpen((current) => !current)}
+                aria-expanded={menuOpen}
+                onClick={() => {
+                  setMenuOpen((current) => {
+                    const nextOpen = !current;
+                    setMenuPinned(nextOpen);
+                    return nextOpen;
+                  });
+                }}
               >
                 <UserRound size={18} />
               </button>
@@ -92,16 +109,16 @@ export default function Layout() {
                   <small>{user?.email}</small>
                 </div>
                 <div className="dropdown-divider"></div>
-                <Link to={getDashboardPath(userRole)} className="dropdown-item">
+                <Link to={getDashboardPath(userRole)} className="dropdown-item" onClick={() => setMenuPinned(false)}>
                   Go to Dashboard
                 </Link>
-                <Link to="/pets" className="dropdown-item">My Pets</Link>
-                <Link to="/medical-records" className="dropdown-item">Health Records</Link>
-                <Link to="/appointments" className="dropdown-item">Appointments</Link>
-                <Link to="/messages" className="dropdown-item">Messages</Link>
+                <Link to="/pets" className="dropdown-item" onClick={() => setMenuPinned(false)}>My Pets</Link>
+                <Link to="/medical-records" className="dropdown-item" onClick={() => setMenuPinned(false)}>Health Records</Link>
+                <Link to="/appointments" className="dropdown-item" onClick={() => setMenuPinned(false)}>Appointments</Link>
+                <Link to="/messages" className="dropdown-item" onClick={() => setMenuPinned(false)}>Messages</Link>
                 <div className="dropdown-divider"></div>
-                <Link to="/account" className="dropdown-item">My Profile</Link>
-                <Link to="/account" className="dropdown-item">Settings</Link>
+                <Link to="/account" className="dropdown-item" onClick={() => setMenuPinned(false)}>My Profile</Link>
+                <Link to="/account" className="dropdown-item" onClick={() => setMenuPinned(false)}>Settings</Link>
                 <div className="dropdown-divider"></div>
                 <button onClick={handleLogout} className="dropdown-item logout-btn" type="button">
                   <LogOut size={16} /> Logout
