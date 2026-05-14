@@ -110,7 +110,7 @@ export default function App() {
         <Route path="/market" element={<Marketplace />} />
         <Route path="/market/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/checkout" element={<ProtectedRoute element={<Checkout />} />} />
         <Route path="/orders" element={<ProtectedRoute element={<Orders />} />} />
         <Route path="/orders/:id" element={<ProtectedRoute element={<OrderView />} />} />
         <Route path="/medical-records" element={<ProtectedRoute element={<MedicalRecords />} />} />

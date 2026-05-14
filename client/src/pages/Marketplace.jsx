@@ -34,7 +34,12 @@ export default function Marketplace() {
       <h1>Marketplace</h1>
       <ProductFilters onChange={(s) => load({ ...s, page: 1 })} />
       {loading && <p>Loading...</p>}
-      <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+        gap: 20,
+        marginTop: 20
+      }}>
         {products.map(p => <ProductCard key={p._id} product={p} onAdd={(prod) => addItem(prod, 1)} />)}
       </div>
     </section>

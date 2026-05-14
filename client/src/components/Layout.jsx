@@ -11,7 +11,7 @@ export default function Layout() {
   // Public navigation items (visible to all)
   const publicNavItems = [
     { to: "/", label: "Home" },
-    { to: "/modules/marketplace", label: "Shop" }
+    { to: "/market", label: "Shop" }
   ];
 
   // Dashboard item - only show if authenticated
@@ -74,7 +74,7 @@ export default function Layout() {
               <Bell size={18} />
             </Link>
           )}
-          <Link to="/modules/marketplace" className="icon-button" aria-label="Cart">
+          <Link to="/cart" className="icon-button" aria-label="Cart">
             <ShoppingCart size={18} />
           </Link>
           

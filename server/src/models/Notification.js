@@ -7,9 +7,10 @@ const notificationSchema = new mongoose.Schema(
     message: { type: String, required: true },
     type: {
       type: String,
-      enum: ["vaccination", "appointment", "promotion", "emergency", "system"],
+      enum: ["vaccination", "appointment", "promotion", "emergency", "order", "system"],
       default: "system"
     },
+    relatedOrder: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
     channel: { type: String, enum: ["email", "push", "inApp"], default: "inApp" },
     readAt: Date
   },

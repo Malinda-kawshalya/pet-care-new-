@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import Review from "../models/Review.js";
+import Notification from "../models/Notification.js";
 
 const sellerRoles = ["petShop", "admin"];
 
@@ -293,14 +294,21 @@ export async function deleteSellerProduct(req, res, next) {
 
 export async function createCheckoutOrder(req, res, next) {
   try {
+    // Handle both flat and nested shipping object formats
+    const shipping = req.body.shipping || {};
     const { items = [], shippingAddress, shippingName, shippingEmail, shippingPhone, paymentMethod = "card", paymentToken, paymentLast4 } = req.body;
+    
+    const finalShippingName = shippingName || shipping.name;
+    const finalShippingEmail = shippingEmail || shipping.email;
+    const finalShippingPhone = shippingPhone || shipping.phone;
+    const finalShippingAddress = shippingAddress || shipping.address;
 
     if (!Array.isArray(items) || items.length === 0) {
       res.status(400);
       throw new Error("Cart is empty");
     }
 
-    if (!shippingAddress || !shippingName) {
+    if (!finalShippingAddress || !finalShippingName) {
       res.status(400);
       throw new Error("Shipping name and address are required");
     }
@@ -348,10 +356,10 @@ export async function createCheckoutOrder(req, res, next) {
 
     const order = await Order.create({
       user: req.user._id,
-      shippingName,
-      shippingEmail,
-      shippingPhone,
-      shippingAddress,
+      shippingName: finalShippingName,
+      shippingEmail: finalShippingEmail,
+      shippingPhone: finalShippingPhone,
+      shippingAddress: finalShippingAddress,
       paymentMethod,
       paymentLast4: paymentLast4 || (paymentToken ? paymentToken.slice(-4) : undefined),
       estimatedDeliveryAt,
@@ -360,7 +368,7 @@ export async function createCheckoutOrder(req, res, next) {
       items: orderItems,
       total: Number(total.toFixed(2)),
       paymentStatus: paymentMethod === "cod" ? "pending" : "paid",
-      orderStatus: "processing",
+      orderStatus: paymentMethod === "cod" ? "placed" : "processing",
       notes: "Tokenized payment data only. Full payment details are not stored."
     });
 
@@ -368,11 +376,159 @@ export async function createCheckoutOrder(req, res, next) {
       .populate("user", "name email role")
       .populate("items.product", "name brand category price images seller stock");
 
+    // Notify each seller of the new order
+    const sellerIds = new Set();
+    hydrated.items.forEach(item => {
+      if (item.product?.seller) {
+        sellerIds.add(String(item.product.seller._id || item.product.seller));
+      }
+    });
+
+    for (const sellerId of sellerIds) {
+      await Notification.create({
+        user: sellerId,
+        title: "New Order Received",
+        message: `You have received a new order #${order._id.toString().slice(-8).toUpperCase()} for $${total.toFixed(2)}`,
+        type: "order",
+        relatedOrder: order._id,
+        channel: "inApp"
+      });
+    }
+
     res.status(201).json({ item: hydrated });
   } catch (error) {
     next(error);
   }
 }
+
+export async function approveOrder(req, res, next) {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate("items.product", "seller")
+      .populate("user", "name email role");
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
+    }
+
+    // Check if user is the seller of any product in the order
+    const isSellerOrder = order.items.some((item) => String(item.product?.seller?._id || item.product?.seller) === String(req.user._id));
+    if (!isSellerOrder && req.user.role !== "admin") {
+      res.status(403);
+      throw new Error("Not allowed to approve this order");
+    }
+
+    // Update order status to processing
+    order.orderStatus = "processing";
+    order.trackingHistory = [...(order.trackingHistory || []), {
+      status: "processing",
+      message: "Shop owner approved - Order is being prepared for shipment",
+      timestamp: new Date()
+    }];
+    await order.save();
+
+    // Notify buyer
+    await Notification.create({
+      user: order.user._id,
+      title: "Order Approved",
+      message: `Your order #${orderId.toString().slice(-8).toUpperCase()} has been approved and is being prepared`,
+      type: "order",
+      relatedOrder: orderId,
+      channel: "inApp"
+    });
+
+    const hydrated = await Order.findById(order._id)
+      .populate("user", "name email role")
+      .populate("items.product", "name brand category price images seller stock");
+
+    res.json({ item: hydrated });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rejectOrder(req, res, next) {
+  try {
+    const { orderId } = req.params;
+    const { reason } = req.body;
+    const order = await Order.findById(orderId)
+      .populate("items.product", "seller stock")
+      .populate("user", "name email role");
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
+    }
+
+    // Check if user is the seller of any product in the order
+    const isSellerOrder = order.items.some((item) => String(item.product?.seller?._id || item.product?.seller) === String(req.user._id));
+    if (!isSellerOrder && req.user.role !== "admin") {
+      res.status(403);
+      throw new Error("Not allowed to reject this order");
+    }
+
+    // Restore stock
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+      if (product) {
+        product.stock += item.quantity;
+        await product.save();
+      }
+    }
+
+    // Update order status to cancelled
+    order.orderStatus = "cancelled";
+    order.paymentStatus = order.paymentStatus === "paid" ? "refunded" : order.paymentStatus;
+    order.trackingHistory = [...(order.trackingHistory || []), {
+      status: "cancelled",
+      message: `Shop owner rejected order${reason ? `: ${reason}` : ''}`,
+      timestamp: new Date()
+    }];
+    await order.save();
+
+    // Notify buyer
+    await Notification.create({
+      user: order.user._id,
+      title: "Order Rejected",
+      message: `Your order #${orderId.toString().slice(-8).toUpperCase()} has been rejected${reason ? `. Reason: ${reason}` : ''}. Payment will be refunded if it was already processed.`,
+      type: "order",
+      relatedOrder: orderId,
+      channel: "inApp"
+    });
+
+    const hydrated = await Order.findById(order._id)
+      .populate("user", "name email role")
+      .populate("items.product", "name brand category price images seller stock");
+
+    res.json({ item: hydrated });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getSellerOrders(req, res, next) {
+  try {
+    if (req.user.role !== "petShop" && req.user.role !== "admin") {
+      res.status(403);
+      throw new Error("Only pet shops can view their orders");
+    }
+
+    const orders = await Order.find()
+      .populate("user", "name email phone")
+      .populate("items.product", "name price seller")
+      .sort({ createdAt: -1 });
+
+    // Filter orders that belong to this seller
+    const sellerOrders = orders.filter(order =>
+      order.items.some(item => String(item.product?.seller) === String(req.user._id))
+    );
+
+    res.json({ items: sellerOrders });
+  } catch (error) {
+    next(error);
+  }
 
 export async function listOrders(req, res, next) {
   try {
@@ -564,6 +720,11 @@ export async function sellerDashboard(req, res, next) {
     ]);
 
     const lowStock = inventory.filter((item) => item.stock <= item.lowStockThreshold);
+    const pendingCodOrders = orders.filter((order) =>
+      order.paymentMethod === "cod" &&
+      order.paymentStatus === "pending" &&
+      order.orderStatus === "placed"
+    );
     const recentOrders = orders.slice(0, 10);
 
     res.json({
@@ -572,11 +733,65 @@ export async function sellerDashboard(req, res, next) {
       summary: {
         totalProducts: inventory.length,
         lowStock: lowStock.length,
+        pendingCod: pendingCodOrders.length,
         orders: orders.length,
         revenue: orders.reduce((sum, order) => sum + (order.total || 0), 0)
       }
     });
   } catch (error) {
     next(error);
+  }
+}
+
+// Wrapper functions to match route names
+export async function shopListOrders(req, res, next) {
+  return getSellerOrders(req, res, next);
+}
+
+export async function shopApproveOrder(req, res, next) {
+  req.params.orderId = req.params.id;
+  return approveOrder(req, res, next);
+}
+
+export async function shopRejectOrder(req, res, next) {
+  req.params.orderId = req.params.id;
+  return rejectOrder(req, res, next);
+}
+
+// Shop product management wrappers
+export async function shopCreateProduct(req, res, next) {
+  try {
+    const payload = { ...req.body, seller: req.user._id };
+    const item = await Product.create(payload);
+    res.status(201).json({ item });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function shopUpdateProduct(req, res, next) {
+  try {
+    const item = await Product.findById(req.params.id);
+    if (!item) { res.status(404); throw new Error('Product not found'); }
+    if (String(item.seller) !== String(req.user._id)) { res.status(403); throw new Error('Not allowed'); }
+    Object.assign(item, req.body);
+    await item.save();
+    res.json({ item });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function shopAdjustInventory(req, res, next) {
+  try {
+    const { delta } = req.body; // positive or negative
+    const item = await Product.findById(req.params.id);
+    if (!item) { res.status(404); throw new Error('Product not found'); }
+    if (String(item.seller) !== String(req.user._id)) { res.status(403); throw new Error('Not allowed'); }
+    item.stock = Math.max(0, item.stock + Number(delta || 0));
+    await item.save();
+    res.json({ item });
+  } catch (err) {
+    next(err);
   }
 }
