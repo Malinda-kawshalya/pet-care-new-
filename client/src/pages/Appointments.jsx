@@ -2,15 +2,37 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api.js";
 
-const initialForm = { pet: "", provider: "", serviceType: "vet", scheduledAt: "", notes: "", location: "" };
+const initialForm = { petName: "", provider: "", scheduledAt: "" };
+
+const timeSlots = [
+  { label: "Today, 10:00 AM", value: "10:00" },
+  { label: "Today, 11:30 AM", value: "11:30" },
+  { label: "Today, 2:00 PM", value: "14:00" },
+  { label: "Tomorrow, 9:30 AM", value: "tomorrow-09:30" },
+  { label: "Tomorrow, 3:00 PM", value: "tomorrow-15:00" }
+];
+
+function slotToDateTime(slotValue) {
+  const date = new Date();
+  let time = slotValue;
+
+  if (slotValue.startsWith("tomorrow-")) {
+    date.setDate(date.getDate() + 1);
+    time = slotValue.replace("tomorrow-", "");
+  }
+
+  const [hours, minutes] = time.split(":");
+  date.setHours(Number(hours), Number(minutes), 0, 0);
+  return date.toISOString();
+}
 
 export default function Appointments() {
   const [pets, setPets] = useState([]);
   const [providers, setProviders] = useState([]);
-  const [slots, setSlots] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const load = async () => {
     try {
@@ -22,31 +44,33 @@ export default function Appointments() {
     }
   };
 
-  const loadProviders = async (serviceType) => {
-    const resp = await api.get(`/appointments/providers?serviceType=${serviceType}`);
+  const loadProviders = async () => {
+    const resp = await api.get("/appointments/providers?serviceType=vet");
     setProviders(resp.data.items || []);
   };
 
   useEffect(() => {
     load();
-    loadProviders(form.serviceType);
+    loadProviders();
   }, []);
-
-  useEffect(() => {
-    loadProviders(form.serviceType);
-  }, [form.serviceType]);
-
-  useEffect(() => {
-    if (!form.provider || !form.scheduledAt) return;
-    const date = form.scheduledAt.slice(0, 10);
-    api.get(`/appointments/slots?providerId=${form.provider}&date=${date}`).then((resp) => setSlots(resp.data.items || []));
-  }, [form.provider, form.scheduledAt]);
 
   const submit = async (event) => {
     event.preventDefault();
-    await api.post("/appointments", form);
+    setError("");
+
+    const selectedPet = pets.find((pet) => pet.name?.toLowerCase() === form.petName.trim().toLowerCase());
+    if (!selectedPet) {
+      setError("Enter a pet name that already exists in your pet profiles.");
+      return;
+    }
+
+    await api.post("/appointments", {
+      pet: selectedPet._id,
+      provider: form.provider,
+      serviceType: "vet",
+      scheduledAt: slotToDateTime(form.scheduledAt)
+    });
     setForm(initialForm);
-    setSlots([]);
     load();
   };
 
@@ -69,32 +93,52 @@ export default function Appointments() {
       </div>
 
       <div className="grid-two content-start">
-        <form className="module-card" onSubmit={submit}>
-          <h2>Create booking</h2>
-          <label>Pet</label>
-          <select value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required>
-            <option value="">Select pet</option>
-            {pets.map((pet) => <option key={pet._id} value={pet._id}>{pet.name}</option>)}
-          </select>
-          <label>Service</label>
-          <select value={form.serviceType} onChange={(e) => setForm({ ...form, serviceType: e.target.value, provider: "" })}>
-            <option value="vet">Veterinarian</option>
-            <option value="grooming">Groomer</option>
-            <option value="training">Trainer</option>
-          </select>
-          <label>Provider</label>
-          <select value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} required>
-            <option value="">Select provider</option>
-            {providers.map((provider) => <option key={provider._id} value={provider._id}>{provider.name} {provider.providerProfile?.businessName ? `(${provider.providerProfile.businessName})` : ""}</option>)}
-          </select>
-          <label>Time</label>
-          <input type="datetime-local" value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} required />
-          <label>Location</label>
-          <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Clinic or address" />
-          <label>Notes</label>
-          <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="4" />
-          <button className="primary-button" type="submit">Book appointment</button>
-          {slots.length > 0 && <p className="muted-text">Available half-hour slots: {slots.join(", ")}</p>}
+        <form className="module-card appointment-form-card" onSubmit={submit}>
+          <div className="appointment-form-heading">
+            <p className="eyebrow">Quick booking</p>
+            <h2>Create appointment</h2>
+            <p>Choose the pet, veterinarian, and a preferred visit time.</p>
+          </div>
+
+          {error && <div className="form-alert error">{error}</div>}
+
+          <label className="appointment-field">
+            <span>Pet name</span>
+            <input
+              list="pet-name-options"
+              value={form.petName}
+              onChange={(e) => setForm({ ...form, petName: e.target.value })}
+              placeholder="Type pet name"
+              required
+            />
+            <datalist id="pet-name-options">
+              {pets.map((pet) => <option key={pet._id} value={pet.name} />)}
+            </datalist>
+          </label>
+
+          <label className="appointment-field">
+            <span>Veterinarian</span>
+            <select value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} required>
+              <option value="">Select veterinarian</option>
+              {providers.map((provider) => (
+                <option key={provider._id} value={provider._id}>
+                  {provider.name}
+                  {provider.providerProfile?.businessName ? ` (${provider.providerProfile.businessName})` : ""}
+                  {provider.approvalStatus && provider.approvalStatus !== "approved" ? ` - ${provider.approvalStatus}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="appointment-field">
+            <span>Time slot</span>
+            <select value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} required>
+              <option value="">Select time slot</option>
+              {timeSlots.map((slot) => <option key={slot.value} value={slot.value}>{slot.label}</option>)}
+            </select>
+          </label>
+
+          <button className="primary-button appointment-submit" type="submit">Book appointment</button>
         </form>
 
         <div className="stack-gap">

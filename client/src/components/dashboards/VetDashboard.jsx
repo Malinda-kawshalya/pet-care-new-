@@ -224,30 +224,32 @@ export default function VetDashboard() {
             <div className="records-list">
               {!loading && recentRecords.length === 0 && <p>No records available.</p>}
               {recentRecords.map((record) => (
-                <div className="record-item" key={record._id}>
-                  <span className="record-type">{record.pet?.name || "Pet"}</span>
-                  <span>{record.diagnosis || "No diagnosis added"}</span>
+                <div key={record._id} className="record-item">
+                  <div className="record-info">
+                    <h3>{record.type}</h3>
+                    <p>{record.pet?.name || "Pet"}</p>
+                    <p className="note">{record.notes || "No notes added."}</p>
+                  </div>
                   <span className="date">{new Date(record.visitDate || record.createdAt).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="widget quick-actions">
+          <div className="widget">
             <div className="widget-header">
-              <h2>Communication</h2>
-              <MessageCircle size={18} />
+              <h2>Messages inbox</h2>
+              <Link className="link" to="/messages">Open all</Link>
             </div>
-            <div className="appointments-list">
-              {!loading && inbox.length === 0 && <p>No inbound messages right now.</p>}
-              {inbox.map((message) => (
-                <div key={message._id} className="appointment-card">
-                  <div className="appointment-info">
-                    <h3><UserRound size={14} /> {message.sender?.name || "User"}</h3>
-                    <p>{message.body}</p>
-                    <p>{new Date(message.createdAt).toLocaleString()}</p>
+            <div className="inbox-list">
+              {!loading && inbox.length === 0 && <p>No messages.</p>}
+              {inbox.map((thread) => (
+                <div key={thread._id} className="message-item">
+                  <div className="message-info">
+                    <h3>{thread.sender?.name || "Sender"}</h3>
+                    <p>{thread.lastMessage || "Click to view conversation."}</p>
                   </div>
-                  <span className={`status ${message.readAt ? "completed" : "pending"}`}>{message.readAt ? "Read" : "Unread"}</span>
+                  <span className="timestamp">{new Date(thread.createdAt).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
@@ -255,31 +257,21 @@ export default function VetDashboard() {
 
           <div className="widget">
             <div className="widget-header">
-              <h2>Upcoming 7 days</h2>
-              <HeartPulse size={18} />
+              <h2>Upcoming appointments</h2>
+              <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
             </div>
             <div className="upcoming-list">
               {!loading && upcomingAppointments.length === 0 && <p>No upcoming appointments in the next 7 days.</p>}
               {upcomingAppointments.map((appointment) => (
                 <div key={appointment._id} className="upcoming-item">
-                  <span className="date">{new Date(appointment.scheduledAt).toLocaleDateString()}</span>
-                  <span>{appointment.pet?.name || "Pet"} - {appointment.owner?.name || "Owner"}</span>
-                  <span>{new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  <div className="appointment-info">
+                    <h3>{appointment.pet?.name || "Pet"}</h3>
+                    <p>{new Date(appointment.scheduledAt).toLocaleDateString()} at {new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    <p>{appointment.owner?.name || "Owner"}</p>
+                  </div>
+                  <span className={`status ${appointment.status}`}>{appointment.status}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div className="widget">
-            <div className="widget-header">
-              <h2>Clinical tools</h2>
-              <ClipboardPlus size={18} />
-            </div>
-            <div className="actions-grid">
-              <Link className="action-btn action-btn-link" to="/medical-records">Add medical note</Link>
-              <Link className="action-btn action-btn-link" to="/appointments">Manage schedule</Link>
-              <Link className="action-btn action-btn-link" to="/messages">Open messages</Link>
-              <Link className="action-btn action-btn-link" to="/account">Provider profile</Link>
             </div>
           </div>
         </div>

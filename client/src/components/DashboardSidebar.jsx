@@ -33,10 +33,10 @@ const menuItems = {
     { icon: Zap, label: "AI Assistant", to: "/ai" }
   ],
   veterinarian: [
-    { icon: Clock, label: "Appointments", to: "/appointments" },
-    { icon: Stethoscope, label: "Medical Records", to: "/medical-records" },
-    { icon: PawPrint, label: "Patients", to: "/pets" },
-    { icon: MessageSquare, label: "Messages", to: "/messages" }
+    { icon: BarChart3, label: "Overview", to: "/dashboard/vet" },
+    { icon: Clock, label: "Appointments", to: "/dashboard/vet?section=appointments" },
+    { icon: Stethoscope, label: "Medical Records", to: "/dashboard/vet?section=records" },
+    { icon: PawPrint, label: "Patients", to: "/dashboard/vet?section=patients" }
   ],
   petShop: [
     { icon: PawPrint, label: "My Pets", to: "/pets" },

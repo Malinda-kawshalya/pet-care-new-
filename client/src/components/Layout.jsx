@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Menu, PawPrint, Search, ShoppingCart, UserRound, LogOut } from "lucide-react";
+import { Bell, LogOut, Menu, PawPrint, Search, ShoppingCart, UserRound } from "lucide-react";
 import { useAuth, useUserRole } from "../hooks/useAuth";
 import { getDashboardPath } from "../utils/roleHelper";
 
@@ -11,7 +11,6 @@ export default function Layout() {
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Public navigation items (visible to all)
   const publicNavItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
@@ -21,22 +20,26 @@ export default function Layout() {
     { to: "/contact", label: "Contact" }
   ];
 
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
-    setMenuOpen(false);
-    navigate('/');
+    closeMenu();
+    navigate("/");
   };
 
   useEffect(() => {
     const handleDocumentClick = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
+        closeMenu();
       }
     };
 
     const handleEscape = (event) => {
       if (event.key === "Escape") {
-        setMenuOpen(false);
+        closeMenu();
       }
     };
 
@@ -56,11 +59,13 @@ export default function Layout() {
         <span className="shell-decor-paw right-a"><PawPrint size={30} /></span>
         <span className="shell-decor-paw right-b"><PawPrint size={40} /></span>
       </div>
+
       <header className="topbar">
         <Link to="/" className="brand" aria-label="Pet Care home">
           <span className="brand-mark"><PawPrint size={18} /></span>
           <span>Pet Care</span>
         </Link>
+
         <nav className="nav-links" aria-label="Main navigation">
           {publicNavItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? "active" : ""}>
@@ -83,10 +88,16 @@ export default function Layout() {
           </Link>
 
           {isAuthenticated ? (
-            <div className={`user-menu-container ${menuOpen ? "open" : ""}`} ref={menuRef}>
+            <div
+              className={`user-menu-container ${menuOpen ? "open" : ""}`}
+              ref={menuRef}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
+            >
               <button
                 className="icon-button user-button"
                 aria-label="User menu"
+                aria-expanded={menuOpen}
                 title={user?.name || "User"}
                 type="button"
                 onClick={() => setMenuOpen((current) => !current)}
@@ -100,16 +111,16 @@ export default function Layout() {
                     <small>{user?.email}</small>
                   </div>
                   <div className="dropdown-divider"></div>
-                  <Link to={getDashboardPath(userRole)} className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                  <Link to={getDashboardPath(userRole)} className="dropdown-item" onClick={closeMenu}>
                     Go to Dashboard
                   </Link>
-                  <Link to="/pets" className="dropdown-item" onClick={() => setMenuOpen(false)}>My Pets</Link>
-                  <Link to="/medical-records" className="dropdown-item" onClick={() => setMenuOpen(false)}>Health Records</Link>
-                  <Link to="/appointments" className="dropdown-item" onClick={() => setMenuOpen(false)}>Appointments</Link>
-                  <Link to="/messages" className="dropdown-item" onClick={() => setMenuOpen(false)}>Messages</Link>
+                  <Link to="/pets" className="dropdown-item" onClick={closeMenu}>My Pets</Link>
+                  <Link to="/medical-records" className="dropdown-item" onClick={closeMenu}>Health Records</Link>
+                  <Link to="/appointments" className="dropdown-item" onClick={closeMenu}>Appointments</Link>
+                  <Link to="/messages" className="dropdown-item" onClick={closeMenu}>Messages</Link>
                   <div className="dropdown-divider"></div>
-                  <Link to="/account" className="dropdown-item" onClick={() => setMenuOpen(false)}>My Profile</Link>
-                  <Link to="/account" className="dropdown-item" onClick={() => setMenuOpen(false)}>Settings</Link>
+                  <Link to="/account" className="dropdown-item" onClick={closeMenu}>My Profile</Link>
+                  <Link to="/account" className="dropdown-item" onClick={closeMenu}>Settings</Link>
                   <div className="dropdown-divider"></div>
                   <button onClick={handleLogout} className="dropdown-item logout-btn" type="button">
                     <LogOut size={16} /> Logout
@@ -128,9 +139,11 @@ export default function Layout() {
           </button>
         </div>
       </header>
+
       <main>
         <Outlet />
       </main>
+
       <footer className="footer">
         <div className="footer-grid">
           <div className="footer-brand">
@@ -150,7 +163,7 @@ export default function Layout() {
             <Link to="/login">Login</Link>
           </nav>
           <div className="footer-utility">
-            <p>Need help choosing a service or role? Start at contact and we’ll route you to the right workflow.</p>
+            <p>Need help choosing a service or role? Start at contact and we'll route you to the right workflow.</p>
             <Link to="/contact" className="topbar-cta">Contact support</Link>
           </div>
         </div>

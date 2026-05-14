@@ -991,6 +991,56 @@ main { display: block; }
   align-items: start;
 }
 
+.appointment-form-card {
+  display: grid;
+  gap: 18px;
+  max-width: 680px;
+}
+
+.appointment-form-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.appointment-form-heading h2,
+.appointment-form-heading p {
+  margin: 0;
+}
+
+.appointment-field {
+  display: grid;
+  gap: 8px;
+  color: var(--shell-ink);
+  font-weight: 800;
+}
+
+.appointment-field input,
+.appointment-field select {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 16px;
+  background: #f8fbff;
+  color: var(--shell-ink);
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.appointment-field input:focus,
+.appointment-field select:focus {
+  border-color: rgba(31, 79, 155, 0.48);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(31, 79, 155, 0.1);
+}
+
+.appointment-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
 .fit-content-btn {
   width: fit-content;
 }
