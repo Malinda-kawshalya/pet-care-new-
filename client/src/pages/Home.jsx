@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import ModuleCard from "../components/ModuleCard.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import SectionHeader from "../components/SectionHeader.jsx";
+import ToastContainer from "../components/ToastContainer.jsx";
+import CartModal from "../components/CartModal.jsx";
 import api from "../services/api.js";
 import { useCart } from "../contexts/CartContext.jsx";
 import { advancedFeatures, databaseTables, modules, roles } from "../data/platformData.js";
@@ -19,10 +21,27 @@ const adoptionImage = "https://images.unsplash.com/photo-1615751072497-5f5169feb
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const { userRole } = useUserRole();
-  const { addItem } = useCart();
+  const { addItem, removeItem, updateQty, clear, cart, total } = useCart();
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const addToast = (message, type = 'success', duration = 4000) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
+  const handleAddToCart = (product) => {
+    addItem(product, 1);
+    addToast(`✨ ${product.name} added to cart!`, 'success');
+    setIsCartOpen(true);
+  };
 
   useEffect(() => {
     let active = true;
@@ -371,7 +390,7 @@ export default function Home() {
             <ProductCard
               key={product._id}
               product={product}
-              onAdd={(item) => addItem(item, 1)}
+              onAdd={handleAddToCart}
             />
           ))}
         </div>
@@ -433,6 +452,333 @@ export default function Home() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="section how-it-works" style={{
+        background: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
+        paddingTop: "80px",
+        paddingBottom: "80px"
+      }}>
+        <SectionHeader
+          eyebrow="Simple workflow"
+          title="How Pet Care Works"
+          text="Get started in minutes with our intuitive, step-by-step process designed for all user types."
+          align="center"
+        />
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: "30px",
+          marginTop: "3rem",
+          maxWidth: "1000px",
+          margin: "3rem auto 0"
+        }}>
+          {[
+            {
+              step: "1",
+              title: "Create Account",
+              description: "Sign up as a pet owner, vet, groomer, shop owner, or admin with role-specific features."
+            },
+            {
+              step: "2",
+              title: "Set Up Profile",
+              description: "Add your pet details, health records, and preferences to personalize your experience."
+            },
+            {
+              step: "3",
+              title: "Explore Services",
+              description: "Book appointments, shop for products, match adoptable pets, or manage health records."
+            },
+            {
+              step: "4",
+              title: "Get Support",
+              description: "Use real-time notifications, community forums, and AI insights for expert guidance."
+            }
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: "relative",
+                padding: "2rem",
+                borderRadius: "16px",
+                background: "white",
+                border: "2px solid #e2e8f0",
+                textAlign: "center",
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#0ea5e9";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(14, 165, 233, 0.15)";
+                e.currentTarget.style.transform = "translateY(-4px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#e2e8f0";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <div
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                  color: "white",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                  fontWeight: "800",
+                  margin: "0 auto 1rem",
+                  boxShadow: "0 8px 16px rgba(14, 165, 233, 0.3)"
+                }}
+              >
+                {item.step}
+              </div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#0f0f1f", margin: "0 0 0.75rem 0" }}>
+                {item.title}
+              </h3>
+              <p style={{ color: "#64748b", lineHeight: 1.6, margin: 0, fontSize: "0.95rem" }}>
+                {item.description}
+              </p>
+              {idx < 3 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "-15px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "700",
+                    zIndex: 1,
+                    boxShadow: "0 4px 12px rgba(14, 165, 233, 0.3)"
+                  }}
+                >
+                  →
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section stats-section" style={{
+        background: "linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%)",
+        paddingTop: "80px",
+        paddingBottom: "80px"
+      }}>
+        <SectionHeader
+          eyebrow="Platform metrics"
+          title="Built at Enterprise Scale"
+          text="Comprehensive features and architecture designed for reliability, security, and scalability."
+          align="center"
+        />
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "24px",
+          marginTop: "2rem"
+        }}>
+          {[
+            { number: "13+", label: "Integrated Modules", icon: "📦" },
+            { number: "5", label: "User Roles", icon: "👥" },
+            { number: "20+", label: "API Endpoints", icon: "🔌" },
+            { number: "100%", label: "Responsive Design", icon: "📱" },
+            { number: "24/7", label: "Real-time Features", icon: "⚡" },
+            { number: "Enterprise", label: "Grade Security", icon: "🔒" }
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              style={{
+                padding: "2rem",
+                borderRadius: "16px",
+                background: "white",
+                border: "1px solid #e2e8f0",
+                textAlign: "center",
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.boxShadow = "0 20px 50px rgba(14, 165, 233, 0.12)";
+                e.currentTarget.style.borderColor = "#0ea5e9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(15, 15, 31, 0.08)";
+                e.currentTarget.style.borderColor = "#e2e8f0";
+              }}
+            >
+              <div style={{ fontSize: "40px", marginBottom: "0.5rem" }}>{stat.icon}</div>
+              <div style={{
+                fontSize: "2.5rem",
+                fontWeight: "900",
+                background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                marginBottom: "0.5rem"
+              }}>
+                {stat.number}
+              </div>
+              <p style={{ color: "#64748b", fontWeight: 700, margin: 0, fontSize: "0.95rem" }}>
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section benefits-section" style={{
+        background: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
+        paddingTop: "80px",
+        paddingBottom: "80px"
+      }}>
+        <SectionHeader
+          eyebrow="Platform advantages"
+          title="Why Choose Pet Care?"
+          text="Comprehensive, modern, and purpose-built for the pet care industry."
+          align="center"
+        />
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "24px",
+          marginTop: "2rem"
+        }}>
+          {[
+            {
+              icon: "🏥",
+              title: "Comprehensive Health Management",
+              points: [
+                "Complete vaccination tracking with reminders",
+                "Medical record storage and retrieval",
+                "Appointment scheduling with vets",
+                "Health alerts and AI risk assessment"
+              ]
+            },
+            {
+              icon: "🛒",
+              title: "Integrated Marketplace",
+              points: [
+                "Browse and purchase pet products",
+                "Real-time inventory management",
+                "Seller ratings and reviews",
+                "Secure checkout and payment"
+              ]
+            },
+            {
+              icon: "👨‍⚖️",
+              title: "Multi-Role Platform",
+              points: [
+                "Pet Owner - Full access to all features",
+                "Veterinarian - Medical record management",
+                "Pet Shop Owner - Inventory and sales",
+                "Admin - Complete platform control"
+              ]
+            },
+            {
+              icon: "🤝",
+              title: "Community & Social",
+              points: [
+                "Community forums and blogs",
+                "Pet adoption matching system",
+                "User messaging and notifications",
+                "Real-time collaboration tools"
+              ]
+            },
+            {
+              icon: "🔐",
+              title: "Security & Privacy",
+              points: [
+                "JWT-based authentication",
+                "Role-based access control",
+                "Data encryption in transit",
+                "GDPR-compliant design"
+              ]
+            },
+            {
+              icon: "📊",
+              title: "Analytics & Insights",
+              points: [
+                "Admin dashboard with metrics",
+                "Appointment analytics",
+                "Marketplace sales tracking",
+                "User engagement reports"
+              ]
+            }
+          ].map((benefit, idx) => (
+            <article
+              key={idx}
+              style={{
+                padding: "2rem",
+                borderRadius: "16px",
+                background: "white",
+                border: "1px solid #e2e8f0",
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.boxShadow = "0 20px 50px rgba(14, 165, 233, 0.12)";
+                e.currentTarget.style.borderColor = "#0ea5e9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(15, 15, 31, 0.08)";
+                e.currentTarget.style.borderColor = "#e2e8f0";
+              }}
+            >
+              <div style={{ fontSize: "40px", marginBottom: "1rem" }}>{benefit.icon}</div>
+              <h3 style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                color: "#0f0f1f",
+                marginBottom: "1rem",
+                margin: "0 0 1rem 0"
+              }}>
+                {benefit.title}
+              </h3>
+              <ul style={{
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem"
+              }}>
+                {benefit.points.map((point, pidx) => (
+                  <li
+                    key={pidx}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "0.75rem",
+                      fontSize: "0.95rem",
+                      color: "#64748b",
+                      lineHeight: 1.6
+                    }}
+                  >
+                    <span style={{
+                      color: "#10b981",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                      marginTop: "2px"
+                    }}>
+                      ✓
+                    </span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -559,6 +905,15 @@ export default function Home() {
         </nav>
         <div className="footer-word">Pet<span>Care</span></div>
       </footer>
+
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        updateQty={updateQty}
+        removeItem={removeItem}
+      />
     </>
   );
 }
