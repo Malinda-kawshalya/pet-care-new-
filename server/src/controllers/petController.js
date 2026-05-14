@@ -77,6 +77,32 @@ export const petController = {
       next(error);
     }
   }
+  ,
+  async uploadPhoto(req, res, next) {
+    try {
+      const item = await Pet.findById(req.params.id);
+      if (!item) { res.status(404); throw new Error('Pet not found'); }
+      if (item.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') { res.status(403); throw new Error('Not authorized'); }
+      if (!req.file) { res.status(400); throw new Error('File required'); }
+      const path = req.file.path;
+      item.images = item.images || [];
+      item.images.push(path);
+      await item.save();
+      res.status(201).json({ item });
+    } catch (error) { next(error); }
+  },
+  async removePhoto(req, res, next) {
+    try {
+      const item = await Pet.findById(req.params.id);
+      if (!item) { res.status(404); throw new Error('Pet not found'); }
+      if (item.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') { res.status(403); throw new Error('Not authorized'); }
+      const { filename } = req.body;
+      if (!filename) { res.status(400); throw new Error('filename required'); }
+      item.images = (item.images || []).filter(p => p !== filename && p !== `uploads/${filename}`);
+      await item.save();
+      res.json({ item });
+    } catch (error) { next(error); }
+  }
 };
 
 export default petController;

@@ -2,6 +2,7 @@ import express from "express";
 import AdoptionPost from "../models/AdoptionPost.js";
 import Appointment from "../models/Appointment.js";
 import Blog from "../models/Blog.js";
+import Discussion from "../models/Discussion.js";
 import MatchRequest from "../models/MatchRequest.js";
 import MedicalRecord from "../models/MedicalRecord.js";
 import Message from "../models/Message.js";
@@ -18,6 +19,10 @@ import crudRoutes from "./crudRoutes.js";
 import uploadRoutes from "./uploadRoutes.js";
 import { createResourceController } from "../controllers/resourceController.js";
 import petRoutes from "./petRoutes.js";
+import communityRoutes from "./communityRoutes.js";
+import marketRoutes from "./marketRoutes.js";
+import medicalRoutes from "./medicalRoutes.js";
+import vaccinationRoutes from "./vaccinationRoutes.js";
 
 const router = express.Router();
 
@@ -32,10 +37,15 @@ router.use("/orders", crudRoutes(createResourceController(Order, ["user", "items
 router.use("/match-requests", crudRoutes(createResourceController(MatchRequest, ["requesterPet", "targetPet"])));
 router.use("/adoptions", crudRoutes(createResourceController(AdoptionPost, ["pet", "postedBy", "requests.user"])));
 router.use("/blogs", crudRoutes(createResourceController(Blog, ["author", "comments.user"])));
+router.use("/discussions", crudRoutes(createResourceController(Discussion, ["author", "replies.user"])));
 router.use("/notifications", crudRoutes(createResourceController(Notification, ["user"])));
 router.use("/reviews", crudRoutes(createResourceController(Review, ["user"])));
 router.use("/messages", crudRoutes(createResourceController(Message, ["sender", "receiver", "relatedPet"])));
 router.use("/admin", adminRoutes);
+router.use("/community", communityRoutes);
+router.use("/market", marketRoutes);
+router.use("/medical-records", medicalRoutes);
+router.use("/vaccinations", vaccinationRoutes);
 router.use("/ai", aiRoutes);
 
 export default router;

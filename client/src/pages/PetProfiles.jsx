@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import api from '../services/api.js';
 import PetForm from '../components/PetForm.jsx';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight, CalendarClock, PawPrint, Sparkles } from 'lucide-react';
+
+const heroImage = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1400&q=85';
 
 export default function PetProfiles() {
   const [pets, setPets] = useState([]);
@@ -57,41 +60,67 @@ export default function PetProfiles() {
   if (loading) return <div>Loading pets...</div>;
 
   return (
-    <div className="page">
-      <div className="section-header">
-        <h2>My Pets</h2>
+    <div className="section pet-profile-page">
+      <section className="module-detail-hero pet-profile-hero">
         <div>
-          <button className="primary-button" onClick={handleCreate}>Add Pet</button>
+          <p className="eyebrow">Pet management</p>
+          <h1>My Pets</h1>
+          <p>Keep every pet profile organized with photos, notes, vaccination status, and quick edit actions.</p>
+          <div className="hero-actions">
+            <button className="primary-button" onClick={handleCreate} type="button">
+              <PawPrint size={17} /> Add Pet
+            </button>
+            <button className="ghost-button" onClick={() => navigate('/modules/health')} type="button">
+              <Sparkles size={16} /> Open Health Module
+            </button>
+          </div>
         </div>
-      </div>
+        <div style={{ display: 'grid', gap: 12, maxWidth: 420, width: '100%' }}>
+          <img
+            src={heroImage}
+            alt="Happy dog wearing a collar"
+            style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'cover', borderRadius: 24, boxShadow: 'var(--shadow)' }}
+          />
+          <div className="hero-strip" style={{ gridColumn: 'auto', minHeight: 'auto' }}>
+            <span>Photo-ready</span>
+            <strong>Upload images, store notes, and keep pet records clean and presentation-ready.</strong>
+            <span className="mini-badge"><ArrowRight size={16} /> Fast updates</span>
+          </div>
+        </div>
+      </section>
 
       {creating && (
-        <div style={{ maxWidth: 720 }}>
+        <div style={{ maxWidth: 840, marginTop: 24 }}>
           <PetForm onSaved={handleSaved} onCancel={() => setCreating(false)} />
         </div>
       )}
 
       {editing && (
-        <div style={{ maxWidth: 720 }}>
+        <div style={{ maxWidth: 840, marginTop: 24 }}>
           <PetForm initial={editing} onSaved={handleSaved} onCancel={() => setEditing(null)} />
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+      <div className="pet-profile-grid" style={{ display: 'grid', gap: 16, marginTop: 24 }}>
         {pets.length === 0 && <div>No pets yet. Add your first pet.</div>}
         {pets.map((pet) => (
-          <div key={pet._id} className="module-card">
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', background: '#eee' }}>
+          <div key={pet._id} className="module-card pet-profile-card">
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ width: 96, height: 96, borderRadius: 20, overflow: 'hidden', background: 'rgba(16,183,166,0.08)', flexShrink: 0 }}>
                 {pet.images && pet.images[0] ? (
                   <img src={pet.images[0].startsWith('uploads') ? `/${pet.images[0]}` : pet.images[0]} alt="pet" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ padding: 12 }}>{pet.species}</div>
+                  <div style={{ padding: 12, display: 'grid', placeItems: 'center', height: '100%', color: 'var(--muted)', fontWeight: 800 }}>{pet.species}</div>
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0 }}>{pet.name}</h3>
-                <div style={{ color: 'var(--muted)' }}>{pet.breed || '—'} • {pet.age != null ? `${pet.age} yrs` : 'Age unknown'}</div>
+                <p className="eyebrow" style={{ marginBottom: 6 }}>{pet.species}</p>
+                <h3 style={{ margin: 0, fontSize: '1.45rem' }}>{pet.name}</h3>
+                <div style={{ color: 'var(--muted)', marginTop: 6 }}>{pet.breed || 'Breed not set'} • {pet.age != null ? `${pet.age} yrs` : 'Age unknown'}</div>
+                <div className="tag-list" style={{ marginTop: 12 }}>
+                  <span><CalendarClock size={13} /> {pet.vaccinationStatus || 'unknown'}</span>
+                  <span>{pet.gender || 'unknown'}</span>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="ghost-button" onClick={() => handleEdit(pet)}>Edit</button>

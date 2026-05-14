@@ -359,6 +359,122 @@
   border-left-color: #3498db;
 }
 
+/* Modern dashboard overrides */
+.dashboard-container {
+  position: relative;
+  padding: clamp(24px, 4vw, 40px);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(16, 183, 166, 0.14), transparent 28%),
+    radial-gradient(circle at 92% 8%, rgba(59, 130, 246, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.96), rgba(242, 247, 253, 0.98));
+}
+
+.dashboard-container h1 {
+  color: var(--ink);
+  letter-spacing: -0.04em;
+}
+
+.dashboard-grid {
+  gap: 1.25rem;
+}
+
+.dashboard-grid > .widget,
+.dashboard-grid > .stats-section,
+.dashboard-grid > .quick-actions {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
+.stats-section {
+  padding: 0;
+}
+
+.stat-card,
+.widget,
+.pet-card,
+.appointment-card,
+.patient-card,
+.inventory-item,
+.order-row,
+.schedule-item,
+.service-card,
+.approval-item,
+.report-item,
+.alert {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
+}
+
+.stat-card {
+  border-left: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(243,248,255,0.92));
+}
+
+.stat-card.highlight {
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.94), rgba(255, 255, 255, 0.96));
+}
+
+.widget-header {
+  border-bottom-color: rgba(17, 24, 39, 0.08);
+}
+
+.btn-primary,
+.btn-small,
+.btn-approve,
+.btn-reject,
+.action-btn {
+  border-radius: 14px;
+}
+
+.btn-primary,
+.action-btn {
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  color: #fff;
+}
+
+.btn-small {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.action-btn:hover,
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.alert.alert-warning {
+  background: linear-gradient(135deg, rgba(255, 248, 225, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.alert.alert-info {
+  background: linear-gradient(135deg, rgba(235, 245, 255, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.quick-actions .actions-grid {
+  gap: 0.9rem;
+}
+
+.action-btn {
+  border: 0;
+  padding: 1.2rem 1rem;
+  box-shadow: 0 16px 32px rgba(59, 130, 246, 0.16);
+}
+
+@media (max-width: 700px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .alert-icon {
   font-size: 1.5rem;
 }

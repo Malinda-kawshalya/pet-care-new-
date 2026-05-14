@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import { sendEmail, generateVerificationLink, generatePasswordResetLink } from "../utils/emailService.js";
 import crypto from "crypto";
 
 const providerRoles = ["veterinarian", "petShop", "groomer"];
@@ -7,6 +8,17 @@ const providerRoles = ["veterinarian", "petShop", "groomer"];
 export async function register(req, res, next) {
   try {
     const { name, email, password, role = "petOwner", phone, address, providerProfile } = req.body;
+    
+    // Validation
+    if (!name || !email || !password) {
+      res.status(400);
+      throw new Error("Name, email, and password are required");
+    }
+    if (password.length < 6) {
+      res.status(400);
+      throw new Error("Password must be at least 6 characters");
+    }
+    
     const exists = await User.findOne({ email });
     if (exists) {
       res.status(409);
@@ -28,11 +40,15 @@ export async function register(req, res, next) {
       verificationTokenExpires: expiresInHours(24)
     });
 
+    // Send welcome email
+    const verificationLink = generateVerificationLink(verificationToken);
+    await sendEmail(email, "welcome", [name, verificationToken, verificationLink]);
+
     res.status(201).json({
       user: sanitizeUser(user),
       token: generateToken(user._id),
       verificationToken,
-      message: "Account created. Verify email with the returned token in this development build."
+      message: "Account created successfully. Check your email to verify your address."
     });
   } catch (error) {
     next(error);
@@ -91,6 +107,14 @@ export async function changePassword(req, res, next) {
       res.status(400);
       throw new Error("Current password and new password are required");
     }
+    if (newPassword.length < 6) {
+      res.status(400);
+      throw new Error("New password must be at least 6 characters");
+    }
+    if (currentPassword === newPassword) {
+      res.status(400);
+      throw new Error("New password must be different from current password");
+    }
 
     const user = await User.findById(req.user._id);
     if (!user || !(await user.matchPassword(currentPassword))) {
@@ -109,9 +133,15 @@ export async function changePassword(req, res, next) {
 export async function forgotPassword(req, res, next) {
   try {
     const { email } = req.body;
+    if (!email) {
+      res.status(400);
+      throw new Error("Email is required");
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({ message: "If that email exists, a reset link has been prepared." });
+      // Don't reveal if email exists for security
+      return res.json({ message: "If that email exists, a reset link has been sent." });
     }
 
     const resetToken = createToken();
@@ -119,9 +149,13 @@ export async function forgotPassword(req, res, next) {
     user.resetPasswordExpires = expiresInHours(1);
     await user.save();
 
+    // Send password reset email
+    const resetLink = generatePasswordResetLink(resetToken);
+    await sendEmail(email, "passwordReset", [user.name, resetToken, resetLink]);
+
     return res.json({
-      message: "Password reset token generated for this development build.",
-      resetToken
+      message: "Password reset link sent to your email.",
+      resetToken: process.env.NODE_ENV === "development" ? resetToken : undefined
     });
   } catch (error) {
     return next(error);
@@ -131,6 +165,15 @@ export async function forgotPassword(req, res, next) {
 export async function resetPassword(req, res, next) {
   try {
     const { token, password } = req.body;
+    if (!token || !password) {
+      res.status(400);
+      throw new Error("Token and password are required");
+    }
+    if (password.length < 6) {
+      res.status(400);
+      throw new Error("Password must be at least 6 characters");
+    }
+
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: new Date() }
@@ -145,7 +188,7 @@ export async function resetPassword(req, res, next) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
-    res.json({ message: "Password reset successfully" });
+    res.json({ message: "Password reset successfully. You can now login with your new password." });
   } catch (error) {
     next(error);
   }
@@ -177,6 +220,10 @@ export async function verifyEmail(req, res, next) {
 export async function resendVerification(req, res, next) {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
     if (user.isEmailVerified) {
       return res.json({ message: "Email is already verified" });
     }
@@ -185,7 +232,15 @@ export async function resendVerification(req, res, next) {
     user.verificationToken = verificationToken;
     user.verificationTokenExpires = expiresInHours(24);
     await user.save();
-    return res.json({ message: "Verification token generated", verificationToken });
+
+    // Send verification email
+    const verificationLink = generateVerificationLink(verificationToken);
+    await sendEmail(user.email, "welcome", [user.name, verificationToken, verificationLink]);
+
+    return res.json({ 
+      message: "Verification email sent. Check your inbox.",
+      verificationToken: process.env.NODE_ENV === "development" ? verificationToken : undefined
+    });
   } catch (error) {
     return next(error);
   }
@@ -337,9 +392,14 @@ export async function updateUserApprovalStatus(req, res, next) {
       throw new Error("User not found");
     }
 
+    // Send approval/rejection email if user is a provider
+    if (providerRoles.includes(user.role) && ["approved", "rejected"].includes(approvalStatus)) {
+      await sendEmail(user.email, "approval", [user.name, user.role, approvalStatus]);
+    }
+
     res.json({
       message: `User ${approvalStatus} successfully`,
-      user: await sanitizeUser(user)
+      user: sanitizeUser(user)
     });
   } catch (error) {
     next(error);

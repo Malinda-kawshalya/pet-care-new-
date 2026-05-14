@@ -1,11 +1,23 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Database, KeyRound, Workflow } from "lucide-react";
 import { modules } from "../data/platformData.js";
 
 export default function ModulePage() {
   const { moduleId } = useParams();
+  const navigate = useNavigate();
   const module = modules.find((item) => item.id === moduleId) ?? modules[0];
   const Icon = module.icon;
+
+  function handleAction(index) {
+    if (module.id === "community" && index === 0) {
+      navigate("/community");
+      return;
+    }
+
+    if (module.id === "admin" && index === 0) {
+      navigate("/dashboard/admin");
+    }
+  }
 
   return (
     <section className="module-detail full-screen-section">
@@ -64,7 +76,13 @@ export default function ModulePage() {
           <h2>Actions</h2>
           <div className="action-stack">
             {module.actions.map((action, index) => (
-              <button className={index === 0 ? "primary-button compact" : "ghost-button"} key={action}>{action}</button>
+              <button
+                className={index === 0 ? "primary-button compact" : "ghost-button"}
+                key={action}
+                onClick={() => handleAction(index)}
+              >
+                {action}
+              </button>
             ))}
           </div>
           <h2>Role and security notes</h2>

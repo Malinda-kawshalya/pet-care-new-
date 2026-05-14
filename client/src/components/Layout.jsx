@@ -24,7 +24,8 @@ export default function Layout() {
   const authenticatedNavItems = isAuthenticated ? [
     { to: "/pets", label: "Pets" },
     { to: "/modules/health", label: "Health" },
-    { to: "/modules/appointments", label: "Bookings" }
+    { to: "/modules/appointments", label: "Bookings" },
+    { to: "/community", label: "Community" }
   ] : [];
 
   // Admin item - only show for admins

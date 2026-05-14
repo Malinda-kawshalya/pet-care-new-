@@ -5,6 +5,14 @@ import Home from "./pages/Home.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ModulePage from "./pages/ModulePage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
+import Community from "./pages/Community.jsx";
+import Marketplace from "./pages/Marketplace.jsx";
+import ProductDetail from "./pages/ProductDetail.jsx";
+import Cart from "./pages/Cart.jsx";
+import Checkout from "./pages/Checkout.jsx";
+import Orders, { OrderView } from "./pages/Orders.jsx";
+import MedicalRecords from "./pages/MedicalRecords.jsx";
+import Vaccinations from "./pages/Vaccinations.jsx";
 
 // Dashboard Components
 import PetOwnerDashboard from "./components/dashboards/PetOwnerDashboard.jsx";
@@ -88,6 +96,19 @@ export default function App() {
           path="/pets"
           element={<ProtectedRoute element={<PetProfiles />} />}
         />
+
+        <Route
+          path="/community"
+          element={<ProtectedRoute element={<Community />} />}
+        />
+        <Route path="/market" element={<Marketplace />} />
+        <Route path="/market/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders" element={<ProtectedRoute element={<Orders />} />} />
+        <Route path="/orders/:id" element={<ProtectedRoute element={<OrderView />} />} />
+        <Route path="/medical-records" element={<ProtectedRoute element={<MedicalRecords />} />} />
+        <Route path="/vaccinations" element={<ProtectedRoute element={<Vaccinations />} />} />
       </Route>
     </Routes>
   );
