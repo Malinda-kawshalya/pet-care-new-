@@ -12,7 +12,7 @@ export async function listAdoptions(req, res, next) {
     const { q = "", status = "open" } = req.query;
     const filter = {};
     if (req.user.role !== "admin") filter.status = status;
-    if (req.user.role === "petOwner") {
+    if (req.user.role !== "admin") {
       filter.$or = [{ status: "open" }, { postedBy: req.user._id }];
     }
 

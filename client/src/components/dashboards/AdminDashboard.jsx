@@ -32,7 +32,7 @@ const defaultForms = {
   user: { name: "", email: "", password: "", role: "petOwner", approvalStatus: "approved" },
   appointment: { pet: "", owner: "", provider: "", serviceType: "vet", scheduledAt: "", status: "pending", location: "", notes: "" },
   product: { seller: "", name: "", category: "", price: "", stock: "", description: "", approvalStatus: "pending", isActive: true },
-  blog: { author: "", title: "", body: "", tags: "", status: "draft" },
+  blog: { author: "", title: "", body: "", tags: "", status: "published" },
   adoption: { pet: "", postedBy: "", title: "", description: "", adoptionFee: "", location: "", status: "pendingApproval" }
 };
 

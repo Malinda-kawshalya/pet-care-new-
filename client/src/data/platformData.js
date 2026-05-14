@@ -52,18 +52,18 @@ export const roles = [
 ];
 
 export const modules = [
-  {
-    id: "auth",
-    title: "Authentication",
-    icon: ShieldCheck,
-    tone: "violet",
-    collection: "Users",
-    summary: "Registration, login, approval, roles, and secure account settings.",
-    features: ["User registration", "Login / logout", "Forgot password", "Profile management", "Change password", "Admin approval", "Role management"],
-    workflows: ["Register with role", "Wait for provider approval", "Login with JWT", "Update profile and password"],
-    actions: ["Create account", "Approve provider", "Block user", "Reset password"],
-    permissions: ["Public registration", "Owner self-service", "Admin-only approval"]
-  },
+  // {
+  //   id: "auth",
+  //   title: "Authentication",
+  //   icon: ShieldCheck,
+  //   tone: "violet",
+  //   collection: "Users",
+  //   summary: "Registration, login, approval, roles, and secure account settings.",
+  //   features: ["User registration", "Login / logout", "Forgot password", "Profile management", "Change password", "Admin approval", "Role management"],
+  //   workflows: ["Register with role", "Wait for provider approval", "Login with JWT", "Update profile and password"],
+  //   actions: ["Create account", "Approve provider", "Block user", "Reset password"],
+  //   permissions: ["Public registration", "Owner self-service", "Admin-only approval"]
+  // },
   {
     id: "pets",
     title: "Pet Profiles",
@@ -100,30 +100,30 @@ export const modules = [
     actions: ["Book", "Cancel", "Reschedule", "Confirm"],
     permissions: ["Owner books", "Provider manages slots", "Admin resolves disputes"]
   },
-  {
-    id: "marketplace",
-    title: "Marketplace",
-    icon: ShoppingBag,
-    tone: "rose",
-    collection: "Products, Orders, Reviews",
-    summary: "Pet products, carts, checkout, seller inventory, reviews, and order tracking.",
-    features: ["Browse products", "Search products", "Filter products", "Add to cart", "Checkout", "Online payment", "Order tracking", "Reviews and ratings", "Seller product management", "Inventory management"],
-    workflows: ["Browse catalog", "Add to cart", "Pay securely", "Track delivery", "Review product"],
-    actions: ["Add product", "Update stock", "Process payment", "Ship order"],
-    permissions: ["Owners buy", "Pet shops sell", "Admin manages disputes"]
-  },
-  {
-    id: "matchmaking",
-    title: "Find a Mate",
-    icon: HeartHandshake,
-    tone: "pink",
-    collection: "MatchRequests, Messages",
-    summary: "Verified pet matching by breed, gender, age, location, and safe request flows.",
-    features: ["Create pet match profile", "Search by breed", "Search by gender", "Search by age", "Search by location", "Send requests", "Accept/reject", "Chat/contact", "Verification", "Report unsafe users"],
-    workflows: ["Publish match profile", "Filter compatible pets", "Send verified request", "Chat after approval", "Report unsafe activity"],
-    actions: ["Send match request", "Accept", "Reject", "Report"],
-    permissions: ["Verified owners only", "Chat after accepted request", "Admin handles reports"]
-  },
+  // {
+  //   id: "marketplace",
+  //   title: "Marketplace",
+  //   icon: ShoppingBag,
+  //   tone: "rose",
+  //   collection: "Products, Orders, Reviews",
+  //   summary: "Pet products, carts, checkout, seller inventory, reviews, and order tracking.",
+  //   features: ["Browse products", "Search products", "Filter products", "Add to cart", "Checkout", "Online payment", "Order tracking", "Reviews and ratings", "Seller product management", "Inventory management"],
+  //   workflows: ["Browse catalog", "Add to cart", "Pay securely", "Track delivery", "Review product"],
+  //   actions: ["Add product", "Update stock", "Process payment", "Ship order"],
+  //   permissions: ["Owners buy", "Pet shops sell", "Admin manages disputes"]
+  // },
+  // {
+  //   id: "matchmaking",
+  //   title: "Find a Mate",
+  //   icon: HeartHandshake,
+  //   tone: "pink",
+  //   collection: "MatchRequests, Messages",
+  //   summary: "Verified pet matching by breed, gender, age, location, and safe request flows.",
+  //   features: ["Create pet match profile", "Search by breed", "Search by gender", "Search by age", "Search by location", "Send requests", "Accept/reject", "Chat/contact", "Verification", "Report unsafe users"],
+  //   workflows: ["Publish match profile", "Filter compatible pets", "Send verified request", "Chat after approval", "Report unsafe activity"],
+  //   actions: ["Send match request", "Accept", "Reject", "Report"],
+  //   permissions: ["Verified owners only", "Chat after accepted request", "Admin handles reports"]
+  // },
   {
     id: "adoption",
     title: "Adoption",
@@ -136,78 +136,78 @@ export const modules = [
     actions: ["Create listing", "Submit request", "Approve adopter", "Archive listing"],
     permissions: ["Owners and shelters post", "Users request adoption", "Admin approves flagged listings"]
   },
-  {
-    id: "community",
-    title: "Community",
-    icon: MessageCircle,
-    tone: "orange",
-    collection: "Blogs",
-    summary: "Blogs, pet care articles, tips, comments, shares, discussions, and moderation.",
-    features: ["Create blog posts", "View articles", "Comment on posts", "Like/share posts", "Pet care tips", "Community discussions", "Admin content moderation"],
-    workflows: ["Write article", "Publish tips", "Discuss with owners", "Moderate flagged content"],
-    actions: ["Publish post", "Comment", "Like", "Moderate"],
-    permissions: ["Users create content", "Admins moderate", "Experts publish verified tips"]
-  },
-  {
-    id: "notifications",
-    title: "Notifications",
-    icon: Bell,
-    tone: "cyan",
-    collection: "Notifications",
-    summary: "Email and push reminders for vaccines, appointments, emergencies, and promotions.",
-    features: ["Vaccination reminders", "Appointment notifications", "Product promotions", "Emergency alerts", "Push notifications", "Email notifications"],
-    workflows: ["Generate trigger", "Choose channel", "Send notification", "Track read status"],
-    actions: ["Send vaccine reminder", "Send appointment alert", "Broadcast emergency", "Mark as read"],
-    permissions: ["System creates reminders", "Admin sends alerts", "Users control preferences"]
-  },
-  {
-    id: "locations",
-    title: "Maps",
-    icon: MapPinned,
-    tone: "lime",
-    collection: "Provider locations",
-    summary: "Nearby vets, grooming centers, pet shops, map display, and navigation assistance.",
-    features: ["Find nearby vets", "Find grooming centers", "Find pet shops", "Display location on map", "Navigation assistance"],
-    workflows: ["Share location", "Search service radius", "Open provider profile", "Navigate to center"],
-    actions: ["Search nearby", "Filter by service", "Open map", "Start directions"],
-    permissions: ["Users search", "Providers maintain location", "Admin verifies service address"]
-  },
-  {
-    id: "admin",
-    title: "Admin",
-    icon: LayoutDashboard,
-    tone: "slate",
-    collection: "All collections",
-    summary: "User approval, product management, appointments, reports, analytics, and moderation.",
-    features: ["User management", "Approve/block users", "Manage products", "Manage appointments", "Monitor reports", "View analytics", "Content moderation", "Generate reports"],
-    workflows: ["Review account queue", "Approve or block", "Moderate reports", "Export analytics", "Audit security"],
-    actions: ["Approve user", "Block account", "Moderate post", "Export report"],
-    permissions: ["Admin only", "Role-based control", "Audit logged"]
-  },
-  {
-    id: "ai",
-    title: "Smart AI",
-    icon: Sparkles,
-    tone: "purple",
-    collection: "AI recommendations",
-    summary: "Vaccination prediction, health risk alerts, diet suggestions, trends, and chatbot advice.",
-    features: ["Predict vaccination dates", "Health risk alerts", "Smart reminder suggestions", "Personalized recommendations", "Disease trend analysis", "AI chatbot", "Diet recommendations"],
-    workflows: ["Analyze pet profile", "Predict next vaccine", "Recommend diet", "Detect health trend", "Show chatbot advice"],
-    actions: ["Run prediction", "Create alert", "Suggest diet", "Ask chatbot"],
-    permissions: ["Owner receives suggestions", "Vet reviews medical alerts", "Admin monitors trends"]
-  },
-  {
-    id: "security",
-    title: "Security",
-    icon: LockKeyhole,
-    tone: "red",
-    collection: "Security controls",
-    summary: "Authorization, encrypted data, secure payments, backups, verification, and fraud controls.",
-    features: ["Authentication and authorization", "Data encryption", "Secure payments", "Backup and recovery", "User verification", "Spam and fraud detection"],
-    workflows: ["Authorize route", "Validate role", "Encrypt sensitive data", "Verify payments", "Run backup"],
-    actions: ["Audit permissions", "Verify user", "Flag fraud", "Restore backup"],
-    permissions: ["JWT protected APIs", "Role checks", "Admin audit"]
-  }
+  // {
+  //   id: "community",
+  //   title: "Community",
+  //   icon: MessageCircle,
+  //   tone: "orange",
+  //   collection: "Blogs",
+  //   summary: "Blogs, pet care articles, tips, comments, shares, discussions, and moderation.",
+  //   features: ["Create blog posts", "View articles", "Comment on posts", "Like/share posts", "Pet care tips", "Community discussions", "Admin content moderation"],
+  //   workflows: ["Write article", "Publish tips", "Discuss with owners", "Moderate flagged content"],
+  //   actions: ["Publish post", "Comment", "Like", "Moderate"],
+  //   permissions: ["Users create content", "Admins moderate", "Experts publish verified tips"]
+  // },
+  // {
+  //   id: "notifications",
+  //   title: "Notifications",
+  //   icon: Bell,
+  //   tone: "cyan",
+  //   collection: "Notifications",
+  //   summary: "Email and push reminders for vaccines, appointments, emergencies, and promotions.",
+  //   features: ["Vaccination reminders", "Appointment notifications", "Product promotions", "Emergency alerts", "Push notifications", "Email notifications"],
+  //   workflows: ["Generate trigger", "Choose channel", "Send notification", "Track read status"],
+  //   actions: ["Send vaccine reminder", "Send appointment alert", "Broadcast emergency", "Mark as read"],
+  //   permissions: ["System creates reminders", "Admin sends alerts", "Users control preferences"]
+  // },
+  // {
+  //   id: "locations",
+  //   title: "Maps",
+  //   icon: MapPinned,
+  //   tone: "lime",
+  //   collection: "Provider locations",
+  //   summary: "Nearby vets, grooming centers, pet shops, map display, and navigation assistance.",
+  //   features: ["Find nearby vets", "Find grooming centers", "Find pet shops", "Display location on map", "Navigation assistance"],
+  //   workflows: ["Share location", "Search service radius", "Open provider profile", "Navigate to center"],
+  //   actions: ["Search nearby", "Filter by service", "Open map", "Start directions"],
+  //   permissions: ["Users search", "Providers maintain location", "Admin verifies service address"]
+  // },
+  // {
+  //   id: "admin",
+  //   title: "Admin",
+  //   icon: LayoutDashboard,
+  //   tone: "slate",
+  //   collection: "All collections",
+  //   summary: "User approval, product management, appointments, reports, analytics, and moderation.",
+  //   features: ["User management", "Approve/block users", "Manage products", "Manage appointments", "Monitor reports", "View analytics", "Content moderation", "Generate reports"],
+  //   workflows: ["Review account queue", "Approve or block", "Moderate reports", "Export analytics", "Audit security"],
+  //   actions: ["Approve user", "Block account", "Moderate post", "Export report"],
+  //   permissions: ["Admin only", "Role-based control", "Audit logged"]
+  // },
+  // {
+  //   id: "ai",
+  //   title: "Smart AI",
+  //   icon: Sparkles,
+  //   tone: "purple",
+  //   collection: "AI recommendations",
+  //   summary: "Vaccination prediction, health risk alerts, diet suggestions, trends, and chatbot advice.",
+  //   features: ["Predict vaccination dates", "Health risk alerts", "Smart reminder suggestions", "Personalized recommendations", "Disease trend analysis", "AI chatbot", "Diet recommendations"],
+  //   workflows: ["Analyze pet profile", "Predict next vaccine", "Recommend diet", "Detect health trend", "Show chatbot advice"],
+  //   actions: ["Run prediction", "Create alert", "Suggest diet", "Ask chatbot"],
+  //   permissions: ["Owner receives suggestions", "Vet reviews medical alerts", "Admin monitors trends"]
+  // },
+  // {
+  //   id: "security",
+  //   title: "Security",
+  //   icon: LockKeyhole,
+  //   tone: "red",
+  //   collection: "Security controls",
+  //   summary: "Authorization, encrypted data, secure payments, backups, verification, and fraud controls.",
+  //   features: ["Authentication and authorization", "Data encryption", "Secure payments", "Backup and recovery", "User verification", "Spam and fraud detection"],
+  //   workflows: ["Authorize route", "Validate role", "Encrypt sensitive data", "Verify payments", "Run backup"],
+  //   actions: ["Audit permissions", "Verify user", "Flag fraud", "Restore backup"],
+  //   permissions: ["JWT protected APIs", "Role checks", "Admin audit"]
+  // }
 ];
 
 export const products = [

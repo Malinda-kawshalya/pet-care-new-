@@ -4,6 +4,7 @@ import { sendEmail, generateVerificationLink, generatePasswordResetLink } from "
 import crypto from "crypto";
 
 const providerRoles = ["veterinarian", "petShop", "groomer"];
+const signUpRoles = ["petOwner", "veterinarian", "petShop", "groomer"];
 
 export async function register(req, res, next) {
   try {
@@ -17,6 +18,10 @@ export async function register(req, res, next) {
     if (password.length < 6) {
       res.status(400);
       throw new Error("Password must be at least 6 characters");
+    }
+    if (!signUpRoles.includes(role)) {
+      res.status(400);
+      throw new Error("Invalid role. Sign up is available for petOwner, veterinarian, petShop, and groomer only");
     }
     
     const exists = await User.findOne({ email });

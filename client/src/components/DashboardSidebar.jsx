@@ -38,6 +38,7 @@ const menuItems = {
     { icon: MessageSquare, label: "Messages", to: "/messages" }
   ],
   petShop: [
+    { icon: PawPrint, label: "My Pets", to: "/pets" },
     { icon: ShoppingBag, label: "Marketplace", to: "/modules/marketplace" },
     { icon: Package, label: "My Products", to: "/community" },
     { icon: Clock, label: "Orders", to: "/orders" },

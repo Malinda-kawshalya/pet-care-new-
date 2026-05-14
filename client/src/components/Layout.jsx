@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { Bell, Menu, PawPrint, Search, ShoppingCart, UserRound, LogOut } from "lucide-react";
 import { useAuth, useUserRole } from "../hooks/useAuth";
 import { getDashboardPath } from "../utils/roleHelper";
@@ -7,12 +8,16 @@ export default function Layout() {
   const { user, isAuthenticated, logout } = useAuth();
   const { userRole } = useUserRole();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Public navigation items (visible to all)
   const publicNavItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/market", label: "Shop" },
+    { to: "/adoption", label: "Adoption" },
+    { to: "/blogs", label: "Blogs" },
     { to: "/contact", label: "Contact" }
   ];
 
@@ -21,8 +26,20 @@ export default function Layout() {
 
   const handleLogout = () => {
     logout();
+    setMenuOpen(false);
     navigate('/');
   };
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    return () => document.removeEventListener("mousedown", handleDocumentClick);
+  }, []);
 
   return (
     <div className="app-shell">
@@ -59,8 +76,14 @@ export default function Layout() {
           </Link>
           
           {isAuthenticated ? (
-            <div className="user-menu-container">
-              <button className="icon-button user-button" aria-label="User menu" title={user?.name || "User"}>
+            <div className={`user-menu-container ${menuOpen ? "open" : ""}`} ref={menuRef} onMouseEnter={() => setMenuOpen(true)} onMouseLeave={() => setMenuOpen(false)}>
+              <button
+                className="icon-button user-button"
+                aria-label="User menu"
+                title={user?.name || "User"}
+                type="button"
+                onClick={() => setMenuOpen((current) => !current)}
+              >
                 <UserRound size={18} />
               </button>
               <div className="user-dropdown">
@@ -80,7 +103,7 @@ export default function Layout() {
                 <Link to="/account" className="dropdown-item">My Profile</Link>
                 <Link to="/account" className="dropdown-item">Settings</Link>
                 <div className="dropdown-divider"></div>
-                <button onClick={handleLogout} className="dropdown-item logout-btn">
+                <button onClick={handleLogout} className="dropdown-item logout-btn" type="button">
                   <LogOut size={16} /> Logout
                 </button>
               </div>

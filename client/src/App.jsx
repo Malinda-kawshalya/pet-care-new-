@@ -10,6 +10,7 @@ import ProductDetail from "./pages/ProductDetail.jsx";
 import Cart from "./pages/Cart.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import Orders, { OrderView } from "./pages/Orders.jsx";
+import BlogsPage from "./pages/BlogsPage.jsx";
 import MedicalRecords from "./pages/MedicalRecords.jsx";
 import Vaccinations from "./pages/Vaccinations.jsx";
 import Appointments from "./pages/Appointments.jsx";
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/blogs" element={<ProtectedRoute element={<BlogsPage />} />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/modules/:moduleId" element={<ModulePage />} />

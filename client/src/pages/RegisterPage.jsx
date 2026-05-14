@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CircleAlert, Eye, EyeOff, PawPrint, ShieldCheck, UserPlus } from "lucide-react";
 import api from "../services/api.js";
 import { getDashboardPath } from "../utils/roleHelper.js";
+import { roles } from "../data/platformData.js";
+
+const signupRoles = roles.filter((role) => role.id !== "admin");
 
 const emptyForm = {
   name: "",
@@ -12,7 +15,11 @@ const emptyForm = {
   bio: "",
   role: "petOwner",
   password: "",
-  confirmPassword: ""
+  confirmPassword: "",
+  businessName: "",
+  licenseNumber: "",
+  serviceArea: "",
+  specialties: ""
 };
 
 export default function RegisterPage() {
@@ -61,7 +68,7 @@ export default function RegisterPage() {
         <article className="auth-form-panel">
           <header className="auth-panel-head">
             <h2>Create account</h2>
-            <p>Register as a pet owner and join the platform.</p>
+            <p>Register as a pet owner, veterinarian, pet shop, or groomer.</p>
           </header>
 
           {status && <div className="form-alert success">{status}</div>}
@@ -100,6 +107,43 @@ export default function RegisterPage() {
                 />
               </label>
             </div>
+
+            <label>Account type
+              <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
+                {signupRoles.map((role) => (
+                  <option key={role.id} value={role.id}>{role.label}</option>
+                ))}
+              </select>
+            </label>
+
+            {isProviderRole(form.role) && (
+              <div className="split-fields">
+                <label>Business name
+                  <input
+                    value={form.businessName}
+                    onChange={(event) => setForm({ ...form, businessName: event.target.value })}
+                  />
+                </label>
+                <label>License number
+                  <input
+                    value={form.licenseNumber}
+                    onChange={(event) => setForm({ ...form, licenseNumber: event.target.value })}
+                  />
+                </label>
+                <label>Service area
+                  <input
+                    value={form.serviceArea}
+                    onChange={(event) => setForm({ ...form, serviceArea: event.target.value })}
+                  />
+                </label>
+                <label>Specialties
+                  <input
+                    value={form.specialties}
+                    onChange={(event) => setForm({ ...form, specialties: event.target.value })}
+                  />
+                </label>
+              </div>
+            )}
 
             <label>Bio
               <textarea
@@ -170,11 +214,11 @@ export default function RegisterPage() {
           <p className="eyebrow">New account</p>
           <h1>Join the platform</h1>
           <p>
-            Create your pet owner account and get immediate access to all features. Service provider roles are available via admin approval after login.
+            Create your account and get access to the role that matches your workflow.
           </p>
           <div className="auth-hero-tags">
             <span><ShieldCheck size={14} /> Secure authentication</span>
-            <span><ArrowRight size={14} /> Instant pet owner access</span>
+            <span><ArrowRight size={14} /> Owner and provider access</span>
             <span><UserPlus size={14} /> Fast onboarding</span>
           </div>
         </article>
@@ -184,6 +228,15 @@ export default function RegisterPage() {
 }
 
 function toPayload(form) {
+  const providerProfile = isProviderRole(form.role)
+    ? {
+        businessName: form.businessName,
+        licenseNumber: form.licenseNumber,
+        serviceArea: form.serviceArea,
+        specialties: form.specialties
+      }
+    : undefined;
+
   return {
     name: form.name,
     email: form.email,
@@ -191,6 +244,11 @@ function toPayload(form) {
     phone: form.phone,
     address: form.address,
     bio: form.bio,
-    role: form.role
+    role: form.role,
+    ...(providerProfile ? { providerProfile } : {})
   };
+}
+
+function isProviderRole(role) {
+  return ["veterinarian", "petShop", "groomer"].includes(role);
 }

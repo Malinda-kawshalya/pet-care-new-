@@ -206,7 +206,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section role-section">
+      {/* <section className="section role-section">
         <SectionHeader
           eyebrow="Role-based access"
           title="Clear workflows for every user type"
@@ -226,7 +226,7 @@ export default function Home() {
             </article>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <section className="section" id="modules">
         <SectionHeader
@@ -306,7 +306,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section page-muted-surface">
+      {/* <section className="section page-muted-surface">
         <SectionHeader
           eyebrow="Database design"
           title="Structured data behind the scenes"
@@ -319,7 +319,7 @@ export default function Home() {
             </span>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CartModal
