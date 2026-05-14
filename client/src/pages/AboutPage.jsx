@@ -52,7 +52,7 @@ export default function AboutPage() {
             <span className="feature-chip"><Award size={14} /> Production ready</span>
             <span className="feature-chip"><PawPrint size={14} /> Pet first UX</span>
           </div>
-          <Link to="/contact" className="primary-button" style={{ width: "fit-content" }}>
+          <Link to="/contact" className="primary-button fit-content-btn">
             Talk to the team <ArrowRight size={18} />
           </Link>
         </div>
@@ -81,7 +81,7 @@ export default function AboutPage() {
 
       <div className="section">
         <div className="section-header section-header-center">
-          <p className="eyebrow" style={{ margin: "0 auto 12px" }}>Our story</p>
+          <p className="eyebrow centered-eyebrow">Our story</p>
           <h2>From feature-rich app to polished care experience</h2>
           <p>
             The platform already had the right features. The work now is about making those features feel cohesive, readable, and inviting on every screen.

@@ -29,7 +29,7 @@ export default function Messages() {
         </div>
       </div>
 
-      <div className="grid-two" style={{ alignItems: "start" }}>
+      <div className="grid-two content-start">
         <form className="module-card" onSubmit={send}>
           <h2>New message</h2>
           <input value={form.receiver} onChange={(e) => setForm({ ...form, receiver: e.target.value })} placeholder="Receiver user ID" required />
@@ -43,7 +43,7 @@ export default function Messages() {
             <article key={message._id} className="module-card">
               <strong>{message.sender?.name} → {message.receiver?.name}</strong>
               <p>{message.body}</p>
-              <small>{new Date(message.createdAt).toLocaleString()}</small>
+              <small className="muted-text">{new Date(message.createdAt).toLocaleString()}</small>
             </article>
           ))}
         </div>

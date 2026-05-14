@@ -35,24 +35,34 @@ export default function MedicalRecords() {
 
   return (
     <section className="section">
-      <h1>Medical Records</h1>
+      <div className="module-detail-hero">
+        <div>
+          <p className="eyebrow">Medical records</p>
+          <h1>Clinical notes and treatment history</h1>
+          <p>Store diagnoses, prescriptions, and supporting files by pet profile.</p>
+        </div>
+      </div>
+
       {isVet ? (
-        <form onSubmit={submit} style={{ marginBottom: 12 }}>
+        <form className="module-card panel-fields" onSubmit={submit}>
           <label>Pet ID<input value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} /></label>
           <label>Diagnosis<textarea value={form.diagnosis} onChange={(e) => setForm({ ...form, diagnosis: e.target.value })} /></label>
           <label>Treatment<textarea value={form.treatment} onChange={(e) => setForm({ ...form, treatment: e.target.value })} /></label>
           <label>Prescriptions (comma separated)<input value={(form.prescriptions||[]).join(',')} onChange={(e) => setForm({ ...form, prescriptions: e.target.value.split(',').map(s=>s.trim()) })} /></label>
           <label>Upload documents<input type="file" onChange={handleUpload} /></label>
+          {uploading && <small className="muted-text">Uploading document...</small>}
           <button className="primary-button" type="submit">Save Record</button>
         </form>
       ) : null}
 
-      <div>
+      <div className="page-card panel-fields">
         <label>Filter by Pet ID<input value={petId} onChange={(e) => setPetId(e.target.value)} /></label>
-        <button onClick={() => setPetId('')}>Clear</button>
+        <div className="inline-actions">
+          <button className="ghost-button" type="button" onClick={() => setPetId('')}>Clear</button>
+        </div>
       </div>
 
-      <div style={{ marginTop: 12 }}>
+      <div className="stack-gap top-gap-12">
         {records.map(r => (
           <div key={r._id} className="module-card">
             <h3>{r.diagnosis || 'Medical record'}</h3>

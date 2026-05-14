@@ -68,9 +68,9 @@ export default function Appointments() {
         <Link to="/dashboard" className="secondary-link">Open dashboard</Link>
       </div>
 
-      <div className="grid-two" style={{ alignItems: "start" }}>
+      <div className="grid-two content-start">
         <form className="module-card" onSubmit={submit}>
-          <h2 style={{ marginTop: 0 }}>Create booking</h2>
+          <h2>Create booking</h2>
           <label>Pet</label>
           <select value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required>
             <option value="">Select pet</option>
@@ -94,13 +94,13 @@ export default function Appointments() {
           <label>Notes</label>
           <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="4" />
           <button className="primary-button" type="submit">Book appointment</button>
-          {slots.length > 0 && <p style={{ marginTop: 12, color: "var(--muted)" }}>Available half-hour slots: {slots.join(", ")}</p>}
+          {slots.length > 0 && <p className="muted-text">Available half-hour slots: {slots.join(", ")}</p>}
         </form>
 
         <div className="stack-gap">
           {appointments.map((appointment) => (
             <article key={appointment._id} className="module-card">
-              <h3 style={{ marginTop: 0 }}>{appointment.pet?.name || "Pet"} with {appointment.provider?.name || "provider"}</h3>
+              <h3>{appointment.pet?.name || "Pet"} with {appointment.provider?.name || "provider"}</h3>
               <p>{appointment.serviceType} • {new Date(appointment.scheduledAt).toLocaleString()}</p>
               <p>{appointment.status}</p>
               <div className="button-row">

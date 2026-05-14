@@ -30,14 +30,14 @@ export default function AI() {
         </div>
       </div>
 
-      <div className="grid-two" style={{ alignItems: "start" }}>
+      <div className="grid-two content-start">
         <div className="module-card">
           <h2>Vaccination prediction</h2>
           <input type="date" value={predictionForm.lastVaccinationDate} onChange={(e) => setPredictionForm({ ...predictionForm, lastVaccinationDate: e.target.value })} />
           <input type="number" value={predictionForm.intervalMonths} onChange={(e) => setPredictionForm({ ...predictionForm, intervalMonths: e.target.value })} min="1" />
           <button className="primary-button" type="button" onClick={runPrediction}>Predict next dose</button>
           {prediction && (
-            <div style={{ marginTop: 16 }}>
+            <div className="result-block">
               <strong>{new Date(prediction.predictedDate).toLocaleDateString()}</strong>
               <p>{prediction.recommendation}</p>
             </div>
@@ -56,7 +56,7 @@ export default function AI() {
           <textarea rows="4" placeholder="Comma separated symptoms" value={riskForm.symptoms} onChange={(e) => setRiskForm({ ...riskForm, symptoms: e.target.value })} />
           <button className="primary-button" type="button" onClick={runRisk}>Assess risk</button>
           {risk && (
-            <div style={{ marginTop: 16 }}>
+            <div className="result-block">
               <strong>{risk.level} risk</strong>
               <p>Score: {risk.riskScore}</p>
               <p>{(risk.suggestions || []).join(" • ")}</p>

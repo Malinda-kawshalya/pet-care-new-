@@ -31,17 +31,19 @@ export default function Marketplace() {
 
   return (
     <section className="section">
-      <h1>Marketplace</h1>
+      <div className="module-detail-hero">
+        <div>
+          <p className="eyebrow">Marketplace</p>
+          <h1>Browse pet essentials and wellness products</h1>
+          <p>Filter by category, brand, and budget, then add items to cart instantly.</p>
+        </div>
+      </div>
       <ProductFilters onChange={(s) => load({ ...s, page: 1 })} />
       {loading && <p>Loading...</p>}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-        gap: 20,
-        marginTop: 20
-      }}>
+      <div className="product-grid product-grid-market">
         {products.map(p => <ProductCard key={p._id} product={p} onAdd={(prod) => addItem(prod, 1)} />)}
       </div>
+      {!loading && !!meta.total && <p className="muted-text top-gap-16">Showing {products.length} of {meta.total} products.</p>}
     </section>
   );
 }

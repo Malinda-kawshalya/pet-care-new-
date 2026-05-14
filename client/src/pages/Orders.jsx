@@ -24,19 +24,29 @@ export function OrderView() {
   }, [id]);
 
   if (error) return <section className="section"><div className="form-alert error">{error}</div></section>;
-  if (!order) return <div>Loading...</div>;
+  if (!order) return <section className="section">Loading...</section>;
 
   return (
     <section className="section">
-      <h1>Order {order._id}</h1>
-      <p>Status: {order.orderStatus} - Payment: {order.paymentStatus}</p>
-      <p>Payment method: {order.paymentMethod === 'cod' ? 'Cash on delivery' : 'Card'}</p>
-      {order.trackingNumber && <p>Tracking: {order.trackingNumber}</p>}
+      <div className="module-detail-hero">
+        <div>
+          <p className="eyebrow">Order details</p>
+          <h1>Order {order._id}</h1>
+          <p>Status: {order.orderStatus} • Payment: {order.paymentStatus}</p>
+        </div>
+      </div>
+
+      <div className="page-card panel-fields">
+        <p className="muted-text">Payment method: {order.paymentMethod === 'cod' ? 'Cash on delivery' : 'Card'}</p>
+        {order.trackingNumber && <p className="muted-text">Tracking: {order.trackingNumber}</p>}
+      </div>
+
       {order.paymentMethod === 'cod' && order.orderStatus === 'placed' && (
         <div className="form-alert success">Your cash on delivery order is waiting for shop approval.</div>
       )}
+
       <h3>Items</h3>
-      <ul>
+      <ul className="orders-list-clean">
         {order.items.map((item) => (
           <li key={item._id}>
             {item.product?.name || item.product} x {item.quantity} - {formatCurrency(item.price)}
@@ -66,12 +76,18 @@ export default function Orders() {
 
   return (
     <section className="section">
-      <h1>Your Orders</h1>
+      <div className="module-detail-hero">
+        <div>
+          <p className="eyebrow">Orders</p>
+          <h1>Your recent purchases</h1>
+          <p>Track status, payment method, and totals for each order.</p>
+        </div>
+      </div>
       {error && <div className="form-alert error">{error}</div>}
       {orders.length === 0 ? (
         <p>No orders yet.</p>
       ) : (
-        <ul>
+        <ul className="orders-list-clean">
           {orders.map((order) => (
             <li key={order._id}>
               <Link to={`/orders/${order._id}`}>{order._id}</Link> - {order.orderStatus} - {order.paymentMethod === 'cod' ? 'COD' : 'Card'} - {formatCurrency(order.total)}
