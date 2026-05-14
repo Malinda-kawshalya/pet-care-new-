@@ -71,7 +71,7 @@ const PetOwnerDashboard = () => {
     <div className="dashboard-with-sidebar">
       <DashboardSidebar />
       <div className="dashboard-container">
-      <div className="dashboard-hero" style={{ marginBottom: '1.5rem' }}>
+      <div className="dashboard-hero">
         <div>
           <p className="eyebrow">Pet owner workspace</p>
           <h1>Welcome{user?.name ? `, ${user.name}` : ''}</h1>
@@ -112,10 +112,10 @@ const PetOwnerDashboard = () => {
           </div>
           <div className="actions-grid">
             {actions.map(({ label, icon: Icon, to, detail }) => (
-              <Link key={label} className="action-btn" to={to} style={{ textDecoration: 'none' }}>
+              <Link key={label} className="action-btn action-btn-link" to={to}>
                 <Icon size={18} />
-                <strong style={{ display: 'block', marginTop: 8 }}>{label}</strong>
-                <span style={{ display: 'block', opacity: 0.9, fontSize: 12, marginTop: 4 }}>{detail}</span>
+                <strong className="action-btn-title">{label}</strong>
+                <span className="action-btn-detail">{detail}</span>
               </Link>
             ))}
           </div>

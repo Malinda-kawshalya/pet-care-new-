@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../services/api.js';
+import DashboardSidebar from '../DashboardSidebar.jsx';
 import './Dashboard.css';
 
 function customerName(user) {
@@ -218,8 +219,16 @@ const PetShopDashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
-      <h1>Pet Shop Dashboard</h1>
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      <div className="dashboard-container">
+      <div className="dashboard-hero">
+        <div>
+          <p className="eyebrow">Pet shop workspace</p>
+          <h1>Pet Shop Dashboard</h1>
+          <p>Manage inventory, review COD approvals, and keep stock healthy.</p>
+        </div>
+      </div>
 
       {error && <div className="form-alert error">{error}</div>}
       {status && <div className="form-alert success">{status}</div>}
@@ -248,12 +257,12 @@ const PetShopDashboard = () => {
           <div className="widget-header">
             <h2>Add Product</h2>
           </div>
-          <form onSubmit={createProduct} style={{ display: 'grid', gap: 12 }}>
+          <form onSubmit={createProduct} className="widget-form-grid">
             <div className="form-group">
               <label htmlFor="product-name">Product name</label>
               <input id="product-name" required value={productForm.name} onChange={(event) => updateProductField('name', event.target.value)} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="widget-form-grid-2">
               <div className="form-group">
                 <label htmlFor="product-brand">Brand</label>
                 <input id="product-brand" value={productForm.brand} onChange={(event) => updateProductField('brand', event.target.value)} />
@@ -267,7 +276,7 @@ const PetShopDashboard = () => {
               <label htmlFor="product-description">Description</label>
               <textarea id="product-description" rows={3} value={productForm.description} onChange={(event) => updateProductField('description', event.target.value)} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+            <div className="widget-form-grid-3">
               <div className="form-group">
                 <label htmlFor="product-price">Price</label>
                 <input id="product-price" required min="0.01" step="0.01" type="number" value={productForm.price} onChange={(event) => updateProductField('price', event.target.value)} />
@@ -290,7 +299,7 @@ const PetShopDashboard = () => {
                 onChange={(event) => updateProductField('imageFile', event.target.files?.[0] || null)} 
               />
               {productForm.imageFile && (
-                <div style={{ marginTop: '8px', fontSize: '13px', color: '#666' }}>
+                <div className="file-note">
                   📁 {productForm.imageFile.name}
                 </div>
               )}
@@ -376,7 +385,7 @@ const PetShopDashboard = () => {
                     <h3>{product.name}</h3>
                     <p>{product.category} - {formatCurrency(product.price)}</p>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="product-actions inventory-actions">
                     <span className={`status ${product.stock <= product.lowStockThreshold ? 'low-stock' : 'in-stock'}`}>
                       {product.stock} in stock
                     </span>
@@ -384,7 +393,6 @@ const PetShopDashboard = () => {
                       className="btn-small" 
                       onClick={() => openEditModal(product)}
                       disabled={updatingId === product._id}
-                      style={{ background: '#0066cc', color: 'white' }}
                     >
                       Edit
                     </button>
@@ -392,7 +400,6 @@ const PetShopDashboard = () => {
                       className="btn-small" 
                       onClick={() => deleteProduct(product._id)}
                       disabled={updatingId === product._id}
-                      style={{ background: '#cc0000', color: 'white' }}
                     >
                       Delete
                     </button>
@@ -427,35 +434,16 @@ const PetShopDashboard = () => {
       </div>
 
       {showEditModal && editingProduct && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '24px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
+        <div className="dashboard-modal-backdrop">
+          <div className="dashboard-modal-panel">
             <h2>Edit Product</h2>
             {error && <div className="form-alert error">{error}</div>}
-            <form onSubmit={updateProduct} style={{ display: 'grid', gap: 12, marginTop: '16px' }}>
+            <form onSubmit={updateProduct} className="widget-form-grid top-gap-16">
               <div className="form-group">
                 <label htmlFor="edit-product-name">Product name</label>
                 <input id="edit-product-name" required value={productForm.name} onChange={(event) => updateProductField('name', event.target.value)} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="widget-form-grid-2">
                 <div className="form-group">
                   <label htmlFor="edit-product-brand">Brand</label>
                   <input id="edit-product-brand" value={productForm.brand} onChange={(event) => updateProductField('brand', event.target.value)} />
@@ -469,7 +457,7 @@ const PetShopDashboard = () => {
                 <label htmlFor="edit-product-description">Description</label>
                 <textarea id="edit-product-description" rows={3} value={productForm.description} onChange={(event) => updateProductField('description', event.target.value)} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="widget-form-grid-3">
                 <div className="form-group">
                   <label htmlFor="edit-product-price">Price</label>
                   <input id="edit-product-price" required min="0.01" step="0.01" type="number" value={productForm.price} onChange={(event) => updateProductField('price', event.target.value)} />
@@ -492,16 +480,16 @@ const PetShopDashboard = () => {
                   onChange={(event) => updateProductField('imageFile', event.target.files?.[0] || null)} 
                 />
                 {productForm.imageFile && (
-                  <div style={{ marginTop: '8px', fontSize: '13px', color: '#666' }}>
+                  <div className="file-note">
                     📁 {productForm.imageFile.name}
                   </div>
                 )}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="modal-actions">
                 <button className="btn-primary" disabled={updatingId === editingProduct._id} type="submit">
                   {updatingId === editingProduct._id ? 'Updating...' : 'Update Product'}
                 </button>
-                <button className="btn-secondary" type="button" onClick={closeEditModal} style={{ background: '#888', color: 'white' }}>
+                <button className="btn-small" type="button" onClick={closeEditModal}>
                   Cancel
                 </button>
               </div>
@@ -509,6 +497,7 @@ const PetShopDashboard = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

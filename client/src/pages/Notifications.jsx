@@ -35,9 +35,9 @@ export default function Notifications() {
       <div className="stack-gap">
         {items.map((item) => (
           <article key={item._id} className="module-card">
-            <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+            <h3>{item.title}</h3>
             <p>{item.message}</p>
-            <small>{item.readAt ? `Read ${new Date(item.readAt).toLocaleString()}` : "Unread"}</small>
+            <small className="muted-text">{item.readAt ? `Read ${new Date(item.readAt).toLocaleString()}` : "Unread"}</small>
             {!item.readAt && <button className="ghost-button" type="button" onClick={() => markRead(item._id)}>Mark read</button>}
           </article>
         ))}

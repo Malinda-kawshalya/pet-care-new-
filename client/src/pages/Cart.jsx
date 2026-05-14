@@ -8,30 +8,36 @@ export default function Cart() {
 
   return (
     <section className="section">
-      <h1>Your Cart</h1>
-      {cart.length === 0 ? (
+      <div className="module-detail-hero">
         <div>
+          <p className="eyebrow">Your cart</p>
+          <h1>Review items before checkout</h1>
+          <p>Adjust quantities or remove products before placing your order.</p>
+        </div>
+      </div>
+      {cart.length === 0 ? (
+        <div className="page-card">
           <p>Cart is empty.</p>
-          <Link to="/market">Browse products</Link>
+          <Link to="/market" className="primary-button fit-content-btn">Browse products</Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="cart-list">
           {cart.map(item => (
-            <div key={item.product} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <img src={item.image || '/placeholder.png'} alt={item.name} style={{ width: 80, height: 64, objectFit: 'cover', borderRadius: 8 }} />
-              <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0 }}>{item.name}</h3>
-                <div style={{ color: 'var(--muted)' }}>${item.price.toFixed(2)}</div>
+            <article key={item.product} className="cart-item-row">
+              <img className="cart-item-image" src={item.image || '/placeholder.png'} alt={item.name} />
+              <div className="cart-item-info">
+                <h3>{item.name}</h3>
+                <div className="muted-text">${item.price.toFixed(2)}</div>
               </div>
               <div>
-                <input type="number" value={item.quantity} min={1} onChange={(e) => updateQty(item.product, Number(e.target.value))} style={{ width: 64 }} />
+                <input className="cart-qty-input" type="number" value={item.quantity} min={1} onChange={(e) => updateQty(item.product, Number(e.target.value))} />
               </div>
               <div>
                 <button onClick={() => removeItem(item.product)} className="action-btn delete">Remove</button>
               </div>
-            </div>
+            </article>
           ))}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="cart-total-row page-card">
             <strong>Total: ${total.toFixed(2)}</strong>
             <button className="primary-button" onClick={() => navigate('/checkout')}>Checkout</button>
           </div>

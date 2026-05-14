@@ -11,7 +11,9 @@ export default function Layout() {
   // Public navigation items (visible to all)
   const publicNavItems = [
     { to: "/", label: "Home" },
-    { to: "/market", label: "Shop" }
+    { to: "/about", label: "About" },
+    { to: "/market", label: "Shop" },
+    { to: "/contact", label: "Contact" }
   ];
 
   // Build navigation array - only public items
@@ -24,6 +26,12 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
+      <div className="shell-decor" aria-hidden="true">
+        <span className="shell-decor-paw left-a"><PawPrint size={34} /></span>
+        <span className="shell-decor-paw left-b"><PawPrint size={24} /></span>
+        <span className="shell-decor-paw right-a"><PawPrint size={30} /></span>
+        <span className="shell-decor-paw right-b"><PawPrint size={40} /></span>
+      </div>
       <header className="topbar">
         <Link to="/" className="brand" aria-label="Pet Care home">
           <span className="brand-mark"><PawPrint size={18} /></span>
@@ -37,6 +45,7 @@ export default function Layout() {
           ))}
         </nav>
         <div className="top-actions">
+          <Link to="/contact" className="topbar-cta">Let's talk</Link>
           <Link to="/modules/locations" className="icon-button" aria-label="Search nearby services">
             <Search size={18} />
           </Link>
@@ -90,6 +99,31 @@ export default function Layout() {
       <main>
         <Outlet />
       </main>
+      <footer className="footer">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <div className="brand">
+              <span className="brand-mark"><PawPrint size={18} /></span>
+              <span>Pet Care</span>
+            </div>
+            <p>
+              A polished pet care platform for owners, clinics, shops, and groomers with one responsive interface.
+            </p>
+          </div>
+          <nav className="footer-links" aria-label="Footer navigation">
+            {publicNavItems.map((item) => (
+              <Link key={item.to} to={item.to}>{item.label}</Link>
+            ))}
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/login">Login</Link>
+          </nav>
+          <div className="footer-utility">
+            <p>Need help choosing a service or role? Start at contact and we’ll route you to the right workflow.</p>
+            <Link to="/contact" className="topbar-cta">Contact support</Link>
+          </div>
+        </div>
+        <div className="footer-word">Pet<span>Care</span></div>
+      </footer>
     </div>
   );
 }

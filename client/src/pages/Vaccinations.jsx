@@ -25,9 +25,15 @@ export default function Vaccinations() {
 
   return (
     <section className="section">
-      <h1>Vaccinations</h1>
+      <div className="module-detail-hero">
+        <div>
+          <p className="eyebrow">Vaccinations</p>
+          <h1>Plan doses and monitor vaccine status</h1>
+          <p>Track schedules, send reminders, and review current pet vaccination states.</p>
+        </div>
+      </div>
       {isVet && (
-        <form onSubmit={submit} style={{ marginBottom: 12 }}>
+        <form className="module-card panel-fields" onSubmit={submit}>
           <label>Pet ID<input value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required /></label>
           <label>Vaccine Name<input value={form.vaccineName} onChange={(e) => setForm({ ...form, vaccineName: e.target.value })} required /></label>
           <label>Administered Date<input type="date" value={form.administeredDate} onChange={(e) => setForm({ ...form, administeredDate: e.target.value })} /></label>
@@ -36,17 +42,19 @@ export default function Vaccinations() {
         </form>
       )}
 
-      <div>
+      <div className="page-card panel-fields">
         <label>Filter by Pet ID<input value={petId} onChange={(e) => setPetId(e.target.value)} /></label>
-        <button onClick={() => setPetId('')}>Clear</button>
+        <div className="inline-actions">
+          <button className="ghost-button" type="button" onClick={() => setPetId('')}>Clear</button>
+        </div>
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        <button onClick={load}>Refresh</button>
-        <button onClick={sendReminders} style={{ marginLeft: 8 }}>Send Reminders</button>
+      <div className="inline-actions top-gap-12">
+        <button className="ghost-button" type="button" onClick={load}>Refresh</button>
+        <button className="primary-button compact" type="button" onClick={sendReminders}>Send Reminders</button>
       </div>
 
-      <div style={{ marginTop: 12 }}>
+      <div className="stack-gap top-gap-12">
         {vaccs.map(v => (
           <div key={v._id} className="module-card">
             <h3>{v.vaccineName}</h3>

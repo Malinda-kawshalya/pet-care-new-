@@ -92,12 +92,12 @@ export default function Checkout() {
       {error && <div className="form-alert error">{error}</div>}
 
       <form className="checkout-grid" onSubmit={handlePlaceOrder}>
-        <div style={{ display: 'grid', gap: 18 }}>
+        <div className="panel-stack">
           <div className="module-card">
             <div className="widget-header">
               <h2><MapPin size={20} /> Delivery details</h2>
             </div>
-            <div style={{ display: 'grid', gap: 14 }}>
+            <div className="panel-fields">
               <div className="form-group">
                 <label htmlFor="shipping-name">Full name</label>
                 <input id="shipping-name" required value={shipping.name} onChange={(event) => updateShipping('name', event.target.value)} />
@@ -121,25 +121,25 @@ export default function Checkout() {
             <div className="widget-header">
               <h2><CreditCard size={20} /> Payment method</h2>
             </div>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <label className="checkbox-row" style={{ alignItems: 'flex-start' }}>
+            <div className="panel-fields">
+              <label className="checkbox-row checkout-choice">
                 <input type="radio" name="paymentMethod" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} />
                 <span>
                   <strong>Card payment</strong>
-                  <small style={{ display: 'block', color: 'var(--muted)' }}>Mock card processing marks the order as paid immediately.</small>
+                  <small>Mock card processing marks the order as paid immediately.</small>
                 </span>
               </label>
-              <label className="checkbox-row" style={{ alignItems: 'flex-start' }}>
+              <label className="checkbox-row checkout-choice">
                 <input type="radio" name="paymentMethod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
                 <span>
                   <strong>Cash on delivery</strong>
-                  <small style={{ display: 'block', color: 'var(--muted)' }}>The order is sent to the shop dashboard for approval.</small>
+                  <small>The order is sent to the shop dashboard for approval.</small>
                 </span>
               </label>
             </div>
 
             {paymentMethod === 'card' && (
-              <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+              <div className="panel-fields top-gap-18">
                 <div className="form-group">
                   <label htmlFor="card-name">Name on card</label>
                   <input id="card-name" required value={card.name} onChange={(event) => updateCard('name', event.target.value)} />
@@ -148,7 +148,7 @@ export default function Checkout() {
                   <label htmlFor="card-number">Card number</label>
                   <input id="card-number" required inputMode="numeric" value={card.number} onChange={(event) => updateCard('number', event.target.value)} placeholder="4242 4242 4242 4242" />
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-grid-two">
                   <div className="form-group">
                     <label htmlFor="card-expiry">Expiry</label>
                     <input id="card-expiry" required value={card.expiry} onChange={(event) => updateCard('expiry', event.target.value)} placeholder="MM/YY" />
@@ -163,23 +163,23 @@ export default function Checkout() {
           </div>
         </div>
 
-        <aside className="module-card" style={{ position: 'sticky', top: 96 }}>
+        <aside className="module-card checkout-summary">
           <div className="widget-header">
             <h2><Truck size={20} /> Order summary</h2>
           </div>
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div className="panel-fields">
             {cart.map((item) => (
-              <div key={item.product} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12 }}>
+              <div key={item.product} className="summary-line">
                 <span>{item.name} x {item.quantity}</span>
                 <strong>${((item.price || 0) * item.quantity).toFixed(2)}</strong>
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
+          <div className="summary-total">
             <span>Total</span>
             <strong>${total.toFixed(2)}</strong>
           </div>
-          <button className="primary-button" disabled={loading} type="submit" style={{ width: '100%', marginTop: 18 }}>
+          <button className="primary-button checkout-submit" disabled={loading} type="submit">
             {loading ? 'Placing order...' : paymentMethod === 'cod' ? 'Submit COD order' : 'Pay and place order'}
           </button>
         </aside>

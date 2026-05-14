@@ -50,7 +50,7 @@ export default function Matchmaking() {
         </div>
       </div>
 
-      <div className="grid-two" style={{ alignItems: "start" }}>
+      <div className="grid-two content-start">
         <div className="module-card">
           <h2>Match profile</h2>
           <select value={selectedPet} onChange={(e) => setSelectedPet(e.target.value)}>

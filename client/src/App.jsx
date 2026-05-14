@@ -21,6 +21,8 @@ import AI from "./pages/AI.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
 
 // Dashboard Components
 import PetOwnerDashboard from "./components/dashboards/PetOwnerDashboard.jsx";
@@ -36,6 +38,8 @@ export default function App() {
       <Route element={<Layout />}>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/modules/:moduleId" element={<ModulePage />} />

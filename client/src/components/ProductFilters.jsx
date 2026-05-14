@@ -10,8 +10,8 @@ export default function ProductFilters({ onChange, categories = [], brands = [] 
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-      <input placeholder="Search products" value={state.q} onChange={(e) => update('q', e.target.value)} style={{ minWidth: 200 }} />
+    <div className="product-filters-row">
+      <input className="product-filter-search" placeholder="Search products" value={state.q} onChange={(e) => update('q', e.target.value)} />
       <select value={state.category} onChange={(e) => update('category', e.target.value)}>
         <option value="">All categories</option>
         {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -20,8 +20,8 @@ export default function ProductFilters({ onChange, categories = [], brands = [] 
         <option value="">All brands</option>
         {brands.map((b) => <option key={b} value={b}>{b}</option>)}
       </select>
-      <input placeholder="Min" value={state.minPrice} onChange={(e) => update('minPrice', e.target.value)} style={{ width: 80 }} />
-      <input placeholder="Max" value={state.maxPrice} onChange={(e) => update('maxPrice', e.target.value)} style={{ width: 80 }} />
+      <input className="product-filter-mini" placeholder="Min" value={state.minPrice} onChange={(e) => update('minPrice', e.target.value)} />
+      <input className="product-filter-mini" placeholder="Max" value={state.maxPrice} onChange={(e) => update('maxPrice', e.target.value)} />
     </div>
   );
 }

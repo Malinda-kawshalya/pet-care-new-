@@ -18,21 +18,22 @@ export default function ProductDetail() {
     load();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!product) return <div>Product not found</div>;
+  if (loading) return <section className="section">Loading...</section>;
+  if (!product) return <section className="section">Product not found</section>;
 
   return (
-    <section className="section module-detail-hero">
-      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 18 }}>
-        <div>
-          <img src={product.images?.[0] || '/placeholder.png'} alt={product.name} style={{ width: '100%', borderRadius: 12 }} />
+    <section className="section">
+      <div className="product-detail-grid page-card">
+        <div className="product-detail-image-wrap">
+          <img className="product-detail-image" src={product.images?.[0] || '/placeholder.png'} alt={product.name} />
         </div>
-        <div>
+        <div className="product-detail-copy">
+          <p className="eyebrow">Product detail</p>
           <h1>{product.name}</h1>
-          <p style={{ color: 'var(--muted)' }}>{product.brand} • {product.category}</p>
+          <p className="muted-text">{product.brand} • {product.category}</p>
           <h2>${product.price.toFixed(2)}</h2>
           <p>{product.description}</p>
-          <div style={{ marginTop: 12 }}>
+          <div className="button-row">
             <button className="primary-button" onClick={() => addItem(product, 1)}>Add to cart</button>
           </div>
         </div>

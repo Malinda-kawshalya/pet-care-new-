@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import DashboardSidebar from '../DashboardSidebar.jsx';
 
 const VetDashboard = () => {
-  const [todayAppointments, setTodayAppointments] = useState([
+  const [todayAppointments] = useState([
     { id: 1, petName: 'Max', owner: 'John Doe', time: '10:00 AM', type: 'Checkup', status: 'Completed' },
     { id: 2, petName: 'Bella', owner: 'Jane Smith', time: '11:30 AM', type: 'Vaccination', status: 'In Progress' },
     { id: 3, petName: 'Charlie', owner: 'Bob Johnson', time: '2:00 PM', type: 'Surgery Follow-up', status: 'Pending' }
   ]);
 
-  const [patients, setPatients] = useState([
+  const [patients] = useState([
     { id: 1, petName: 'Max', owner: 'John Doe', breed: 'Golden Retriever', lastVisit: '2025-05-10', nextDue: '2025-06-10' },
     { id: 2, petName: 'Bella', owner: 'Jane Smith', breed: 'Labrador', lastVisit: '2025-05-15', nextDue: '2025-06-15' }
   ]);
@@ -17,7 +17,13 @@ const VetDashboard = () => {
     <div className="dashboard-with-sidebar">
       <DashboardSidebar />
       <div className="dashboard-container">
-      <h1>Veterinarian Dashboard</h1>
+      <div className="dashboard-hero">
+        <div>
+          <p className="eyebrow">Veterinarian workspace</p>
+          <h1>Veterinarian Dashboard</h1>
+          <p>Manage schedules, patients, records, and services from a single clinical view.</p>
+        </div>
+      </div>
 
       <div className="dashboard-grid">
         {/* Stats Cards */}
@@ -44,7 +50,7 @@ const VetDashboard = () => {
         <div className="widget">
           <div className="widget-header">
             <h2>Today's Schedule</h2>
-            <button className="btn-primary">+ Add Appointment</button>
+            <button className="btn-primary" type="button">+ Add Appointment</button>
           </div>
           <div className="schedule-list">
             {todayAppointments.map(apt => (
@@ -66,7 +72,7 @@ const VetDashboard = () => {
         <div className="widget">
           <div className="widget-header">
             <h2>My Patients</h2>
-            <button className="btn-primary">+ Add Patient</button>
+            <button className="btn-primary" type="button">+ Add Patient</button>
           </div>
           <div className="patients-list">
             {patients.map(patient => (
@@ -90,7 +96,7 @@ const VetDashboard = () => {
         <div className="widget">
           <div className="widget-header">
             <h2>Recent Medical Records</h2>
-            <button className="btn-primary">+ Add Record</button>
+            <button className="btn-primary" type="button">+ Add Record</button>
           </div>
           <div className="records-list">
             <div className="record-item">
@@ -162,7 +168,7 @@ const VetDashboard = () => {
               <span>Dental Cleaning</span>
               <span>$150</span>
             </div>
-            <button className="btn-primary">Edit Services</button>
+            <button className="btn-primary" type="button">Edit Services</button>
           </div>
         </div>
       </div>

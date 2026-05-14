@@ -43,7 +43,7 @@ export default function Adoption() {
         </div>
       </div>
 
-      <div className="grid-two" style={{ alignItems: "start" }}>
+      <div className="grid-two content-start">
         <form className="module-card" onSubmit={submit}>
           <h2>Create listing</h2>
           <select value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required>
@@ -60,7 +60,7 @@ export default function Adoption() {
         <div className="stack-gap">
           {items.map((item) => (
             <article key={item._id} className="module-card">
-              <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+              <h3>{item.title}</h3>
               <p>{item.description}</p>
               <p>{item.pet?.name} • {item.location || "No location"} • {item.status}</p>
               <div className="button-row">

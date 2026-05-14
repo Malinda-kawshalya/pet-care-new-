@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import DashboardSidebar from '../DashboardSidebar.jsx';
 
 const GroomerDashboard = () => {
-  const [todayAppointments, setTodayAppointments] = useState([
+  const [todayAppointments] = useState([
     { id: 1, petName: 'Max', owner: 'John Doe', time: '9:00 AM', service: 'Full Groom', duration: '2 hours' },
     { id: 2, petName: 'Bella', owner: 'Jane Smith', time: '11:30 AM', service: 'Bath & Trim', duration: '1.5 hours' },
     { id: 3, petName: 'Charlie', owner: 'Bob Johnson', time: '2:00 PM', service: 'Nail Trim', duration: '30 mins' }
   ]);
 
-  const [services, setServices] = useState([
+  const [services] = useState([
     { id: 1, name: 'Full Groom', duration: '2 hours', price: '$80', description: 'Complete grooming package' },
     { id: 2, name: 'Bath & Trim', duration: '1.5 hours', price: '$60', description: 'Bath and haircut' },
     { id: 3, name: 'Nail Trim', duration: '30 mins', price: '$25', description: 'Nail trimming only' }
   ]);
 
-  const [reviews, setReviews] = useState([
+  const [reviews] = useState([
     { id: 1, petName: 'Max', owner: 'John Doe', rating: 5, comment: 'Excellent groomer! Max looks amazing!' },
     { id: 2, petName: 'Bella', owner: 'Jane Smith', rating: 5, comment: 'Very professional and gentle with my pet' }
   ]);
@@ -23,9 +23,12 @@ const GroomerDashboard = () => {
     <div className="dashboard-with-sidebar">
       <DashboardSidebar />
       <section className="groomer-shell-modern">
-        <div className="dashboard-header">
-          <h1>Groomer Dashboard</h1>
-          <p>Welcome back! Here's your grooming schedule and services overview.</p>
+        <div className="dashboard-hero">
+          <div>
+            <p className="eyebrow">Groomer workspace</p>
+            <h1>Groomer Dashboard</h1>
+            <p>Track appointments, service offerings, and customer feedback in one streamlined view.</p>
+          </div>
         </div>
 
         <div className="dashboard-grid">
@@ -53,7 +56,7 @@ const GroomerDashboard = () => {
           <div className="widget">
             <div className="widget-header">
               <h2>Today's Appointments</h2>
-              <button className="btn-primary">+ New Appointment</button>
+              <button className="btn-primary" type="button">+ New Appointment</button>
             </div>
             <div className="appointments-list">
               {todayAppointments.map(appointment => (
@@ -81,7 +84,7 @@ const GroomerDashboard = () => {
           <div className="widget">
             <div className="widget-header">
               <h2>Services Offered</h2>
-              <button className="btn-primary">+ Add Service</button>
+              <button className="btn-primary" type="button">+ Add Service</button>
             </div>
             <div className="services-list">
               {services.map(service => (
@@ -104,7 +107,7 @@ const GroomerDashboard = () => {
           <div className="widget">
             <div className="widget-header">
               <h2>Recent Reviews</h2>
-              <a href="#" className="link">View All</a>
+              <button className="btn-small" type="button">View all</button>
             </div>
             <div className="reviews-list">
               {reviews.map(review => (
