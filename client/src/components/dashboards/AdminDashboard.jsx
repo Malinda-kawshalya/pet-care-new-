@@ -13,6 +13,7 @@ import {
   Plus,
   RefreshCcw
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import api from "../../services/api.js";
 import DashboardSidebar from "../DashboardSidebar.jsx";
 import "../../styles/admin.css";
@@ -36,6 +37,7 @@ const defaultForms = {
 };
 
 export default function AdminDashboard() {
+  const location = useLocation();
   const [active, setActive] = useState("overview");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +64,13 @@ export default function AdminDashboard() {
     loadOverview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const section = new URLSearchParams(location.search).get("section");
+    if (section && sections.some((item) => item.key === section)) {
+      setActive(section);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (active === "users") loadUsers();
@@ -381,34 +390,6 @@ export default function AdminDashboard() {
     <div className="dashboard-with-sidebar">
       <DashboardSidebar />
       <section className="admin-shell-modern">
-      <aside className="admin-sidebar-modern">
-        <div className="admin-brand">
-          <span className="admin-brand-dot" />
-          <div>
-            <h2>Control Center</h2>
-            <p>Platform Administration</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav-modern">
-          {sections.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.key}
-                className={`admin-nav-item ${active === item.key ? "active" : ""}`}
-                onClick={() => {
-                  setSearch("");
-                  setActive(item.key);
-                }}
-              >
-                <Icon size={18} /> {item.label}
-              </button>
-            );
-          })}
-        </nav>
-      </aside>
-
       <div className="admin-main-modern">
         <header className="admin-main-header">
           <div>

@@ -1944,6 +1944,8 @@ img { display: block; max-width: 100%; }
 
 .dashboard-sidebar {
   position: relative;
+  z-index: 5;
+  flex-shrink: 0;
   width: 280px;
   background: #f8faf9;
   border-right: 1px solid var(--line);
@@ -2063,6 +2065,9 @@ img { display: block; max-width: 100%; }
 
 .dashboard-content {
   flex: 1;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
   overflow-y: auto;
   padding: clamp(20px, 4vw, 40px);
 }

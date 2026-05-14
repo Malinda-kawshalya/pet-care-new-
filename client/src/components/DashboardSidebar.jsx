@@ -49,13 +49,13 @@ const menuItems = {
     { icon: MessageSquare, label: "Messages", to: "/messages" }
   ],
   admin: [
-    { icon: BarChart3, label: "Overview", to: "/dashboard/admin" },
-    { icon: Users, label: "Users Management", to: "/dashboard/admin" },
-    { icon: Clock, label: "Appointments", to: "/dashboard/admin" },
-    { icon: Package, label: "Products", to: "/dashboard/admin" },
-    { icon: FileText, label: "Blogs", to: "/dashboard/admin" },
-    { icon: Heart, label: "Adoptions", to: "/dashboard/admin" },
-    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin" }
+    { icon: BarChart3, label: "Overview", to: "/dashboard/admin?section=overview" },
+    { icon: Users, label: "Users Management", to: "/dashboard/admin?section=users" },
+    { icon: Clock, label: "Appointments", to: "/dashboard/admin?section=appointments" },
+    { icon: Package, label: "Products", to: "/dashboard/admin?section=products" },
+    { icon: FileText, label: "Blogs", to: "/dashboard/admin?section=blogs" },
+    { icon: Heart, label: "Adoptions", to: "/dashboard/admin?section=adoptions" },
+    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" }
   ]
 };
 
