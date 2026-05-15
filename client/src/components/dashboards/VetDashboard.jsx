@@ -31,9 +31,13 @@ export default function VetDashboard() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [records, setRecords] = useState([]);
+  const [pets, setPets] = useState([]);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [recordTarget, setRecordTarget] = useState(null);
+  const [recordForm, setRecordForm] = useState({ pet: "", diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
+  const [recordSubmitting, setRecordSubmitting] = useState(false);
 
   const userId = user?._id || user?.id;
 
@@ -41,14 +45,16 @@ export default function VetDashboard() {
     setLoading(true);
     setError("");
     try {
-      const [appointmentsRes, recordsRes, messagesRes] = await Promise.all([
+      const [appointmentsRes, recordsRes, messagesRes, petsRes] = await Promise.all([
         api.get("/appointments"),
         api.get("/medical-records"),
-        api.get("/messages")
+        api.get("/messages"),
+        api.get("/pets")
       ]);
       setAppointments(appointmentsRes.data.items || []);
       setRecords(recordsRes.data.items || []);
       setThreads(messagesRes.data.items || []);
+      setPets(petsRes.data.items || []);
     } catch (loadError) {
       setError(loadError.response?.data?.message || "Failed to load veterinarian dashboard.");
     } finally {
@@ -62,9 +68,7 @@ export default function VetDashboard() {
 
   const summary = useMemo(() => {
     const todayAppointments = appointments.filter((item) => isToday(item.scheduledAt));
-    const patientIds = new Set(
-      appointments.map((item) => item.pet?._id || item.pet).filter(Boolean).map((id) => String(id))
-    );
+    const patientIds = new Set(pets.map((item) => String(item._id)));
     const unreadMessages = threads.filter(
       (item) => String(item.receiver?._id || item.receiver) === String(userId) && !item.readAt
     ).length;
@@ -91,22 +95,36 @@ export default function VetDashboard() {
   }, [appointments]);
 
   const patients = useMemo(() => {
-    const map = new Map();
-    appointments.forEach((appointment) => {
-      const petId = String(appointment.pet?._id || appointment.pet || "");
-      if (!petId) return;
-      if (!map.has(petId)) {
-        map.set(petId, {
-          petId,
-          petName: appointment.pet?.name || "Pet",
-          species: appointment.pet?.species || "-",
-          breed: appointment.pet?.breed || "Unknown",
-          ownerName: appointment.owner?.name || "Owner"
+    const recordMap = new Map();
+    records.forEach((record) => {
+      const petId = String(record.pet?._id || record.pet || "");
+      if (petId) recordMap.set(petId, record);
+    });
+
+    const ownerMap = new Map();
+    pets.forEach((pet) => {
+      const ownerId = String(pet.owner?._id || pet.owner?.id || pet.owner || "unknown");
+      if (!ownerMap.has(ownerId)) {
+        ownerMap.set(ownerId, {
+          ownerId,
+          ownerName: pet.owner?.name || pet.owner?.firstName || "Owner",
+          ownerEmail: pet.owner?.email || "",
+          pets: []
         });
       }
+
+      ownerMap.get(ownerId).pets.push({
+        petId: String(pet._id),
+        petName: pet.name || "Pet",
+        species: pet.species || "-",
+        breed: pet.breed || "Unknown",
+        vaccinationStatus: pet.vaccinationStatus || "unknown",
+        latestRecord: recordMap.get(String(pet._id)) || null
+      });
     });
-    return Array.from(map.values()).slice(0, 8);
-  }, [appointments]);
+
+    return Array.from(ownerMap.values()).sort((a, b) => a.ownerName.localeCompare(b.ownerName));
+  }, [pets, records]);
 
   const recentRecords = useMemo(() => {
     return [...records]
@@ -127,6 +145,42 @@ export default function VetDashboard() {
       await loadDashboard();
     } catch (updateError) {
       setError(updateError.response?.data?.message || "Failed to update appointment.");
+    }
+  };
+
+  const openRecordComposer = (pet) => {
+    setRecordTarget(pet);
+    setRecordForm({ pet: pet.petId, diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
+  };
+
+  const closeRecordComposer = () => {
+    setRecordTarget(null);
+  };
+
+  const submitRecord = async (event) => {
+    event.preventDefault();
+    if (!recordForm.pet) return;
+
+    setRecordSubmitting(true);
+    setError("");
+
+    try {
+      await api.post("/medical-records", {
+        pet: recordForm.pet,
+        diagnosis: recordForm.diagnosis,
+        treatment: recordForm.treatment,
+        prescriptions: recordForm.prescriptions
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+        vetNotes: recordForm.vetNotes
+      });
+      await loadDashboard();
+      closeRecordComposer();
+    } catch (saveError) {
+      setError(saveError.response?.data?.message || "Failed to save medical record.");
+    } finally {
+      setRecordSubmitting(false);
     }
   };
 
@@ -196,22 +250,54 @@ export default function VetDashboard() {
 
           <div className="widget">
             <div className="widget-header">
-              <h2>Patient list</h2>
+              <h2>Patients</h2>
               <Link className="link" to="/pets">Open pets</Link>
             </div>
-            <div className="patients-list">
+            <div className="patients-list" style={{ display: "grid", gap: 16 }}>
               {!loading && patients.length === 0 && <p>No patient records available yet.</p>}
-              {patients.map((patient) => (
-                <div key={patient.petId} className="patient-card">
-                  <div className="patient-info">
-                    <h3>{patient.petName}</h3>
-                    <p>{patient.breed} • {patient.species}</p>
-                    <p>Owner: {patient.ownerName}</p>
+              {patients.map((owner) => (
+                <article key={owner.ownerId} className="patient-card" style={{ display: "grid", gap: 12, padding: 18 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                    <div>
+                      <h3 style={{ margin: 0 }}>{owner.ownerName}</h3>
+                      <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{owner.ownerEmail || "No email"}</p>
+                    </div>
+                    <span className="status approved">{owner.pets.length} pets</span>
                   </div>
-                  <div className="patient-actions">
-                    <button className="btn-small" type="button" onClick={() => navigate("/medical-records")}>View records</button>
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {owner.pets.map((pet) => (
+                      <div
+                        key={pet.petId}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: 12,
+                          borderRadius: 14,
+                          background: "#f8fafc",
+                          border: "1px solid rgba(148, 163, 184, 0.16)"
+                        }}
+                      >
+                        <div>
+                          <h4 style={{ margin: 0 }}>{pet.petName}</h4>
+                          <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{pet.breed} • {pet.species}</p>
+                          <p style={{ margin: "4px 0 0", color: "var(--shell-muted)", fontSize: 13 }}>
+                            Latest record: {pet.latestRecord?.diagnosis || pet.latestRecord?.type || "None yet"}
+                          </p>
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "flex-end" }}>
+                          <button className="btn-small" type="button" onClick={() => navigate(`/medical-records?petId=${pet.petId}`)}>
+                            View records
+                          </button>
+                          <button className="btn-small" type="button" onClick={() => openRecordComposer(pet)}>
+                            Add record
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           </div>
@@ -275,6 +361,52 @@ export default function VetDashboard() {
             </div>
           </div>
         </div>
+
+        {recordTarget && (
+          <div className="request-modal-backdrop" onClick={closeRecordComposer} role="presentation">
+            <div className="request-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="record-composer-title">
+              <div className="request-modal-header">
+                <div>
+                  <p className="eyebrow">Medical record</p>
+                  <h2 id="record-composer-title">Add record for {recordTarget.petName}</h2>
+                </div>
+                <button className="ghost-button compact" type="button" onClick={closeRecordComposer}>Close</button>
+              </div>
+
+              <form className="request-modal-form" onSubmit={submitRecord}>
+                <input value={recordForm.pet} readOnly />
+                <input
+                  placeholder="Diagnosis"
+                  value={recordForm.diagnosis}
+                  onChange={(event) => setRecordForm({ ...recordForm, diagnosis: event.target.value })}
+                  required
+                />
+                <textarea
+                  rows={3}
+                  placeholder="Treatment"
+                  value={recordForm.treatment}
+                  onChange={(event) => setRecordForm({ ...recordForm, treatment: event.target.value })}
+                />
+                <input
+                  placeholder="Prescriptions, comma separated"
+                  value={recordForm.prescriptions}
+                  onChange={(event) => setRecordForm({ ...recordForm, prescriptions: event.target.value })}
+                />
+                <textarea
+                  rows={4}
+                  placeholder="Vet notes"
+                  value={recordForm.vetNotes}
+                  onChange={(event) => setRecordForm({ ...recordForm, vetNotes: event.target.value })}
+                />
+                <div className="request-modal-actions">
+                  <button className="primary-button" type="submit" disabled={recordSubmitting}>
+                    {recordSubmitting ? "Saving..." : "Save medical record"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

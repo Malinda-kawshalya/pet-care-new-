@@ -2,12 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api.js';
 import { useCart } from '../contexts/CartContext.jsx';
+import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const { addItem } = useCart();
+
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -25,7 +32,12 @@ export default function ProductDetail() {
     <section className="section">
       <div className="product-detail-grid page-card">
         <div className="product-detail-image-wrap">
-          <img className="product-detail-image" src={product.images?.[0] || '/placeholder.png'} alt={product.name} />
+          <img
+            className="product-detail-image"
+            src={getUploadUrl(product.images?.[0])}
+            alt={product.name}
+            onError={handleImageError}
+          />
         </div>
         <div className="product-detail-copy">
           <p className="eyebrow">Product detail</p>

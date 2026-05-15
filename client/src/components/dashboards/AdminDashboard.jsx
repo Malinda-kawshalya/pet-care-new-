@@ -5,6 +5,7 @@ import {
   Package,
   FileText,
   Heart,
+  Mail,
   BarChart3,
   Check,
   Ban,
@@ -25,6 +26,7 @@ const sections = [
   { key: "products", label: "Products", icon: Package },
   { key: "blogs", label: "Blogs", icon: FileText },
   { key: "adoptions", label: "Adoptions", icon: Heart },
+  { key: "contacts", label: "Contacts", icon: Mail },
   { key: "analytics", label: "Analytics & Reports", icon: BarChart3 }
 ];
 
@@ -52,6 +54,7 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [adoptions, setAdoptions] = useState([]);
+  const [contacts, setContacts] = useState([]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -78,6 +81,7 @@ export default function AdminDashboard() {
     if (active === "products") loadProducts();
     if (active === "blogs") loadBlogs();
     if (active === "adoptions") loadAdoptions();
+    if (active === "contacts") loadContacts();
     if (active === "analytics") loadAnalyticsAndReport();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
@@ -141,6 +145,13 @@ export default function AdminDashboard() {
     });
   }
 
+  async function loadContacts() {
+    await run(async () => {
+      const res = await api.get("/admin/contact-inquiries", { params: { q: search } });
+      setContacts(res.data.items || []);
+    });
+  }
+
   async function loadAnalyticsAndReport() {
     await run(async () => {
       const [analyticsRes, reportRes] = await Promise.all([
@@ -158,9 +169,10 @@ export default function AdminDashboard() {
       appointments,
       products,
       blogs,
-      adoptions
+      adoptions,
+      contacts
     };
-  }, [users, appointments, products, blogs, adoptions]);
+  }, [users, appointments, products, blogs, adoptions, contacts]);
 
   function openCreate(type) {
     setFormType(type);
@@ -410,11 +422,12 @@ export default function AdminDashboard() {
               if (active === "products") loadProducts();
               if (active === "blogs") loadBlogs();
               if (active === "adoptions") loadAdoptions();
+              if (active === "contacts") loadContacts();
               if (active === "analytics") loadAnalyticsAndReport();
             }}>
               <RefreshCcw size={16} /> Refresh
             </button>
-            {active !== "overview" && active !== "analytics" && (
+            {active !== "overview" && active !== "analytics" && active !== "contacts" && (
               <button className="admin-btn primary" onClick={() => openCreate(active.slice(0, -1))}>
                 <Plus size={16} /> New
               </button>
@@ -432,6 +445,7 @@ export default function AdminDashboard() {
             <Card title="Appointments" value={stats?.totalAppointments || 0} />
             <Card title="Products" value={stats?.totalProducts || 0} />
             <Card title="Pending Approvals" value={stats?.pendingApprovals || 0} />
+            <Card title="Contact Inquiries" value={stats?.totalContactInquiries || 0} />
             <Card title="Platform Health" value={`${stats?.platformHealth || 0}%`} />
             <Card title="Pending Adoptions" value={stats?.pendingAdoptions || 0} />
 
@@ -477,6 +491,11 @@ export default function AdminDashboard() {
                   {active === "adoptions" && (
                     <>
                       <th>Title</th><th>Pet</th><th>Posted By</th><th>Status</th><th>Actions</th>
+                    </>
+                  )}
+                  {active === "contacts" && (
+                    <>
+                      <th>Name</th><th>Email</th><th>Subject</th><th>Role</th><th>Status</th><th>Actions</th>
                     </>
                   )}
                 </tr>
@@ -560,6 +579,19 @@ export default function AdminDashboard() {
                         </td>
                       </>
                     )}
+
+                    {active === "contacts" && (
+                      <>
+                        <td>{item.name}</td>
+                        <td>{item.email}</td>
+                        <td>{item.subject}</td>
+                        <td>{item.role || "-"}</td>
+                        <td>{item.status}</td>
+                        <td className="actions">
+                          <span className="table-pill">New</span>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -568,30 +600,46 @@ export default function AdminDashboard() {
         )}
 
         {active === "analytics" && (
-          <div className="admin-overview-grid">
-            <div className="admin-panel-card">
-              <h3>User Analytics</h3>
-              {Object.entries(analytics?.byRole || {}).map(([k, v]) => (
-                <p key={k} className="mini-row"><span>{k}</span><strong>{v}</strong></p>
-              ))}
+          <div className="analytics-layout">
+            <div className="analytics-hero-card admin-panel-card full">
+              <div className="analytics-hero-copy">
+                <p className="eyebrow">Platform report</p>
+                <h3>Clear operational visibility across users, orders, appointments, and contact requests.</h3>
+                <p>Use these charts to track growth, moderation load, and support demand from one view.</p>
+              </div>
+              <div className="analytics-summary-grid">
+                <div><span>Revenue</span><strong>${report?.revenue || 0}</strong></div>
+                <div><span>Contacts</span><strong>{report?.totals?.contacts || 0}</strong></div>
+                <div><span>Orders</span><strong>{report?.totals?.orders || 0}</strong></div>
+                <div><span>Appointments</span><strong>{report?.totals?.appointments || 0}</strong></div>
+              </div>
             </div>
 
-            <div className="admin-panel-card">
-              <h3>Approval Status</h3>
-              {Object.entries(analytics?.byStatus || {}).map(([k, v]) => (
-                <p key={k} className="mini-row"><span>{k}</span><strong>{v}</strong></p>
-              ))}
+            <div className="analytics-grid-3">
+              <ChartPanel title="Users by role" items={analytics?.byRole || {}} accent="teal" />
+              <ChartPanel title="Approval status" items={analytics?.byStatus || {}} accent="blue" />
+              <ChartPanel title="Monthly trends" items={analytics?.trends?.users || []} accent="amber" valueLabel="records" />
             </div>
 
             <div className="admin-panel-card full">
-              <h3>Reports</h3>
-              <div className="report-grid">
-                <p>Total Users: <strong>{report?.totals?.users || 0}</strong></p>
-                <p>Total Orders: <strong>{report?.totals?.orders || 0}</strong></p>
-                <p>Total Appointments: <strong>{report?.totals?.appointments || 0}</strong></p>
-                <p>Revenue: <strong>${report?.revenue || 0}</strong></p>
+              <div className="section-heading-row">
+                <div>
+                  <h3>Report totals</h3>
+                  <p>Snapshot from the latest summary export.</p>
+                </div>
+                <button className="admin-btn primary" onClick={csvFromReport}>Export CSV</button>
               </div>
-              <button className="admin-btn primary" onClick={csvFromReport}>Export CSV</button>
+              <div className="report-grid">
+                <div className="report-stat"><span>Total Users</span><strong>{report?.totals?.users || 0}</strong></div>
+                <div className="report-stat"><span>Total Orders</span><strong>{report?.totals?.orders || 0}</strong></div>
+                <div className="report-stat"><span>Total Appointments</span><strong>{report?.totals?.appointments || 0}</strong></div>
+                <div className="report-stat"><span>Total Contacts</span><strong>{report?.totals?.contacts || 0}</strong></div>
+              </div>
+              <div className="report-note-grid">
+                {(analytics?.alerts || []).map((item) => (
+                  <div key={item} className="report-note">{item}</div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -621,6 +669,31 @@ function Card({ title, value }) {
     <div className="admin-panel-card">
       <p>{title}</p>
       <h2>{value}</h2>
+    </div>
+  );
+}
+
+function ChartPanel({ title, items, accent = "teal", valueLabel = "count" }) {
+  const entries = Array.isArray(items) ? items.map((item) => [item.label, item.count]) : Object.entries(items);
+  const max = Math.max(1, ...entries.map(([, value]) => Number(value) || 0));
+
+  return (
+    <div className="admin-panel-card chart-card">
+      <h3>{title}</h3>
+      <div className={`chart-stack ${accent}`}>
+        {entries.length ? entries.map(([label, value]) => {
+          const width = `${Math.max(10, ((Number(value) || 0) / max) * 100)}%`;
+          return (
+            <div key={label} className="chart-row">
+              <span>{label}</span>
+              <div className="chart-bar-track">
+                <div className="chart-bar-fill" style={{ width }} />
+              </div>
+              <strong>{value} {valueLabel}</strong>
+            </div>
+          );
+        }) : <p className="chart-empty">No data yet.</p>}
+      </div>
     </div>
   );
 }

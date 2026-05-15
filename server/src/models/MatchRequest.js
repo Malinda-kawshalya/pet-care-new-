@@ -4,6 +4,11 @@ const matchRequestSchema = new mongoose.Schema(
   {
     requesterPet: { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true },
     targetPet: { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true },
+    applicantName: String,
+    applicantEmail: String,
+    applicantPhone: String,
+    meetingPreference: String,
+    applicantNotes: String,
     message: String,
     status: { type: String, enum: ["pending", "accepted", "rejected", "reported"], default: "pending" },
     reportReason: String

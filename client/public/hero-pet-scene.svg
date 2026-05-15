@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-label="Pet care hero illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#eef7ff"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dff9ff"/>
+      <stop offset="100%" stop-color="#b9e8ff"/>
+    </linearGradient>
+    <linearGradient id="dog" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd98f"/>
+      <stop offset="100%" stop-color="#f6c36a"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" rx="64" fill="url(#bg)"/>
+  <circle cx="780" cy="170" r="120" fill="#b9f0f3" opacity="0.65"/>
+  <circle cx="250" cy="580" r="150" fill="#dff4b7" opacity="0.55"/>
+  <circle cx="650" cy="350" r="220" fill="url(#accent)" opacity="0.62"/>
+  <circle cx="630" cy="330" r="175" fill="#ffffff" opacity="0.72"/>
+  <circle cx="630" cy="330" r="150" fill="url(#dog)" opacity="0.92"/>
+  <circle cx="585" cy="288" r="34" fill="#f7d889" opacity="0.95"/>
+  <circle cx="700" cy="270" r="56" fill="#f3c87e" opacity="0.85"/>
+  <circle cx="586" cy="352" r="70" fill="#f7d889" opacity="0.85"/>
+  <path d="M500 395c34-64 88-98 142-98s108 34 142 98" fill="none" stroke="#8d3d18" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="570" cy="286" r="12" fill="#8d3d18"/>
+  <circle cx="620" cy="286" r="12" fill="#8d3d18"/>
+  <circle cx="670" cy="286" r="12" fill="#8d3d18"/>
+  <circle cx="645" cy="315" r="15" fill="#8d3d18"/>
+  <circle cx="420" cy="220" r="34" fill="#ffffff" stroke="#d7e3f3" stroke-width="8"/>
+  <circle cx="420" cy="220" r="12" fill="#2f6bd2"/>
+  <path d="M398 196c8-18 18-26 31-26" stroke="#2f6bd2" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M214 400c26-53 69-83 121-83 20 0 39 4 56 12" stroke="#7c2d12" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.4"/>
+  <circle cx="165" cy="350" r="34" fill="#fff" stroke="#d7e3f3" stroke-width="8"/>
+  <circle cx="165" cy="350" r="14" fill="#f59e0b"/>
+  <circle cx="118" cy="515" r="38" fill="#fff" stroke="#d7e3f3" stroke-width="8"/>
+  <circle cx="118" cy="515" r="16" fill="#7c2d12"/>
+  <circle cx="175" cy="510" r="20" fill="#ffffff" stroke="#d7e3f3" stroke-width="8"/>
+  <text x="630" y="510" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" fill="#8d3d18">Pet Care</text>
+  <text x="630" y="548" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#8d3d18" opacity="0.85">Calm care, clear workflows</text>
+</svg>

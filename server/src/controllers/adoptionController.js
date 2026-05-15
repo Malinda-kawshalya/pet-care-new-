@@ -11,14 +11,17 @@ export async function listAdoptions(req, res, next) {
   try {
     const { q = "", status = "open", limit } = req.query;
     const filter = {};
-    if (req.user.role !== "admin") filter.status = status;
-    if (req.user.role !== "admin") {
+    const role = req.user?.role;
+
+    if (role && role !== "admin") filter.status = status;
+    if (role && role !== "admin") {
       filter.$or = [{ status: "open" }, { postedBy: req.user._id }];
     }
 
     const items = await AdoptionPost.find(filter)
       .populate("pet", "name species breed images location vaccinationStatus")
       .populate("postedBy", "name email role")
+      .populate("requests.user", "name email phone address role")
       .sort({ createdAt: -1 });
 
     const normalized = items.filter((item) => {
@@ -73,7 +76,15 @@ export async function createAdoption(req, res, next) {
 
 export async function requestAdoption(req, res, next) {
   try {
-    const { message } = req.body;
+    const {
+      message,
+      applicantName,
+      applicantEmail,
+      applicantPhone,
+      applicantAddress,
+      homeType,
+      experience
+    } = req.body;
     const post = await AdoptionPost.findById(req.params.id).populate("postedBy", "name email");
     if (!post) {
       res.status(404);
@@ -84,7 +95,22 @@ export async function requestAdoption(req, res, next) {
       throw new Error("Adoption post is not open");
     }
 
-    post.requests.push({ user: req.user._id, message, status: "pending" });
+    if (!applicantName || !applicantEmail || !applicantPhone) {
+      res.status(400);
+      throw new Error("Applicant name, email, and phone are required");
+    }
+
+    post.requests.push({
+      user: req.user._id,
+      applicantName,
+      applicantEmail,
+      applicantPhone,
+      applicantAddress,
+      homeType,
+      experience,
+      message,
+      status: "pending"
+    });
     await post.save();
 
     await Notification.create({
@@ -123,7 +149,10 @@ export async function respondAdoptionRequest(req, res, next) {
       throw new Error("Request not found");
     }
     request.status = status;
-    if (status === "approved") post.status = "pendingApproval";
+    if (status === "approved") post.status = "adopted";
+    if (status === "rejected" && post.requests.every((entry) => entry.status !== "pending")) {
+      post.status = "open";
+    }
     await post.save();
 
     await Notification.create({

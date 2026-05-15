@@ -14,6 +14,7 @@
   --blue: #0ea5e9;
   --green: #10b981;
   --red: #ef4444;
+  --topbar-offset: 72px;
   --shadow: 0 20px 60px rgba(15, 15, 31, 0.15);
   --shadow-lg: 0 40px 80px rgba(15, 15, 31, 0.2);
   --shadow-sm: 0 4px 12px rgba(15, 15, 31, 0.08);
@@ -63,6 +64,7 @@ input, select, textarea {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  min-height: var(--topbar-offset);
   padding: 16px clamp(18px, 4vw, 72px);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(18px);
@@ -1979,17 +1981,17 @@ input, select, textarea {
 /* Dashboard Sidebar */
 .dashboard-with-sidebar {
   position: relative;
-  min-height: calc(100vh - 73px);
+  min-height: calc(100vh - var(--topbar-offset, 73px));
 }
 
 .dashboard-sidebar {
   position: fixed;
-  top: 73px;
+  top: var(--topbar-offset, 73px);
   left: 0;
-  z-index: 1300;
+  z-index: 1100;
   flex-shrink: 0;
   width: 280px;
-  height: calc(100vh - 73px);
+  height: calc(100vh - var(--topbar-offset, 73px));
   background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
   border-right: 1px solid rgba(148, 163, 184, 0.24);
   display: flex;
@@ -2007,7 +2009,7 @@ input, select, textarea {
 .dashboard-sidebar + .admin-shell-modern,
 .dashboard-sidebar + .groomer-shell-modern {
   margin-left: 280px;
-  min-height: calc(100vh - 73px);
+  min-height: calc(100vh - var(--topbar-offset, 73px));
   transition: margin-left 0.28s ease;
 }
 
@@ -2165,7 +2167,7 @@ input, select, textarea {
   .dashboard-sidebar-overlay {
     display: block;
     position: fixed;
-    inset: 73px 0 0;
+    inset: var(--topbar-offset, 73px) 0 0;
     background: rgba(2, 8, 23, 0.38);
     backdrop-filter: blur(2px);
     z-index: 1200;
@@ -2185,7 +2187,7 @@ input, select, textarea {
     align-items: center;
     justify-content: center;
     left: 14px;
-    top: 84px;
+    top: calc(var(--topbar-offset, 73px) + 11px);
     width: 42px;
     height: 42px;
     border-radius: 12px;

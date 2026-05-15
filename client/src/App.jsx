@@ -24,6 +24,7 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
+import AdoptionForm from "./pages/AdoptionForm.jsx";
 
 // Dashboard Components
 import PetOwnerDashboard from "./components/dashboards/PetOwnerDashboard.jsx";
@@ -136,7 +137,8 @@ export default function App() {
         <Route path="/vaccinations" element={<ProtectedRoute element={<Vaccinations />} />} />
         <Route path="/appointments" element={<ProtectedRoute element={<Appointments />} />} />
         <Route path="/matchmaking" element={<ProtectedRoute element={<Matchmaking />} />} />
-        <Route path="/adoption" element={<ProtectedRoute element={<Adoption />} />} />
+        <Route path="/adoption" element={<Adoption />} />
+        <Route path="/dashboard/adoption" element={<ProtectedRoute element={<AdoptionForm />} />} />
         <Route path="/messages" element={<ProtectedRoute element={<Messages />} />} />
         <Route path="/notifications" element={<ProtectedRoute element={<Notifications />} />} />
         <Route path="/ai" element={<ProtectedRoute element={<AI />} />} />

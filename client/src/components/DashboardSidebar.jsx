@@ -28,7 +28,7 @@ const menuItems = {
     { icon: Clock, label: "Appointments", to: "/appointments" },
     { icon: Users, label: "Community", to: "/community" },
     { icon: HeartIcon, label: "Matchmaking", to: "/matchmaking" },
-    { icon: ShoppingBag, label: "Adoption", to: "/adoption" },
+    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" },
     { icon: MessageSquare, label: "Messages", to: "/messages" },
     { icon: Zap, label: "AI Assistant", to: "/ai" }
   ],
@@ -36,19 +36,22 @@ const menuItems = {
     { icon: BarChart3, label: "Overview", to: "/dashboard/vet" },
     { icon: Clock, label: "Appointments", to: "/dashboard/vet?section=appointments" },
     { icon: Stethoscope, label: "Medical Records", to: "/dashboard/vet?section=records" },
-    { icon: PawPrint, label: "Patients", to: "/dashboard/vet?section=patients" }
+    { icon: PawPrint, label: "Patients", to: "/dashboard/vet?section=patients" },
+    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
   ],
   petShop: [
     { icon: PawPrint, label: "My Pets", to: "/pets" },
     { icon: ShoppingBag, label: "Marketplace", to: "/modules/marketplace" },
     { icon: Package, label: "My Products", to: "/community" },
     { icon: Clock, label: "Orders", to: "/orders" },
-    { icon: MessageSquare, label: "Messages", to: "/messages" }
+    { icon: MessageSquare, label: "Messages", to: "/messages" },
+    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
   ],
   groomer: [
     { icon: Clock, label: "Appointments", to: "/appointments" },
     { icon: Scissors, label: "Services", to: "/community" },
-    { icon: MessageSquare, label: "Messages", to: "/messages" }
+    { icon: MessageSquare, label: "Messages", to: "/messages" },
+    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
   ],
   admin: [
     { icon: BarChart3, label: "Overview", to: "/dashboard/admin?section=overview" },
@@ -57,7 +60,8 @@ const menuItems = {
     { icon: Package, label: "Products", to: "/dashboard/admin?section=products" },
     { icon: FileText, label: "Blogs", to: "/dashboard/admin?section=blogs" },
     { icon: Heart, label: "Adoptions", to: "/dashboard/admin?section=adoptions" },
-    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" }
+    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" },
+    { icon: ShoppingBag, label: "Adoption Form", to: "/dashboard/adoption" }
   ]
 };
 

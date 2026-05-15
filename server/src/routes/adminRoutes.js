@@ -13,6 +13,7 @@ import {
   deleteProduct,
   deleteBlog,
   deleteAdoption,
+  listContactInquiries,
   getUser,
   listUsers,
   listAppointments,
@@ -64,5 +65,6 @@ router.delete("/adoptions/:id", deleteAdoption);
 
 router.get("/analytics", analytics);
 router.get("/reports", reports);
+router.get("/contact-inquiries", listContactInquiries);
 
 export default router;

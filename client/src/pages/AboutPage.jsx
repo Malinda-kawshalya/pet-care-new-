@@ -1,5 +1,8 @@
 import { ArrowRight, Award, HeartHandshake, ShieldCheck, Sparkles, Users, PawPrint } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DEFAULT_IMAGE_FALLBACK } from "../utils/media.js";
+
+const aboutImage = "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=1200&q=85";
 
 const storyTimeline = [
   {
@@ -38,6 +41,12 @@ const values = [
 ];
 
 export default function AboutPage() {
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
+
   return (
     <section className="section about-page">
       <div className="page-intro page-grid">
@@ -59,8 +68,9 @@ export default function AboutPage() {
 
         <img
           className="page-image"
-          src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1400&q=85"
+          src={aboutImage}
           alt="Team caring for a dog"
+          onError={handleImageError}
         />
       </div>
 

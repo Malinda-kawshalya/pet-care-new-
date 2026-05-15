@@ -1,10 +1,11 @@
 import Pet from "../models/Pet.js";
+import { normalizeUploadPath } from "../utils/uploadPath.js";
 
 export const petController = {
   async list(req, res, next) {
     try {
-      // Admins see all, owners see their own pets
-      if (req.user && req.user.role === 'admin') {
+      // Admins and veterinarians see all pets; owners see their own pets
+      if (req.user && (req.user.role === 'admin' || req.user.role === 'veterinarian')) {
         const items = await Pet.find().sort({ createdAt: -1 }).populate('owner');
         return res.json({ items });
       }
@@ -84,7 +85,7 @@ export const petController = {
       if (!item) { res.status(404); throw new Error('Pet not found'); }
       if (item.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') { res.status(403); throw new Error('Not authorized'); }
       if (!req.file) { res.status(400); throw new Error('File required'); }
-      const path = req.file.path;
+      const path = `/${normalizeUploadPath(req.file.path)}`;
       item.images = item.images || [];
       item.images.push(path);
       await item.save();
@@ -98,7 +99,7 @@ export const petController = {
       if (item.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') { res.status(403); throw new Error('Not authorized'); }
       const { filename } = req.body;
       if (!filename) { res.status(400); throw new Error('filename required'); }
-      item.images = (item.images || []).filter(p => p !== filename && p !== `uploads/${filename}`);
+      item.images = (item.images || []).filter(p => p !== filename && p !== `uploads/${filename}` && p !== `/uploads/${filename}`);
       await item.save();
       res.json({ item });
     } catch (error) { next(error); }

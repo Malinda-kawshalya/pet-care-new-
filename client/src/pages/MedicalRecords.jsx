@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api.js';
 import { useUserRole } from '../hooks/useAuth.js';
 
 export default function MedicalRecords() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [records, setRecords] = useState([]);
-  const [petId, setPetId] = useState('');
+  const [petId, setPetId] = useState(searchParams.get('petId') || '');
   const [form, setForm] = useState({ pet: '', diagnosis: '', treatment: '', prescriptions: [], documents: [], vetNotes: '' });
   const [uploading, setUploading] = useState(false);
   const { isVet } = useUserRole();
@@ -17,6 +19,14 @@ export default function MedicalRecords() {
   }
 
   useEffect(() => { load(); }, [petId]);
+
+  useEffect(() => {
+    const queryPetId = searchParams.get('petId') || '';
+    if (queryPetId !== petId) {
+      setPetId(queryPetId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   async function handleUpload(e) {
     const f = e.target.files[0]; if (!f) return;
@@ -58,7 +68,7 @@ export default function MedicalRecords() {
       <div className="page-card panel-fields">
         <label>Filter by Pet ID<input value={petId} onChange={(e) => setPetId(e.target.value)} /></label>
         <div className="inline-actions">
-          <button className="ghost-button" type="button" onClick={() => setPetId('')}>Clear</button>
+          <button className="ghost-button" type="button" onClick={() => { setPetId(''); setSearchParams({}); }}>Clear</button>
         </div>
       </div>
 

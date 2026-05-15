@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Menu, PawPrint, Search, ShoppingCart, UserRound } from "lucide-react";
 import { useAuth, useUserRole } from "../hooks/useAuth";
@@ -8,8 +8,10 @@ export default function Layout() {
   const { user, isAuthenticated, logout } = useAuth();
   const { userRole } = useUserRole();
   const navigate = useNavigate();
+  const location = useLocation();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isDashboardRoute = location.pathname.startsWith("/dashboard");
 
   const publicNavItems = [
     { to: "/", label: "Home" },
@@ -72,11 +74,6 @@ export default function Layout() {
               {item.label}
             </NavLink>
           ))}
-          {isAuthenticated && (
-            <NavLink to={getDashboardPath(userRole)} className={({ isActive }) => isActive ? "active" : ""}>
-              Dashboard
-            </NavLink>
-          )}
         </nav>
         <div className="top-actions">
           <Link to="/contact" className="topbar-cta">Let's talk</Link>
@@ -104,7 +101,6 @@ export default function Layout() {
               className={`user-menu-container ${menuOpen ? "open" : ""}`}
               ref={menuRef}
               onMouseEnter={() => setMenuOpen(true)}
-              onMouseLeave={() => setMenuOpen(false)}
             >
               <button
                 className="icon-button user-button"
@@ -159,31 +155,56 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="footer">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <div className="brand">
-              <span className="brand-mark"><PawPrint size={18} /></span>
-              <span>Pet Care</span>
+      {!isDashboardRoute && (
+        <footer className="footer">
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <div className="brand">
+                <span className="brand-mark"><PawPrint size={18} /></span>
+                <span>Pet Care</span>
+              </div>
+              <p>
+                A polished pet care platform for owners, clinics, shops, and groomers with one responsive interface.
+                Manage health, commerce, adoption, and communication from one connected workspace.
+              </p>
+              <div className="footer-badges">
+                <span>Role based access</span>
+                <span>Secure login</span>
+                <span>Responsive UI</span>
+              </div>
             </div>
-            <p>
-              A polished pet care platform for owners, clinics, shops, and groomers with one responsive interface.
-            </p>
+            <div className="footer-column">
+              <h3>Explore</h3>
+              <nav className="footer-links" aria-label="Footer navigation">
+                {publicNavItems.map((item) => (
+                  <Link key={item.to} to={item.to}>{item.label}</Link>
+                ))}
+                <Link to="/login">Login</Link>
+                <Link to="/register">Register</Link>
+              </nav>
+            </div>
+            <div className="footer-column">
+              <h3>Support</h3>
+              <div className="footer-utility">
+                <p>Email: support@petcare.demo</p>
+                <p>Phone: +94 77 000 1000</p>
+                <p>Hours: Mon - Fri, 8:00 AM - 6:00 PM</p>
+                <Link to="/contact" className="topbar-cta">Contact support</Link>
+              </div>
+            </div>
+            <div className="footer-utility">
+              <h3>Workflows</h3>
+              <p>Need help choosing a service or role? Start at contact and we’ll route you to the right workflow.</p>
+              <ul className="footer-workflow-list">
+                <li>Adoption request and approval flow</li>
+                <li>Vet patient records and follow-ups</li>
+                <li>Marketplace checkout and order tracking</li>
+              </ul>
+            </div>
           </div>
-          <nav className="footer-links" aria-label="Footer navigation">
-            {publicNavItems.map((item) => (
-              <Link key={item.to} to={item.to}>{item.label}</Link>
-            ))}
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/login">Login</Link>
-          </nav>
-          <div className="footer-utility">
-            <p>Need help choosing a service or role? Start at contact and we'll route you to the right workflow.</p>
-            <Link to="/contact" className="topbar-cta">Contact support</Link>
-          </div>
-        </div>
-        <div className="footer-word">Pet<span>Care</span></div>
-      </footer>
+          <div className="footer-word">Pet<span>Care</span></div>
+        </footer>
+      )}
     </div>
   );
 }

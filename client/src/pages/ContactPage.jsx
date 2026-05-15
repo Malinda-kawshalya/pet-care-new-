@@ -1,5 +1,6 @@
 import { ArrowRight, Clock3, Mail, MapPin, Phone, Send, Sparkles } from "lucide-react";
 import { useState } from "react";
+import api from "../services/api.js";
 
 const contactCards = [
   {
@@ -21,11 +22,26 @@ const contactCards = [
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSent(true);
-    event.currentTarget.reset();
+    setLoading(true);
+    setError("");
+
+    const formData = new FormData(event.currentTarget);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+      await api.post("/contact", payload);
+      setSent(true);
+      event.currentTarget.reset();
+    } catch (submitError) {
+      setError(submitError.response?.data?.message || "Unable to send your message right now.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -62,6 +78,7 @@ export default function ContactPage() {
           </div>
 
           {sent && <div className="form-alert success">Thanks. Your message was sent successfully.</div>}
+          {error && <div className="form-alert error">{error}</div>}
 
           <form className="contact-form" onSubmit={handleSubmit}>
             <div className="split-fields">
@@ -85,11 +102,15 @@ export default function ContactPage() {
               </label>
             </div>
             <label>
+              Phone
+              <input name="phone" placeholder="Optional phone number" />
+            </label>
+            <label>
               Message
               <textarea required name="message" placeholder="Tell us a little more about your question or request." />
             </label>
-            <button className="primary-button" type="submit">
-              <Send size={16} /> Send message
+            <button className="primary-button" type="submit" disabled={loading}>
+              <Send size={16} /> {loading ? "Sending..." : "Send message"}
             </button>
           </form>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
 import { formatLKR } from '../utils/currency.js';
+import { getUploadUrl } from '../utils/media.js';
 
 export default function Cart() {
   const { cart, removeItem, updateQty, total } = useCart();
@@ -25,7 +26,7 @@ export default function Cart() {
         <div className="cart-list">
           {cart.map(item => (
             <article key={item.product} className="cart-item-row">
-              <img className="cart-item-image" src={item.image || '/placeholder.png'} alt={item.name} />
+              <img className="cart-item-image" src={getUploadUrl(item.image)} alt={item.name} />
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
                 <div className="muted-text">{formatLKR(item.price)}</div>

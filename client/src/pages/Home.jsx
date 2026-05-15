@@ -8,15 +8,16 @@ import ToastContainer from "../components/ToastContainer.jsx";
 import CartModal from "../components/CartModal.jsx";
 import api from "../services/api.js";
 import { useCart } from "../contexts/CartContext.jsx";
-import { getUploadUrl } from "../utils/media.js";
+import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from "../utils/media.js";
+import { formatLKR } from "../utils/currency.js";
 import { advancedFeatures, databaseTables, modules, roles } from "../data/platformData.js";
 import { useAuth, useUserRole } from "../hooks/useAuth";
 import { getDashboardPath } from "../utils/roleHelper";
 
-const heroDog = "https://images.unsplash.com/photo-1633722715463-d30628519b5f?auto=format&fit=crop&w=1200&q=85";
-const careImage = "https://images.unsplash.com/photo-1608848461950-0fed8e2fdf94?auto=format&fit=crop&w=1200&q=85";
-const vetImage = "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=85";
-const adoptionImage = "https://images.unsplash.com/photo-1615751072497-5f5169febe17?auto=format&fit=crop&w=1200&q=85";
+const heroDog = "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1400&q=85";
+const careImage = "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=85";
+const vetImage = "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=900&q=85";
+const adoptionImage = "https://images.unsplash.com/photo-1558944351-cd8a1e12e9f7?auto=format&fit=crop&w=900&q=85";
 
 const heroStats = [
   { value: "24/7", label: "Access" },
@@ -71,6 +72,12 @@ export default function Home() {
   const [loadingAdoptions, setLoadingAdoptions] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
 
   const resolveAdoptionImage = (post) => {
     const image = post?.pet?.images?.[0] || post?.images?.[0] || post?.photo;
@@ -162,12 +169,12 @@ export default function Home() {
 
         <div className="hero-visual" aria-label="Pet Care platform preview">
           <div className="hero-canvas">
-            <img className="hero-image" src={heroDog} alt="Happy dog looking upward" />
+            <img className="hero-image" src={heroDog} alt="Happy dog looking upward" onError={handleImageError} />
             <div className="hero-pet-bubble dog">
-              <img src={vetImage} alt="Smiling pet owner with dog" />
+              <img src={vetImage} alt="Smiling pet owner with dog" onError={handleImageError} />
             </div>
             <div className="hero-pet-bubble cat">
-              <img src={adoptionImage} alt="Cat waiting for adoption" />
+              <img src={adoptionImage} alt="Cat waiting for adoption" onError={handleImageError} />
             </div>
             <div className="hero-paw-badge top"><PawPrint size={28} /></div>
             <div className="hero-paw-badge bottom"><Star size={24} /></div>
@@ -201,7 +208,7 @@ export default function Home() {
               <article className="metric-card"><strong>5</strong><span>User types</span></article>
             </div>
           </div>
-          <img className="story-image" src={careImage} alt="Pet health care workspace" />
+          <img className="story-image" src={careImage} alt="Pet health care workspace" onError={handleImageError} />
         </div>
       </section>
 
@@ -297,21 +304,26 @@ export default function Home() {
         <div className="adoption-grid">
           {loadingAdoptions && <p>Loading pets...</p>}
           {!loadingAdoptions && adoptionItems.length === 0 && <p>No recent listings.</p>}
-          <div className="pet-grid">
+          <div className="home-adoption-list">
             {adoptionItems.map((post) => (
-              <article key={post._id} className="pet-card card">
-                <div style={{ width: 120, height: 90, overflow: "hidden", borderRadius: 8, flexShrink: 0 }}>
+              <article key={post._id} className="home-adoption-card">
+                <div className="home-adoption-image-wrap">
                   <img
                     src={resolveAdoptionImage(post)}
                     alt={post.pet?.name || post.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={handleImageError}
                   />
                 </div>
-                <div style={{ flex: 1, marginLeft: 12 }}>
+                <div className="home-adoption-copy">
+                  <div className="home-adoption-topline">
+                    <span className={`home-adoption-status ${post.status || "open"}`}>{post.status || "open"}</span>
+                    <span className="home-adoption-fee">{formatLKR(Number(post.adoptionFee || 0))}</span>
+                  </div>
                   <h3>{post.pet?.name || post.title}</h3>
-                  <p className="muted">{post.location || post.pet?.breed || ""}</p>
-                  <div style={{ marginTop: 8 }}>
-                    <a href="/adoption" className="btn btn-outline">View</a>
+                  <p className="home-adoption-meta">{post.location || post.pet?.breed || "No location"}</p>
+                  <p className="home-adoption-summary">{post.description || "View details about this pet and send an adoption request from the adoption page."}</p>
+                  <div className="home-adoption-actions">
+                    <a href="/adoption" className="btn btn-outline">View details</a>
                   </div>
                 </div>
               </article>

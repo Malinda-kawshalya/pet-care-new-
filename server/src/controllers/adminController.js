@@ -5,6 +5,7 @@ import Product from "../models/Product.js";
 import Blog from "../models/Blog.js";
 import AdoptionPost from "../models/AdoptionPost.js";
 import Order from "../models/Order.js";
+import ContactInquiry from "../models/ContactInquiry.js";
 
 const userSelect = "-password -verificationToken -resetPasswordToken";
 
@@ -243,10 +244,12 @@ export async function dashboardStats(_req, res, next) {
       pendingProducts,
       pendingBlogs,
       pendingAdoptions,
+      totalContactInquiries,
       usersByRole,
       latestUsers,
       latestAppointments,
-      latestOrders
+      latestOrders,
+      latestContacts
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ approvalStatus: "approved" }),
@@ -257,13 +260,20 @@ export async function dashboardStats(_req, res, next) {
       Product.countDocuments({ approvalStatus: "pending" }),
       Blog.countDocuments({ status: "draft" }),
       AdoptionPost.countDocuments({ status: "pendingApproval" }),
+      ContactInquiry.countDocuments(),
       User.aggregate([{ $group: { _id: "$role", count: { $sum: 1 } } }]),
       User.find().select("name createdAt").sort({ createdAt: -1 }).limit(4),
       Appointment.find().select("serviceType createdAt status").sort({ createdAt: -1 }).limit(4),
-      Order.find().select("total createdAt orderStatus").sort({ createdAt: -1 }).limit(4)
+      Order.find().select("total createdAt orderStatus").sort({ createdAt: -1 }).limit(4),
+      ContactInquiry.find().select("name subject createdAt").sort({ createdAt: -1 }).limit(4)
     ]);
 
     const recentActivity = [
+      ...latestContacts.map((contact) => ({
+        type: "contact",
+        message: `Contact message received: ${contact.subject}`,
+        timestamp: formatAgo(contact.createdAt)
+      })),
       ...latestUsers.map((u) => ({
         type: "user",
         message: `New user registered: ${u.name}`,
@@ -291,6 +301,7 @@ export async function dashboardStats(_req, res, next) {
       totalAppointments,
       totalProducts,
       pendingApprovals: pendingUsers + pendingProducts + pendingBlogs + pendingAdoptions,
+      totalContactInquiries,
       pendingUsers,
       approvedUsers,
       blockedUsers,
@@ -581,13 +592,35 @@ export async function deleteAdoption(req, res, next) {
   }
 }
 
+export async function listContactInquiries(req, res, next) {
+  try {
+    const { status, q = "" } = req.query;
+    const filters = {};
+    if (status) filters.status = status;
+
+    const items = await ContactInquiry.find(filters).sort({ createdAt: -1 }).limit(300);
+    const normalized = items.filter((item) => {
+      if (!q) return true;
+      const search = q.toLowerCase();
+      return [item.name, item.email, item.subject, item.message, item.role]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(search));
+    });
+
+    res.json({ items: normalized });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function reports(req, res, next) {
   try {
     const { type = "summary" } = req.query;
-    const [users, orders, appointments] = await Promise.all([
+    const [users, orders, appointments, contactInquiries] = await Promise.all([
       User.find().select("name email role approvalStatus isEmailVerified createdAt"),
       Order.find().select("total paymentStatus orderStatus createdAt"),
-      Appointment.find().select("serviceType status scheduledAt createdAt")
+      Appointment.find().select("serviceType status scheduledAt createdAt"),
+      ContactInquiry.find().select("name email subject status createdAt")
     ]);
 
     const base = {
@@ -595,7 +628,8 @@ export async function reports(req, res, next) {
       totals: {
         users: users.length,
         orders: orders.length,
-        appointments: appointments.length
+        appointments: appointments.length,
+        contacts: contactInquiries.length
       },
       usersByRole: users.reduce((acc, item) => {
         acc[item.role] = (acc[item.role] || 0) + 1;
@@ -609,6 +643,10 @@ export async function reports(req, res, next) {
         acc[item.status] = (acc[item.status] || 0) + 1;
         return acc;
       }, {}),
+      contactsByStatus: contactInquiries.reduce((acc, item) => {
+        acc[item.status] = (acc[item.status] || 0) + 1;
+        return acc;
+      }, {}),
       revenue: orders.reduce((sum, item) => sum + (item.total || 0), 0)
     };
 
@@ -617,7 +655,8 @@ export async function reports(req, res, next) {
         ...base,
         users,
         orders,
-        appointments
+        appointments,
+        contactInquiries
       });
     }
 

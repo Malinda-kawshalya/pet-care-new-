@@ -1,43 +1,104 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CircleAlert } from "lucide-react";
 import api from "../services/api.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { getUploadUrl } from "../utils/media.js";
 
-const emptyForm = { pet: "", title: "", description: "", adoptionFee: "", location: "" };
-const emptyPetForm = {
-  name: "",
-  species: "dog",
+const initialFilters = {
+  q: "",
+  status: "",
   breed: "",
-  age: "",
-  gender: "unknown",
-  vaccinationStatus: "unknown",
-  medicalHistory: "",
-  images: []
+  location: "",
+  minFee: "",
+  maxFee: "",
+  sort: "latest"
 };
 
+function normalizeStatus(status) {
+  if (status === "open") return "open";
+  if (status === "pendingApproval") return "pending";
+  if (status === "closed") return "closed";
+  return "pending";
+}
+
+function statusLabel(status) {
+  if (status === "pendingApproval") return "Pending";
+  return status ? `${status.charAt(0).toUpperCase()}${status.slice(1)}` : "Pending";
+}
+
 export default function Adoption() {
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState([]);
-  const [pets, setPets] = useState([]);
-  const [form, setForm] = useState(emptyForm);
-  const [createPetForListing, setCreatePetForListing] = useState(false);
-  const [petForm, setPetForm] = useState(emptyPetForm);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState(initialFilters);
   const [message, setMessage] = useState("");
   const [busyKey, setBusyKey] = useState("");
   const [error, setError] = useState("");
+  const [requestTarget, setRequestTarget] = useState(null);
+  const [requestForm, setRequestForm] = useState({
+    applicantName: "",
+    applicantEmail: "",
+    applicantPhone: "",
+    applicantAddress: "",
+    homeType: "",
+    experience: "",
+    message: ""
+  });
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const breeds = useMemo(() => {
+    return Array.from(new Set(items.map((item) => item.pet?.breed).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  }, [items]);
+
+  const locations = useMemo(() => {
+    return Array.from(new Set(items.map((item) => item.location).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    const term = filters.q.trim().toLowerCase();
+    const minFee = filters.minFee === "" ? null : Number(filters.minFee);
+    const maxFee = filters.maxFee === "" ? null : Number(filters.maxFee);
+
+    const result = items.filter((item) => {
+      const fee = Number(item.adoptionFee || 0);
+      const status = item.status || "";
+      const breed = item.pet?.breed || "";
+      const location = item.location || "";
+      const searchable = [item.title, item.description, item.pet?.name, breed, location]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      if (term && !searchable.includes(term)) return false;
+      if (filters.status && status !== filters.status) return false;
+      if (filters.breed && breed !== filters.breed) return false;
+      if (filters.location && location !== filters.location) return false;
+      if (minFee !== null && Number.isFinite(minFee) && fee < minFee) return false;
+      if (maxFee !== null && Number.isFinite(maxFee) && fee > maxFee) return false;
+
+      return true;
+    });
+
+    result.sort((a, b) => {
+      if (filters.sort === "feeAsc") return Number(a.adoptionFee || 0) - Number(b.adoptionFee || 0);
+      if (filters.sort === "feeDesc") return Number(b.adoptionFee || 0) - Number(a.adoptionFee || 0);
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+
+    return result;
+  }, [items, filters]);
 
   const load = async () => {
+    setLoading(true);
     try {
-      const [adoptionsResp, petsResp] = await Promise.all([api.get("/adoptions"), api.get("/pets")]);
-      const petItems = petsResp.data.items || [];
+      const adoptionsResp = await api.get("/adoptions");
       setItems(adoptionsResp.data.items || []);
-      setPets(petItems);
-      if (!petItems.length) {
-        setCreatePetForListing(true);
-      }
     } catch (loadError) {
       setError(loadError.response?.data?.message || "Failed to load adoption data.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,337 +109,227 @@ export default function Adoption() {
     return getUploadUrl(image, "https://images.unsplash.com/photo-1615751072497-5f5169febe17?auto=format&fit=crop&w=640&q=85");
   };
 
-  const uploadPetImage = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const data = new FormData();
-    data.append("file", file);
-    setError("");
-
-    try {
-      setUploadingImage(true);
-      const response = await api.post("/uploads", data, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      const path = response.data.file?.path || response.data.file?.filename;
-      if (path) {
-        setPetForm((current) => ({ ...current, images: [...current.images, path] }));
-      }
-    } catch (uploadError) {
-      setError(uploadError.response?.data?.message || "Image upload failed.");
-    } finally {
-      setUploadingImage(false);
-      event.target.value = "";
-    }
+  const updateFilter = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value }));
   };
 
-  const removePetImage = (index) => {
-    setPetForm((current) => ({
+  const clearFilters = () => {
+    setFilters(initialFilters);
+  };
+
+  const openRequestForm = (item) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setRequestTarget(item);
+    setRequestForm((current) => ({
       ...current,
-      images: current.images.filter((_, imageIndex) => imageIndex !== index)
+      applicantName: current.applicantName || "",
+      applicantEmail: current.applicantEmail || "",
+      applicantPhone: current.applicantPhone || "",
+      applicantAddress: current.applicantAddress || "",
+      homeType: current.homeType || "",
+      experience: current.experience || "",
+      message: `I would love to adopt ${item.pet?.name || item.title}.`
     }));
   };
 
-  const createPetFromForm = async () => {
-    if (!petForm.name.trim()) {
-      throw new Error("Pet name is required when creating a new pet.");
-    }
-
-    const payload = {
-      ...petForm,
-      name: petForm.name.trim(),
-      breed: petForm.breed.trim(),
-      medicalHistory: petForm.medicalHistory.trim(),
-      age: petForm.age === "" ? undefined : Number(petForm.age)
-    };
-
-    const { data } = await api.post("/pets", payload);
-    return data.item;
+  const closeRequestForm = () => {
+    setRequestTarget(null);
   };
 
-  const submit = async (event) => {
+  const submitRequest = async (event) => {
     event.preventDefault();
+    if (!requestTarget) return;
+
+    setRequestSubmitting(true);
+    setBusyKey(`request-${requestTarget._id}`);
     setMessage("");
     setError("");
 
     try {
-      let petId = form.pet;
-
-      if (createPetForListing) {
-        const createdPet = await createPetFromForm();
-        petId = createdPet?._id;
-      }
-
-      if (!petId) {
-        throw new Error("Please select or create a pet for this listing.");
-      }
-
-      await api.post("/adoptions", {
-        ...form,
-        pet: petId,
-        adoptionFee: form.adoptionFee === "" ? 0 : Number(form.adoptionFee)
-      });
-
-      setForm(emptyForm);
-      setPetForm(emptyPetForm);
-      setMessage("Adoption listing created and submitted for review.");
-      await load();
-    } catch (submitError) {
-      setError(submitError.response?.data?.message || submitError.message || "Failed to create adoption listing.");
-    }
-  };
-
-  const requestAdoption = async (id) => {
-    setBusyKey(`request-${id}`);
-    setMessage("");
-    setError("");
-    try {
-      await api.post(`/adoptions/${id}/requests`, { message: "I would love to adopt this pet." });
+      await api.post(`/adoptions/${requestTarget._id}/requests`, requestForm);
       setMessage("Adoption request sent.");
+      closeRequestForm();
       await load();
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Failed to send adoption request.");
     } finally {
       setBusyKey("");
+      setRequestSubmitting(false);
     }
-  };
-
-  const contactOwner = async (id) => {
-    setBusyKey(`contact-${id}`);
-    setMessage("");
-    setError("");
-    try {
-      await api.post(`/adoptions/${id}/contact`, { message: "Interested in the adoption listing." });
-      setMessage("Owner contacted.");
-      await load();
-    } catch (contactError) {
-      setError(contactError.response?.data?.message || "Failed to contact owner.");
-    } finally {
-      setBusyKey("");
-    }
-  };
-
-  const respondToRequest = async (postId, requestId, status) => {
-    setBusyKey(`${postId}-${requestId}-${status}`);
-    setMessage("");
-    setError("");
-    try {
-      await api.patch(`/adoptions/${postId}/requests/respond`, { requestId, status });
-      setMessage(`Request ${status}.`);
-      await load();
-    } catch (respondError) {
-      setError(respondError.response?.data?.message || "Failed to update request.");
-    } finally {
-      setBusyKey("");
-    }
-  };
-
-  const userId = user?._id || user?.id;
-
-  const myListings = useMemo(() => {
-    if (!userId) return [];
-    return items.filter((item) => String(item.postedBy?._id || item.postedBy) === String(userId));
-  }, [items, userId]);
-
-  const isOwnerOfListing = (item) => String(item.postedBy?._id || item.postedBy) === String(userId);
-
-  const renderRequests = (item) => {
-    if (!isOwnerOfListing(item) || !item.requests?.length) return null;
-    return (
-      <div className="request-list">
-        <h4>Adoption requests</h4>
-        {item.requests.map((request) => (
-          <div key={request._id} className="request-item">
-            <div>
-              <strong>{request.user?.name || "Requester"}</strong>
-              <p>{request.message || "No message"}</p>
-              <p>Status: {request.status}</p>
-            </div>
-            <div className="button-row">
-              <button
-                className="primary-button compact"
-                type="button"
-                disabled={busyKey === `${item._id}-${request._id}-approved`}
-                onClick={() => respondToRequest(item._id, request._id, "approved")}
-              >
-                Approve
-              </button>
-              <button
-                className="ghost-button compact"
-                type="button"
-                disabled={busyKey === `${item._id}-${request._id}-rejected`}
-                onClick={() => respondToRequest(item._id, request._id, "rejected")}
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
-    <div className="section">
+    <section className="section">
       <div className="module-detail-hero">
         <div>
           <p className="eyebrow">Adoption</p>
-          <h1>Adoption listings and requests</h1>
-          <p>List pets for adoption, review requests, and contact the owner without leaving the platform.</p>
+          <h1>Browse pets available for adoption</h1>
+          <p>Filter by status, breed, location, and adoption fee, then request in one click.</p>
         </div>
       </div>
 
-      <div className="grid-two content-start">
-        <form className="module-card" onSubmit={submit}>
-          <h2>Create listing</h2>
+      {message && <div className="community-alert success">{message}</div>}
+      {error && <div className="community-alert error"><CircleAlert size={16} /> {error}</div>}
 
-          <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <input
-              type="checkbox"
-              checked={createPetForListing}
-              onChange={(event) => setCreatePetForListing(event.target.checked)}
-            />
-            Create a new pet for this listing
-          </label>
+      <div className="product-filters-row adoption-filters-row">
+        <input
+          className="product-filter-search"
+          placeholder="Search by title, pet, breed, or location"
+          value={filters.q}
+          onChange={(event) => updateFilter("q", event.target.value)}
+        />
+        <select value={filters.status} onChange={(event) => updateFilter("status", event.target.value)}>
+          <option value="">All statuses</option>
+          <option value="open">Open</option>
+          <option value="pendingApproval">Pending</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select value={filters.breed} onChange={(event) => updateFilter("breed", event.target.value)}>
+          <option value="">All breeds</option>
+          {breeds.map((breed) => <option key={breed} value={breed}>{breed}</option>)}
+        </select>
+        <select value={filters.location} onChange={(event) => updateFilter("location", event.target.value)}>
+          <option value="">All locations</option>
+          {locations.map((location) => <option key={location} value={location}>{location}</option>)}
+        </select>
+        <input
+          className="product-filter-mini"
+          placeholder="Min"
+          value={filters.minFee}
+          onChange={(event) => updateFilter("minFee", event.target.value)}
+          inputMode="numeric"
+        />
+        <input
+          className="product-filter-mini"
+          placeholder="Max"
+          value={filters.maxFee}
+          onChange={(event) => updateFilter("maxFee", event.target.value)}
+          inputMode="numeric"
+        />
+        <select value={filters.sort} onChange={(event) => updateFilter("sort", event.target.value)}>
+          <option value="latest">Newest</option>
+          <option value="feeAsc">Fee: low to high</option>
+          <option value="feeDesc">Fee: high to low</option>
+        </select>
+        <button type="button" className="ghost-button compact" onClick={clearFilters}>Clear filters</button>
+      </div>
 
-          {!createPetForListing && (
-            <select value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required>
-              <option value="">Choose pet</option>
-              {pets.map((pet) => <option key={pet._id} value={pet._id}>{pet.name}</option>)}
-            </select>
-          )}
+      {loading && <p>Loading...</p>}
 
-          {createPetForListing && (
-            <div className="stack-gap">
-              <h3 style={{ margin: 0 }}>Pet details</h3>
-              <input
-                placeholder="Pet name"
-                value={petForm.name}
-                onChange={(e) => setPetForm({ ...petForm, name: e.target.value })}
-                required
-              />
-              <div className="split-fields">
-                <select value={petForm.species} onChange={(e) => setPetForm({ ...petForm, species: e.target.value })}>
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="bird">Bird</option>
-                  <option value="fish">Fish</option>
-                  <option value="rabbit">Rabbit</option>
-                  <option value="other">Other</option>
-                </select>
-                <input
-                  placeholder="Breed"
-                  value={petForm.breed}
-                  onChange={(e) => setPetForm({ ...petForm, breed: e.target.value })}
-                />
+      <div className="product-grid product-grid-market adoption-product-grid">
+        {filteredItems.map((item) => (
+          <article key={item._id} className="product-card adoption-product-card">
+            <div className="product-card-image">
+              <img src={resolvePetImage(item)} alt={item.pet?.name || item.title} />
+            </div>
+
+            <div className="product-card-body">
+              <span className={`product-card-badge adoption-status-badge ${normalizeStatus(item.status)}`}>
+                {statusLabel(item.status)}
+              </span>
+
+              <h3>{item.title}</h3>
+
+              <div className="product-card-footer">
+                <span className="product-card-price">${Number(item.adoptionFee || 0).toFixed(0)}</span>
+                <span className="adoption-card-location">{item.location || "No location"}</span>
               </div>
-              <div className="split-fields">
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Age"
-                  value={petForm.age}
-                  onChange={(e) => setPetForm({ ...petForm, age: e.target.value })}
-                />
-                <select value={petForm.gender} onChange={(e) => setPetForm({ ...petForm, gender: e.target.value })}>
-                  <option value="unknown">Unknown</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
+
+              <div className="adoption-card-detail">
+                {(item.pet?.name || "Pet")}
+                {item.pet?.breed ? ` • ${item.pet.breed}` : ""}
+                {item.pet?.age != null ? ` • ${item.pet.age}y` : ""}
               </div>
-              <select
-                value={petForm.vaccinationStatus}
-                onChange={(e) => setPetForm({ ...petForm, vaccinationStatus: e.target.value })}
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => openRequestForm(item)}
+                disabled={busyKey === `request-${item._id}`}
               >
-                <option value="unknown">Vaccination unknown</option>
-                <option value="upToDate">Up to date</option>
-                <option value="dueSoon">Due soon</option>
-                <option value="overdue">Overdue</option>
-              </select>
-              <textarea
-                placeholder="Medical notes"
-                rows="3"
-                value={petForm.medicalHistory}
-                onChange={(e) => setPetForm({ ...petForm, medicalHistory: e.target.value })}
-              />
-              <input type="file" accept="image/*" onChange={uploadPetImage} disabled={uploadingImage} />
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {petForm.images.map((image, index) => (
-                  <div key={`${image}-${index}`} style={{ position: "relative", width: 72, height: 72 }}>
-                    <img
-                      src={getUploadUrl(image)}
-                      alt="Pet"
-                      style={{ width: "100%", height: "100%", borderRadius: 8, objectFit: "cover" }}
-                    />
-                    <button
-                      type="button"
-                      className="ghost-button compact"
-                      style={{ position: "absolute", top: 2, right: 2, padding: "0 6px", minHeight: "auto" }}
-                      onClick={() => removePetImage(index)}
-                    >
-                      x
-                    </button>
-                  </div>
-                ))}
-              </div>
+                Request adoption
+              </button>
             </div>
-          )}
-
-          <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-          <textarea placeholder="Description" rows="4" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <input placeholder="Adoption fee" type="number" value={form.adoptionFee} onChange={(e) => setForm({ ...form, adoptionFee: e.target.value })} />
-          <input placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-          <button className="primary-button" type="submit">Post adoption</button>
-        </form>
-
-        <div className="stack-gap">
-          {message && <div className="community-alert success">{message}</div>}
-          {error && <div className="community-alert error">{error}</div>}
-          {items.map((item) => (
-            <article key={item._id} className="module-card">
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                <img
-                  src={resolvePetImage(item)}
-                  alt={item.pet?.name || item.title}
-                  style={{ width: 96, height: 96, borderRadius: 12, objectFit: "cover", flexShrink: 0 }}
-                />
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                  <p>
-                    {item.pet?.name || "Pet"}
-                    {item.pet?.breed ? ` • ${item.pet.breed}` : ""}
-                    {item.pet?.age != null ? ` • ${item.pet.age}y` : ""}
-                  </p>
-                  <p>{item.location || "No location"} • {item.status} • Fee: ${item.adoptionFee || 0}</p>
-                </div>
-              </div>
-              <div className="button-row">
-                {!isOwnerOfListing(item) && (
-                  <button className="ghost-button" type="button" onClick={() => requestAdoption(item._id)} disabled={busyKey === `request-${item._id}`}>
-                    Request adoption
-                  </button>
-                )}
-                <button className="secondary-button" type="button" onClick={() => contactOwner(item._id)}>Contact owner</button>
-              </div>
-              {renderRequests(item)}
-            </article>
-          ))}
-        </div>
+          </article>
+        ))}
       </div>
 
-      {myListings.length > 0 && (
-        <div className="section">
-          <div className="module-detail-hero">
-            <div>
-              <p className="eyebrow">My listings</p>
-              <h2>Review and confirm adoption requests</h2>
-              <p>These posts were created by you, so you can approve or reject incoming requests.</p>
+      {requestTarget && (
+        <div className="request-modal-backdrop" onClick={closeRequestForm} role="presentation">
+          <div className="request-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="adoption-request-title">
+            <div className="request-modal-header">
+              <div>
+                <p className="eyebrow">Adoption request</p>
+                <h2 id="adoption-request-title">Tell the owner about yourself</h2>
+              </div>
+              <button className="ghost-button compact" type="button" onClick={closeRequestForm}>Close</button>
             </div>
+
+            <form className="request-modal-form" onSubmit={submitRequest}>
+              <div className="split-fields">
+                <input
+                  required
+                  placeholder="Full name"
+                  value={requestForm.applicantName}
+                  onChange={(event) => setRequestForm({ ...requestForm, applicantName: event.target.value })}
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="Email"
+                  value={requestForm.applicantEmail}
+                  onChange={(event) => setRequestForm({ ...requestForm, applicantEmail: event.target.value })}
+                />
+              </div>
+              <div className="split-fields">
+                <input
+                  required
+                  placeholder="Phone"
+                  value={requestForm.applicantPhone}
+                  onChange={(event) => setRequestForm({ ...requestForm, applicantPhone: event.target.value })}
+                />
+                <input
+                  placeholder="Home type"
+                  value={requestForm.homeType}
+                  onChange={(event) => setRequestForm({ ...requestForm, homeType: event.target.value })}
+                />
+              </div>
+              <input
+                placeholder="Address"
+                value={requestForm.applicantAddress}
+                onChange={(event) => setRequestForm({ ...requestForm, applicantAddress: event.target.value })}
+              />
+              <textarea
+                rows={3}
+                placeholder="Pet experience and why you want to adopt"
+                value={requestForm.experience}
+                onChange={(event) => setRequestForm({ ...requestForm, experience: event.target.value })}
+              />
+              <textarea
+                rows={4}
+                required
+                placeholder="Message to the pet owner"
+                value={requestForm.message}
+                onChange={(event) => setRequestForm({ ...requestForm, message: event.target.value })}
+              />
+              <div className="request-modal-actions">
+                <button className="primary-button" type="submit" disabled={requestSubmitting}>
+                  {requestSubmitting ? "Sending..." : "Send request"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-    </div>
+
+      {!loading && !filteredItems.length && <p className="muted-text top-gap-16">No matching listings found.</p>}
+      {!loading && !!items.length && <p className="muted-text top-gap-16">Showing {filteredItems.length} of {items.length} listings.</p>}
+    </section>
   );
 }

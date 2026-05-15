@@ -10,12 +10,10 @@ import {
 
 const router = express.Router();
 
-router.use(protect);
-
 router.get("/", listAdoptions);
-router.post("/", createAdoption);
-router.post("/:id/requests", requestAdoption);
-router.patch("/:id/requests/respond", respondAdoptionRequest);
-router.post("/:id/contact", contactAdoptionOwner);
+router.post("/", protect, createAdoption);
+router.post("/:id/requests", protect, requestAdoption);
+router.patch("/:id/requests/respond", protect, respondAdoptionRequest);
+router.post("/:id/contact", protect, contactAdoptionOwner);
 
 export default router;

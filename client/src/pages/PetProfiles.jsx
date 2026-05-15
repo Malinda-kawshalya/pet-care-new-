@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api.js';
-import { getUploadUrl } from '../utils/media.js';
+import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
 import PetForm from '../components/PetForm.jsx';
 import { useNavigate } from 'react-router-dom';
 import { CalendarClock, PawPrint, Sparkles, Edit, Trash2, Plus } from 'lucide-react';
 
-const heroImage = 'https://images.unsplash.com/photo-1633722715463-d30628519b5f?auto=format&fit=crop&w=1400&q=85';
-const emptyStateImage = 'https://images.unsplash.com/photo-1611003228941-98852ba62227?auto=format&fit=crop&w=600&q=85';
+const heroImage = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=85';
+const emptyStateImage = 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=85';
 
 export default function PetProfiles() {
   const [pets, setPets] = useState([]);
@@ -57,6 +57,12 @@ export default function PetProfiles() {
     }
   };
 
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
+
   if (loading) {
     return (
       <section className="section">
@@ -85,7 +91,7 @@ export default function PetProfiles() {
         </div>
 
         <div className="pet-hero-media">
-          <img src={heroImage} alt="Happy pets" className="pet-hero-image" />
+          <img src={heroImage} alt="Happy pets" className="pet-hero-image" onError={handleImageError} />
         </div>
       </section>
 
@@ -153,7 +159,7 @@ export default function PetProfiles() {
 
       {pets.length === 0 && !creating && !editing && (
         <section className="pet-empty-state page-card">
-          <img src={emptyStateImage} alt="Add your first pet" className="pet-empty-image" />
+          <img src={emptyStateImage} alt="Add your first pet" className="pet-empty-image" onError={handleImageError} />
           <div>
             <h2>No pets yet</h2>
             <p>

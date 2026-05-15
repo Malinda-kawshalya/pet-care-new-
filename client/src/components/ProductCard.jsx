@@ -1,17 +1,22 @@
 import React from 'react';
-import { getUploadUrl } from '../utils/media.js';
+import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
 import { Star } from 'lucide-react';
 import { formatLKR } from '../utils/currency.js';
 
 export default function ProductCard({ product, onAdd }) {
   const imageUrl = getUploadUrl(product.images?.[0]);
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
   
   const rating = product.rating || 0;
 
   return (
     <div className="product-card">
       <div className="product-card-image">
-        <img src={imageUrl} alt={product.name} />
+        <img src={imageUrl} alt={product.name} onError={handleImageError} />
       </div>
 
       <div className="product-card-body">

@@ -12,6 +12,7 @@ import aiRoutes from "./aiRoutes.js";
 import appointmentRoutes from "./appointmentRoutes.js";
 import blogRoutes from "./blogRoutes.js";
 import adoptionRoutes from "./adoptionRoutes.js";
+import contactRoutes from "./contactRoutes.js";
 import authRoutes from "./authRoutes.js";
 import crudRoutes from "./crudRoutes.js";
 import matchRoutes from "./matchRoutes.js";
@@ -37,6 +38,7 @@ router.use("/products", crudRoutes(createResourceController(Product, ["seller"])
 router.use("/orders", crudRoutes(createResourceController(Order, ["user", "items.product"])));
 router.use("/match", matchRoutes);
 router.use("/adoptions", adoptionRoutes);
+router.use("/contact", contactRoutes);
 router.use("/blogs", blogRoutes);
 router.use("/discussions", crudRoutes(createResourceController(Discussion, ["author", "replies.user"])));
 router.use("/notifications", notificationRoutes);

@@ -1,12 +1,17 @@
 import React from 'react';
 import { ShoppingCart, Trash2, Plus, Minus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getUploadUrl } from '../utils/media.js';
+import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
 import { formatLKR } from '../utils/currency.js';
 
 export default function CartModal({ isOpen, onClose, cart, updateQty, removeItem }) {
   const navigate = useNavigate();
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const handleImageError = (event) => {
+    if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
+      event.currentTarget.src = DEFAULT_IMAGE_FALLBACK;
+    }
+  };
 
   const handleCheckout = () => {
     onClose();
@@ -186,6 +191,7 @@ export default function CartModal({ isOpen, onClose, cart, updateQty, removeItem
                     <img
                       src={getUploadUrl(item.image)}
                       alt={item.name}
+                      onError={handleImageError}
                       style={{
                         width: '100%',
                         height: '100%',

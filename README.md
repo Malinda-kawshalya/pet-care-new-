@@ -1,263 +1,430 @@
-# Pet Care Smart Platform 🐾
+# Pet Care Smart Platform
 
-A comprehensive MERN stack web application for managing all aspects of pet care, featuring role-based dashboards for different user types including pet owners, veterinarians, pet shop owners, groomers, and administrators.
+Pet Care Smart Platform is a full-stack MERN application for pet owners, veterinarians, pet shops, groomers, and administrators. The system combines pet profile management, medical records, appointments, marketplace operations, adoption, communication, and moderation in one role-based platform.
 
-## 🌟 Key Features
+This README is written as a report-ready technical overview of what is implemented in this repository.
 
-### User Roles & Dashboards
-- **Pet Owner Dashboard**: Manage pets, track health records, book appointments, shop products, find matches
-- **Veterinarian Dashboard**: Manage patient appointments, medical records, prescriptions, and availability
-- **Pet Shop Owner Dashboard**: Inventory management, order processing, sales analytics, customer reviews
-- **Groomer Dashboard**: Schedule management, service pricing, portfolio, customer feedback
-- **Admin Dashboard**: User management, content moderation, system analytics, account approvals
+## 1. Project Summary
 
-### Core Features
-- 🐕 **Pet Profile Management** - Add and manage multiple pets with complete health history
-- 💊 **Medical Records & Vaccinations** - Track health records, vaccines, and set reminders
-- 📅 **Appointment Booking** - Book veterinary, grooming, and training appointments
-- 🛒 **Marketplace** - Browse and purchase pet products
-- 💑 **Pet Matching** - Find compatible pets for breeding or companionship
-- 🏠 **Adoption System** - List and search for adoption opportunities
-- 📚 **Community & Blog** - Share experiences and access pet care tips
-- 🔔 **Notifications** - Automated reminders for vaccinations and appointments
-- 🔐 **Security** - JWT authentication, role-based access control, data encryption
+### Main objectives
+- Centralize pet care workflows into one web application.
+- Support multi-role operations with strict access control.
+- Provide operational modules for health, services, commerce, and community.
 
-### Advanced Features (Roadmap)
-- 🤖 AI-powered vaccination prediction and health risk alerts
-- 📍 Google Maps integration for nearby services
-- 💬 Real-time messaging with service providers
-- 🆘 Emergency SOS system
-- 📸 QR code medical profile access
-- 🎯 Personalized recommendations
-- 📱 Mobile app adaptation
+### Implemented role dashboards
+- Pet Owner dashboard
+- Veterinarian dashboard
+- Pet Shop dashboard
+- Groomer dashboard
+- Admin dashboard
 
-## 🏗️ Project Structure
+### Core functional modules
+- Authentication and account/profile management
+- Pet profile CRUD and photo uploads
+- Medical records and vaccination management
+- Appointment booking and provider workflow
+- Marketplace catalog, cart, checkout, and order flow
+- Adoption listings, request flow, and owner decision flow
+- Matching module
+- Community posts/discussions and blog system
+- Messaging and notifications
+- AI utility endpoints
 
+## 2. Tech Stack
+
+### Frontend
+- React 18
+- React Router 6
+- Vite
+- Axios
+- Lucide React (icons)
+- Custom CSS design system (`global.css`, `rebrand.css`)
+
+### Backend
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT authentication
+- Multer for uploads
+- Helmet, CORS, rate limiting, Morgan logging
+
+### Workspace tooling
+- npm workspaces (`client`, `server`)
+- concurrently for parallel dev startup
+
+## 3. Repository Structure
+
+```text
+pet-care-new-
+├─ client/
+│  ├─ public/
+│  ├─ src/
+│  │  ├─ components/
+│  │  ├─ contexts/
+│  │  ├─ data/
+│  │  ├─ hooks/
+│  │  ├─ pages/
+│  │  ├─ services/
+│  │  ├─ styles/
+│  │  └─ utils/
+│  └─ package.json
+├─ server/
+│  ├─ src/
+│  │  ├─ config/
+│  │  ├─ controllers/
+│  │  ├─ middleware/
+│  │  ├─ models/
+│  │  ├─ routes/
+│  │  └─ utils/
+│  └─ package.json
+├─ docs/
+└─ README.md
 ```
-pet-care-new/
-├── client/                    # React frontend
-│   ├── src/
-│   │   ├── components/       # React components
-│   │   ├── dashboards/       # Role-specific dashboards
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── pages/            # Page components
-│   │   ├── services/         # API services
-│   │   ├── utils/            # Utility functions
-│   │   └── styles/           # CSS styling
-│   └── package.json
-│
-├── server/                    # Node.js/Express backend
-│   ├── src/
-│   │   ├── config/           # Configuration files
-│   │   ├── controllers/      # Route controllers
-│   │   ├── middleware/       # Express middleware
-│   │   ├── models/           # MongoDB schemas
-│   │   ├── routes/           # API routes
-│   │   └── utils/            # Utility functions
-│   └── package.json
-│
-├── docs/                      # Documentation
-│   ├── IMPLEMENTATION_GUIDE.md
-│   ├── DASHBOARD_ARCHITECTURE.md
-│   └── API_REFERENCE.md
-│
-└── README.md
-```
 
-## 🚀 Quick Start
+## 4. Environment and Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB Atlas account (or local MongoDB)
-- Git
+- Node.js 18+
+- npm 9+
+- MongoDB Atlas or local MongoDB
 
 ### Installation
 
-1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd pet-care-new
-```
-
-2. **Install root dependencies**
-```bash
+git clone <your-repo-url>
+cd pet-care-new-
 npm install
 ```
 
-3. **Install backend dependencies**
-```bash
-cd server
-npm install
-```
+### Server environment variables
 
-4. **Install frontend dependencies**
-```bash
-cd ../client
-npm install
-```
+Create `server/.env`:
 
-### Configuration
-
-1. **Create `.env` file in server directory**
-```bash
-cd server
-cp .env.example .env
-```
-
-2. **Update `.env` with your credentials**
 ```env
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/petcare
-JWT_SECRET=your_very_long_and_secure_secret_key_here
+MONGO_URI=mongodb://127.0.0.1:27017/pet-care-smart
+JWT_SECRET=replace_with_strong_secret
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
-PORT=5000
+PORT=5001
 ```
 
-### Running the Application
+### Run in development
 
-**Development Mode (from project root)**
+From project root:
+
 ```bash
 npm run dev
 ```
 
-This will start both backend (port 5000) and frontend (port 5173) concurrently.
+Or separately:
 
-**Or run separately:**
+```bash
+# terminal 1
+npm run server
 
-Terminal 1 - Backend:
+# terminal 2
+npm run client
+```
+
+### Build and run
+
+```bash
+npm run build
+npm run start
+```
+
+### Seed demo data
+
 ```bash
 cd server
-npm start
+npm run seed
 ```
 
-Terminal 2 - Frontend:
+To clear seeded data:
+
 ```bash
-cd client
-npm run dev
+cd server
+npm run seed:destroy
 ```
 
-### Access the Application
+## 5. NPM Scripts
 
-- Frontend: [http://localhost:5173](http://localhost:5173)
-- Backend API: [http://localhost:5000/api](http://localhost:5000/api)
-- API Health Check: [http://localhost:5000](http://localhost:5000)
+### Root
+- `npm run dev` - start server and client in parallel
+- `npm run client` - start Vite client
+- `npm run server` - start backend with nodemon
+- `npm run build` - production build of client
+- `npm run start` - run server in production mode
+- `npm run lint` - lint client code
 
-## 📊 User Types & Permissions
+### Client
+- `npm run dev`
+- `npm run build`
+- `npm run preview`
+- `npm run lint`
 
-| Role | Permissions | Dashboard |
-|------|-------------|-----------|
-| **Pet Owner** | View pets, book appointments, shop, medical records | ✅ Custom dashboard |
-| **Veterinarian** | Manage patients, appointments, records | ✅ Custom dashboard |
-| **Pet Shop Owner** | Manage inventory, orders, analytics | ✅ Custom dashboard |
-| **Groomer** | Manage appointments, services, portfolio | ✅ Custom dashboard |
-| **Admin** | User management, moderation, analytics | ✅ Custom dashboard |
+### Server
+- `npm run dev`
+- `npm run start`
+- `npm run seed`
+- `npm run seed:destroy`
 
-## 🔐 Authentication
+## 6. System Architecture
 
-The application uses JWT (JSON Web Tokens) for authentication:
+### Frontend architecture
+- Route-driven app shell in `client/src/App.jsx`
+- Shared layout with protected and public routes
+- Role-based redirection and dashboard access
+- API abstraction via `client/src/services/api.js`
 
-1. User registers/logs in
-2. Server returns JWT token
-3. Token stored in localStorage
-4. Token sent with every request via Authorization header
-5. Backend validates token and user role
+### Backend architecture
+- Express app in `server/src/app.js`
+- API namespace: `/api`
+- Route index in `server/src/routes/index.js`
+- Mongoose models + controllers + middleware pattern
 
-### Example Login
-```javascript
-// POST /api/auth/login
-{
-  "email": "owner@example.com",
-  "password": "password123"
-}
+### Security model
+- JWT bearer tokens
+- Route-level `protect` middleware
+- Role checks via `authorize`/role middleware
+- Helmet, CORS allowlist, rate limiting
 
-// Response
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": "user_id",
-    "role": "petOwner",
-    "email": "owner@example.com"
-  }
-}
-```
+## 7. Implemented Functional Scope
 
-## 🗄️ Database Models
+### 7.1 Authentication and User Management
+- Register/login/logout
+- Forgot/reset password
+- Email verification endpoints
+- Profile update and password change
+- Admin approval and role update workflows
 
-The application uses MongoDB with the following main models:
+### 7.2 Pet Profiles
+- CRUD pet records
+- Role-aware list behavior (owner/admin/vet visibility)
+- Upload and remove pet photos
 
-- **User** - User accounts with role-based access
-- **Pet** - Pet profiles with owner references
-- **MedicalRecord** - Health records and medical history
-- **Appointment** - Veterinary, grooming, training bookings
-- **Product** - Marketplace products
-- **Order** - Customer orders
-- **MatchRequest** - Pet matching/breeding requests
-- **AdoptionPost** - Pet adoption listings
-- **Blog** - Community blog posts
-- **Message** - Direct messaging
-- **Notification** - System notifications
-- **Review** - Product and service reviews
+### 7.3 Medical and Vaccination
+- Medical record CRUD
+- Vet/admin creation and update controls
+- Owner-limited read visibility for own pets
+- Vaccination CRUD + reminders endpoint
 
-## 📱 API Endpoints
+### 7.4 Appointments
+- Appointment booking and updates
+- Provider listing and slot retrieval
+- History endpoint
 
-### Authentication
-```
-POST   /api/auth/register        - Register new user
-POST   /api/auth/login           - Login user
-GET    /api/auth/profile         - Get user profile
-PUT    /api/auth/profile         - Update profile
-POST   /api/auth/change-password - Change password
-```
+### 7.5 Marketplace
+- Public product browsing and product detail
+- Product reviews
+- Order placement and order tracking
+- Pet shop/admin operations for inventory and order decisions
 
-### Dashboards
-```
-GET    /api/dashboard/petowner   - Pet owner dashboard data
-GET    /api/dashboard/vet        - Veterinarian dashboard data
-GET    /api/dashboard/petshop    - Pet shop dashboard data
-GET    /api/dashboard/groomer    - Groomer dashboard data
-GET    /api/dashboard/admin      - Admin dashboard data
-```
+### 7.6 Adoption (updated flow)
+- Public adoption listings page (`/adoption`)
+- Protected listing creation (`/dashboard/adoption`)
+- Request modal with applicant details:
+  - name, email, phone
+  - address, home type, experience
+  - message
+- Listing owner sees request details and can approve/decline
+- Request status lifecycle and listing status updates
 
-### Resources
-```
-GET    /api/pets                 - Get user's pets
-POST   /api/pets                 - Create pet
-PUT    /api/pets/:id             - Update pet
-DELETE /api/pets/:id             - Delete pet
+### 7.7 Veterinarian Patients + Records (updated flow)
+- Vet dashboard pulls all pet owners and pets (for vets)
+- Grouped owner/pet patient view in vet dashboard
+- Quick add medical-record modal per pet
+- Direct navigation to filtered records (`/medical-records?petId=...`)
+- Pet owners can view their own pets’ records
 
-GET    /api/appointments         - Get appointments
-POST   /api/appointments         - Book appointment
-PUT    /api/appointments/:id     - Update appointment
+### 7.8 Community, Blogs, Messaging, Notifications
+- Community posts/discussions with likes/comments and moderation routes
+- Blogs with admin publishing controls
+- Direct messaging conversations + read tracking
+- Notifications listing and mark-read behavior
 
-GET    /api/medical-records      - Get medical records
-POST   /api/medical-records      - Add medical record
+### 7.9 AI and Utility
+- AI prediction endpoints (`/api/ai/...`)
+- File upload endpoint (`/api/uploads`)
 
-GET    /api/products             - Browse products
-POST   /api/orders               - Create order
-```
+## 8. UI/UX Implementation Notes
+
+- Modernized rebrand design system in `client/src/styles/rebrand.css`
+- Rounded shell/card visual language and responsive layouts
+- Dropdown/header/sidebar behavior improvements
+- Dashboard-specific layout offsets and overlap fixes
+- Robust image fallback pipeline:
+  - `getUploadUrl` supports string/object/bare filename payloads
+  - fallback asset: `client/public/placeholder.svg`
+- Added local SVG illustrations for high-visibility sections so the app is not dependent on external image hotlinks
+
+## 9. API Surface (Report View)
+
+All endpoints are under `/api`.
+
+### Auth (`/auth`)
+- `POST /register`
+- `POST /login`
+- `POST /forgot-password`
+- `POST /reset-password`
+- `POST /verify-email`
+- `GET /me`
+- `PUT /profile`
+- `PUT /change-password`
+- `POST /logout`
+- `POST /resend-verification`
+- Admin management: users, approvals, roles, stats
+
+### Pets (`/pets`)
+- `GET /`
+- `POST /`
+- `GET /:id`
+- `PUT /:id`
+- `DELETE /:id`
+- `POST /:id/photos`
+- `POST /:id/photos/remove`
+
+### Medical (`/medical-records`)
+- `GET /`
+- `POST /`
+- `PUT /:id`
+- `DELETE /:id`
+
+### Vaccinations (`/vaccinations`)
+- `GET /`
+- `POST /`
+- `PUT /:id`
+- `DELETE /:id`
+- `POST /reminders`
+
+### Appointments (`/appointments`)
+- `GET /`
+- `GET /history`
+- `GET /providers`
+- `GET /slots`
+- `POST /`
+- `PATCH /:id`
+- `DELETE /:id`
+
+### Market (`/market`)
+- Public catalog and detail
+- Product reviews
+- Orders
+- Shop dashboard/order/product/inventory actions
+
+### Adoption (`/adoptions`)
+- `GET /`
+- `POST /`
+- `POST /:id/requests`
+- `PATCH /:id/requests/respond`
+- `POST /:id/contact`
+
+### Other modules
+- `/community`
+- `/blogs`
+- `/messages`
+- `/notifications`
+- `/match`
+- `/admin`
+- `/ai`
+- `/uploads`
+
+## 10. Role and Permission Matrix (Implemented Behavior)
+
+### Pet Owner
+- Manage own pets
+- View own medical records and vaccinations
+- Book appointments
+- Browse market and place orders
+- Request adoption and messaging features
+
+### Veterinarian
+- Dashboard with schedules and patient directory
+- See all pets for care operations
+- Create/update medical records
+- Appointment management
+
+### Pet Shop
+- Manage products/inventory
+- Process orders
+- Market dashboard operations
+
+### Groomer
+- Appointment/service-related workflow
 
 ### Admin
-```
-GET    /api/admin/users          - Get all users
-PUT    /api/admin/users/:id/approve - Approve user
-PUT    /api/admin/users/:id/block   - Block user
-```
+- User approvals/roles
+- Cross-module moderation/management
+- Analytics/report endpoints
 
-For complete API documentation, see [API_REFERENCE.md](docs/API_REFERENCE.md)
+## 11. Data Model Overview
 
-## 🔧 Development
+Primary models used by implemented modules:
+- `User`
+- `Pet`
+- `MedicalRecord`
+- `Vaccination`
+- `Appointment`
+- `Product`
+- `Order`
+- `AdoptionPost`
+- `Blog`
+- `Discussion`
+- `Message`
+- `Notification`
+- `Review`
 
-### Technologies Used
+## 12. Testing and Validation in This Repository
 
-**Frontend**
-- React 18+
-- React Router v6
-- Vite (build tool)
-- Fetch API
-- CSS3
+Current standard verification used during implementation:
+- `npm run build` (client)
+- Manual role-based UI checks
+- API route/controller-level runtime checks
 
-**Backend**
+Note: there is currently no automated unit/integration test suite committed in this repository.
+
+## 13. Demo Login Credentials
+
+All demo accounts use the password `password123`.
+
+| Role | Email |
+|------|-------|
+| Admin | `admin@petcare.demo` |
+| Pet Owner | `nimal.owner@petcare.demo` |
+| Pet Owner | `kavindi.owner@petcare.demo` |
+| Pet Owner | `ruwan.owner@petcare.demo` |
+| Veterinarian | `amara.vet@petcare.demo` |
+| Veterinarian | `lahiru.vet@petcare.demo` |
+| Pet Shop | `pawmart.shop@petcare.demo` |
+| Groomer | `cuddle.groom@petcare.demo` |
+
+## 14. Known Constraints / Future Improvements
+
+- Add formal automated tests (unit + integration + e2e)
+- Add pagination and stronger query controls to all list-heavy screens
+- Add richer auditing and admin activity logs
+- Improve validation/error messaging consistency across forms
+- Add CI pipeline for lint/build/test gates
+
+## 15. Documentation References
+
+- `docs/API_REFERENCE.md`
+- `docs/IMPLEMENTATION_STEPS.md`
+- `docs/QUICK_START.md`
+- `AUTHENTICATION_COMPLETE_GUIDE.md`
+- `DASHBOARD_ARCHITECTURE.md`
+
+---
+
+If you are using this for a project report, recommended chapter order is:
+1. Problem Statement
+2. Objectives
+3. Architecture
+4. Module Implementation
+5. Role-Based Flows
+6. API Design
+7. Security
+8. Results and Validation
+9. Limitations and Future Work
 - Node.js
 - Express.js
 - MongoDB & Mongoose

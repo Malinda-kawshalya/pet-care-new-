@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../services/api.js';
+import { getUploadUrl } from '../utils/media.js';
 
 export default function PetForm({ initial = null, onSaved, onCancel }) {
   const [form, setForm] = useState(initial || {
@@ -107,7 +108,7 @@ export default function PetForm({ initial = null, onSaved, onCancel }) {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {(form.images || []).map((img, idx) => (
           <div key={idx} style={{ position: 'relative', width: 80, height: 80, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--line)' }}>
-            <img src={img.startsWith('uploads') ? `/${img}` : img} alt="pet" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={getUploadUrl(img)} alt="pet" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <button type="button" onClick={() => handleRemoveImage(idx)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 6px' }}>x</button>
           </div>
         ))}

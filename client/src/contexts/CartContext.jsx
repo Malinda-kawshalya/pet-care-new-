@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { getUploadUrl } from '../utils/media.js';
 
 const CartContext = createContext(null);
 
@@ -15,7 +16,7 @@ export function CartProvider({ children }) {
     setCart((prev) => {
       const found = prev.find((p) => p.product === product._id);
       if (found) return prev.map((p) => p.product === product._id ? { ...p, quantity: p.quantity + qty } : p);
-      return [...prev, { product: product._id, name: product.name, price: product.price, quantity: qty, image: product.images?.[0] }];
+      return [...prev, { product: product._id, name: product.name, price: product.price, quantity: qty, image: getUploadUrl(product.images?.[0]) }];
     });
   }
 

@@ -12,6 +12,12 @@ const adoptionPostSchema = new mongoose.Schema(
     requests: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        applicantName: String,
+        applicantEmail: String,
+        applicantPhone: String,
+        applicantAddress: String,
+        homeType: String,
+        experience: String,
         message: String,
         status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" }
       }

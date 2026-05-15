@@ -249,17 +249,17 @@ export default function AuthPage() {
               <p className="eyebrow demo-eyebrow">Try demo accounts</p>
               <div className="demo-buttons">
                 {[
-                  { role: "petOwner", email: "owner@demo.com", label: "Pet Owner" },
-                  { role: "veterinarian", email: "vet@demo.com", label: "Veterinarian" },
-                  { role: "petShop", email: "shop@demo.com", label: "Pet Shop" },
-                  { role: "groomer", email: "groomer@demo.com", label: "Groomer" },
-                  { role: "admin", email: "admin@demo.com", label: "Admin" }
+                  { role: "petOwner", email: "nimal.owner@petcare.demo", label: "Pet Owner" },
+                  { role: "veterinarian", email: "amara.vet@petcare.demo", label: "Veterinarian" },
+                  { role: "petShop", email: "pawmart.shop@petcare.demo", label: "Pet Shop" },
+                  { role: "groomer", email: "cuddle.groom@petcare.demo", label: "Groomer" },
+                  { role: "admin", email: "admin@petcare.demo", label: "Admin" }
                 ].map(({ role, email, label }) => (
                   <button
                     key={role}
                     type="button"
                     className="demo-button"
-                    onClick={() => submitLogin(null, { email, password: "demo123" })}
+                      onClick={() => submitLogin(null, { email, password: "password123" })}
                     title={`Login as ${label}`}
                   >
                     {label}

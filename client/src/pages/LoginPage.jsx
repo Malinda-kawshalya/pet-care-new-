@@ -5,11 +5,11 @@ import api from "../services/api.js";
 import { getDashboardPath } from "../utils/roleHelper.js";
 
 const demoAccounts = [
-  { role: "petOwner", email: "owner@demo.com", label: "Pet Owner" },
-  { role: "veterinarian", email: "vet@demo.com", label: "Veterinarian" },
-  { role: "petShop", email: "shop@demo.com", label: "Pet Shop" },
-  { role: "groomer", email: "groomer@demo.com", label: "Groomer" },
-  { role: "admin", email: "admin@demo.com", label: "Admin" }
+  { role: "petOwner", email: "nimal.owner@petcare.demo", label: "Pet Owner" },
+  { role: "veterinarian", email: "amara.vet@petcare.demo", label: "Veterinarian" },
+  { role: "petShop", email: "pawmart.shop@petcare.demo", label: "Pet Shop" },
+  { role: "groomer", email: "cuddle.groom@petcare.demo", label: "Groomer" },
+  { role: "admin", email: "admin@petcare.demo", label: "Admin" }
 ];
 
 export default function LoginPage() {
@@ -184,7 +184,7 @@ export default function LoginPage() {
                   key={role}
                   type="button"
                   className="demo-button"
-                  onClick={() => submitLogin(null, { email, password: "demo123" })}
+                  onClick={() => submitLogin(null, { email, password: "password123" })}
                 >
                   {label}
                 </button>

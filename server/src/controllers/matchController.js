@@ -11,7 +11,7 @@ async function isOwnerOfPet(petId, userId) {
 export async function listMatchablePets(req, res, next) {
   try {
     const { breed, gender, city, species, q = "" } = req.query;
-    const filter = { owner: { $ne: req.user._id } };
+    const filter = { owner: { $ne: req.user._id }, "matchProfile.isLooking": true };
     if (breed) filter.breed = new RegExp(breed, "i");
     if (gender && gender !== "any") filter.gender = gender;
     if (species) filter.species = species;
@@ -61,7 +61,16 @@ export async function updateMatchProfile(req, res, next) {
 
 export async function createMatchRequest(req, res, next) {
   try {
-    const { requesterPet, targetPet, message } = req.body;
+    const {
+      requesterPet,
+      targetPet,
+      message,
+      applicantName,
+      applicantEmail,
+      applicantPhone,
+      meetingPreference,
+      applicantNotes
+    } = req.body;
     if (!requesterPet || !targetPet) {
       res.status(400);
       throw new Error("requesterPet and targetPet are required");
@@ -76,7 +85,17 @@ export async function createMatchRequest(req, res, next) {
       throw new Error("Target pet not found");
     }
 
-    const item = await MatchRequest.create({ requesterPet, targetPet, message, status: "pending" });
+    const item = await MatchRequest.create({
+      requesterPet,
+      targetPet,
+      message,
+      applicantName: applicantName || req.user.name,
+      applicantEmail: applicantEmail || req.user.email,
+      applicantPhone: applicantPhone || req.user.phone,
+      meetingPreference,
+      applicantNotes,
+      status: "pending"
+    });
     await Notification.create({
       user: target.owner._id,
       title: "New match request",

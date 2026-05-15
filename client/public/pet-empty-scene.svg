@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-label="Empty pet state illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#eef7ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="520" rx="40" fill="url(#bg)"/>
+  <circle cx="260" cy="190" r="86" fill="#f7d889" opacity="0.8"/>
+  <circle cx="390" cy="180" r="60" fill="#f3c87e" opacity="0.7"/>
+  <circle cx="245" cy="175" r="12" fill="#8d3d18"/>
+  <circle cx="295" cy="175" r="12" fill="#8d3d18"/>
+  <circle cx="220" cy="150" r="10" fill="#8d3d18"/>
+  <circle cx="320" cy="150" r="10" fill="#8d3d18"/>
+  <path d="M180 270c22-44 58-68 104-68s82 24 104 68" fill="none" stroke="#8d3d18" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="535" cy="290" r="70" fill="#dff8ff"/>
+  <circle cx="535" cy="290" r="34" fill="#ffffff"/>
+  <text x="360" y="400" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="800" fill="#1f4f9b">Add a pet to see records here</text>
+</svg>
