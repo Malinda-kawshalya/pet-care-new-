@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -48,6 +49,18 @@ const PetOwnerDashboard = () => {
       active = false;
     };
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const section = new URLSearchParams(location.search).get('section');
+    if (section) {
+      setTimeout(() => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
+  }, [location.search]);
 
   const summary = useMemo(() => {
     const vaccinationDue = pets.filter((pet) => ['dueSoon', 'overdue', 'unknown'].includes(pet.vaccinationStatus)).length;
@@ -105,7 +118,7 @@ const PetOwnerDashboard = () => {
           </div>
         </div>
 
-        <div className="widget quick-actions">
+        <div className="widget quick-actions" id="account">
           <div className="widget-header">
             <h2>Account options</h2>
             <span className="link">Fast access</span>
@@ -121,7 +134,7 @@ const PetOwnerDashboard = () => {
           </div>
         </div>
 
-        <div className="widget">
+        <div className="widget" id="pets">
           <div className="widget-header">
             <h2>My pets</h2>
             <Link className="link" to="/pets">View all</Link>
@@ -146,7 +159,7 @@ const PetOwnerDashboard = () => {
           </div>
         </div>
 
-        <div className="widget">
+        <div className="widget" id="next-steps">
           <div className="widget-header">
             <h2>Next steps</h2>
             <ClipboardList size={18} />

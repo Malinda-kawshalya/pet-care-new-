@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../services/api.js';
 import DashboardSidebar from '../DashboardSidebar.jsx';
 import './Dashboard.css';
@@ -56,6 +57,18 @@ const PetShopDashboard = () => {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const section = new URLSearchParams(location.search).get('section');
+    if (section) {
+      setTimeout(() => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
+  }, [location.search]);
 
   const pendingCodOrders = useMemo(() => (
     dashboard.orders.filter((order) =>
@@ -251,7 +264,7 @@ const PetShopDashboard = () => {
           </div>
         </div>
 
-        <div className="widget">
+        <div className="widget" id="add-product">
           <div className="widget-header">
             <h2>Add Product</h2>
           </div>
@@ -308,7 +321,7 @@ const PetShopDashboard = () => {
           </form>
         </div>
 
-        <div className="widget">
+        <div className="widget" id="cod">
           <div className="widget-header">
             <h2>Cash on Delivery Requests</h2>
             <button className="btn-small" onClick={loadDashboard} disabled={loading}>Refresh</button>
@@ -346,7 +359,7 @@ const PetShopDashboard = () => {
           )}
         </div>
 
-        <div className="widget">
+        <div className="widget" id="recent-orders">
           <div className="widget-header">
             <h2>Recent Orders</h2>
           </div>
@@ -367,7 +380,7 @@ const PetShopDashboard = () => {
           )}
         </div>
 
-        <div className="widget">
+        <div className="widget" id="inventory">
           <div className="widget-header">
             <h2>Inventory</h2>
           </div>
@@ -408,7 +421,7 @@ const PetShopDashboard = () => {
           )}
         </div>
 
-        <div className="widget">
+        <div className="widget" id="low-stock">
           <div className="widget-header">
             <h2>Low Stock Alerts</h2>
           </div>

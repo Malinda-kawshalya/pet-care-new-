@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CalendarClock, ClipboardPlus, HeartPulse, MessageCircle, UserRound } from "lucide-react";
 import api from "../../services/api.js";
 import DashboardSidebar from "../DashboardSidebar.jsx";
@@ -65,6 +65,19 @@ export default function VetDashboard() {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const section = new URLSearchParams(location.search).get("section");
+    if (section) {
+      // allow DOM to render
+      setTimeout(() => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
+  }, [location.search]);
 
   const summary = useMemo(() => {
     const todayAppointments = appointments.filter((item) => isToday(item.scheduledAt));
@@ -224,7 +237,7 @@ export default function VetDashboard() {
             </div>
           </div>
 
-          <div className="widget">
+          <div className="widget" id="appointments">
             <div className="widget-header">
               <h2>Today schedule</h2>
               <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
@@ -248,7 +261,7 @@ export default function VetDashboard() {
             </div>
           </div>
 
-          <div className="widget">
+          <div className="widget" id="patients">
             <div className="widget-header">
               <h2>Patients</h2>
               <Link className="link" to="/pets">Open pets</Link>
@@ -302,7 +315,7 @@ export default function VetDashboard() {
             </div>
           </div>
 
-          <div className="widget">
+          <div className="widget" id="records">
             <div className="widget-header">
               <h2>Recent medical records</h2>
               <Link className="btn-small" to="/medical-records">Add record</Link>
@@ -322,7 +335,7 @@ export default function VetDashboard() {
             </div>
           </div>
 
-          <div className="widget">
+          <div className="widget" id="messages">
             <div className="widget-header">
               <h2>Messages inbox</h2>
               <Link className="link" to="/messages">Open all</Link>
@@ -341,7 +354,7 @@ export default function VetDashboard() {
             </div>
           </div>
 
-          <div className="widget">
+          <div className="widget" id="upcoming">
             <div className="widget-header">
               <h2>Upcoming appointments</h2>
               <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
