@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   PawPrint,
   Heart,
@@ -60,8 +60,7 @@ const menuItems = {
     { icon: Package, label: "Products", to: "/dashboard/admin?section=products" },
     { icon: FileText, label: "Blogs", to: "/dashboard/admin?section=blogs" },
     { icon: Heart, label: "Adoptions", to: "/dashboard/admin?section=adoptions" },
-    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" },
-    { icon: ShoppingBag, label: "Adoption Form", to: "/dashboard/adoption" }
+    { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" }
   ]
 };
 
@@ -73,6 +72,19 @@ export default function DashboardSidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const currentMenuItems = menuItems[userRole] || menuItems.petOwner;
+  const location = useLocation();
+
+  const isActiveItem = (item) => {
+    const [pathOnly, search] = (item.to || "").split("?");
+    if (search) {
+      const params = new URLSearchParams(search);
+      const section = params.get("section");
+      const currentSection = new URLSearchParams(location.search).get("section");
+      if (section) return section === currentSection;
+    }
+    // fallback to pathname compare
+    return location.pathname === pathOnly;
+  };
 
   const handleLogout = () => {
     logout();
@@ -120,7 +132,7 @@ export default function DashboardSidebar() {
             <NavLink
               key={`${item.to}-${item.label}`}
               to={item.to}
-              className={({ isActive }) => `sidebar-nav-item ${isActive ? "active" : ""}`}
+              className={() => `sidebar-nav-item ${isActiveItem(item) ? "active" : ""}`}
               title={item.label}
               onClick={closeMobile}
             >

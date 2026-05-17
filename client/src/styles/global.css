@@ -14,7 +14,7 @@
   --blue: #0ea5e9;
   --green: #10b981;
   --red: #ef4444;
-  --topbar-offset: 72px;
+  --topbar-offset: 82px;
   --shadow: 0 20px 60px rgba(15, 15, 31, 0.15);
   --shadow-lg: 0 40px 80px rgba(15, 15, 31, 0.2);
   --shadow-sm: 0 4px 12px rgba(15, 15, 31, 0.08);
@@ -1980,15 +1980,16 @@ input, select, textarea {
 
 /* Dashboard Sidebar */
 .dashboard-with-sidebar {
-  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   min-height: calc(100vh - var(--topbar-offset, 73px));
 }
 
 .dashboard-sidebar {
-  position: fixed;
+  position: sticky;
   top: var(--topbar-offset, 73px);
-  left: 0;
-  z-index: 1100;
+  z-index: 18;
   flex-shrink: 0;
   width: 280px;
   height: calc(100vh - var(--topbar-offset, 73px));
@@ -1999,6 +2000,7 @@ input, select, textarea {
   padding: 0;
   transition: width 0.28s ease, transform 0.28s ease;
   box-shadow: 10px 0 32px rgba(15, 23, 42, 0.08);
+  overflow-y: auto;
 }
 
 .dashboard-sidebar.collapsed {
@@ -2008,15 +2010,17 @@ input, select, textarea {
 .dashboard-sidebar + .dashboard-container,
 .dashboard-sidebar + .admin-shell-modern,
 .dashboard-sidebar + .groomer-shell-modern {
-  margin-left: 280px;
+  flex: 1;
+  min-width: 0;
   min-height: calc(100vh - var(--topbar-offset, 73px));
-  transition: margin-left 0.28s ease;
+  transition: none;
 }
 
 .dashboard-sidebar.collapsed + .dashboard-container,
 .dashboard-sidebar.collapsed + .admin-shell-modern,
 .dashboard-sidebar.collapsed + .groomer-shell-modern {
-  margin-left: 74px;
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar-header {
@@ -2143,8 +2147,13 @@ input, select, textarea {
 
 @media (max-width: 1024px) {
   .dashboard-sidebar {
-    width: min(320px, 86vw);
-    transform: translateX(-105%);
+    position: fixed;
+    top: var(--topbar-offset, 73px);
+    left: 16px;
+    width: min(320px, calc(86vw - 32px));
+    height: calc(100vh - var(--topbar-offset, 73px) - 32px);
+    transform: translateX(calc(-100% - 20px));
+    border-radius: 0 16px 16px 0;
   }
 
   .dashboard-sidebar.mobile-open {
@@ -2152,7 +2161,7 @@ input, select, textarea {
   }
 
   .dashboard-sidebar.collapsed {
-    width: min(320px, 86vw);
+    width: min(320px, calc(86vw - 32px));
   }
 
   .dashboard-sidebar + .dashboard-container,
@@ -2162,6 +2171,7 @@ input, select, textarea {
   .dashboard-sidebar.collapsed + .admin-shell-modern,
   .dashboard-sidebar.collapsed + .groomer-shell-modern {
     margin-left: 0;
+    flex: 1;
   }
 
   .dashboard-sidebar-overlay {
