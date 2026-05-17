@@ -1,6 +1,8 @@
 .admin-shell-modern {
   display: block;
-  min-height: calc(100vh - 72px);
+  flex: 1;
+  min-width: 0;
+  min-height: calc(100vh - var(--topbar-offset, 82px));
   background:
     radial-gradient(circle at 10% 20%, rgba(17, 140, 126, 0.08), transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(40, 107, 200, 0.1), transparent 45%),
