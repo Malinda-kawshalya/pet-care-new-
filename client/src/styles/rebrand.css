@@ -68,6 +68,119 @@ main {
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  transition:
+    padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Floating header (activates after 40px scroll) ── */
+.topbar.floating {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100vw - 48px), 1520px);
+  margin: 0;
+  padding: 12px clamp(16px, 2.5vw, 36px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 8px 32px rgba(31, 79, 155, 0.14),
+    0 2px 8px rgba(31, 79, 155, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: floatIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(-12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Brand shrinks slightly when floating */
+.topbar.floating .brand-mark {
+  width: 36px;
+  height: 36px;
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+/* Nav links adapt in floating mode */
+.topbar.floating .nav-links a {
+  padding: 0.6rem 0.85rem;
+}
+
+/* CTA button adapts */
+.topbar.floating .topbar-cta {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
+/* Icon buttons adapt */
+.topbar.floating .icon-button {
+  width: 38px;
+  height: 38px;
+}
+
+/* Scroll-to-top FAB */
+.scroll-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--shell-blue-light), var(--shell-blue));
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(31, 79, 155, 0.36);
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
+}
+
+.scroll-to-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 14px 32px rgba(31, 79, 155, 0.46);
+}
+
+.scroll-to-top:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Spacer that fills the header height when topbar becomes fixed */
+.topbar-spacer {
+  height: var(--topbar-offset, 82px);
+  flex-shrink: 0;
 }
 
 .brand {

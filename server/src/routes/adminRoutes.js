@@ -14,6 +14,14 @@ import {
   deleteBlog,
   deleteAdoption,
   listContactInquiries,
+  listHealthRecords,
+  createHealthRecord,
+  updateHealthRecord,
+  deleteHealthRecord,
+  listMessages,
+  createMessage,
+  updateMessage,
+  deleteMessage,
   getUser,
   listUsers,
   listAppointments,
@@ -66,5 +74,14 @@ router.delete("/adoptions/:id", deleteAdoption);
 router.get("/analytics", analytics);
 router.get("/reports", reports);
 router.get("/contact-inquiries", listContactInquiries);
+router.get("/health-records", listHealthRecords);
+router.post("/health-records", createHealthRecord);
+router.put("/health-records/:id", updateHealthRecord);
+router.delete("/health-records/:id", deleteHealthRecord);
+
+router.get("/messages", listMessages);
+router.post("/messages", createMessage);
+router.put("/messages/:id", updateMessage);
+router.delete("/messages/:id", deleteMessage);
 
 export default router;
