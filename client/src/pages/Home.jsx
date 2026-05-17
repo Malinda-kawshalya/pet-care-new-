@@ -324,7 +324,10 @@ export default function Home() {
                   <p className="home-adoption-meta">{post.location || post.pet?.breed || "No location"}</p>
                   <p className="home-adoption-summary">{post.description || "View details about this pet and send an adoption request from the adoption page."}</p>
                   <div className="home-adoption-actions">
-                    <a href="/adoption" className="btn btn-outline">View details</a>
+                    <a href="/adoption" className="primary-button">
+                      View details
+                      <ArrowRight size={16} />
+                    </a>
                   </div>
                 </div>
               </article>
@@ -364,7 +367,10 @@ export default function Home() {
         <div className="timeline-grid">
           {journey.map((step) => (
             <article className="timeline-item" key={step.year}>
-              <span className="timeline-year">Step {step.year}</span>
+              <div className="timeline-head">
+                <span className="timeline-year">Step {step.year}</span>
+                <span className="timeline-dot" aria-hidden="true"></span>
+              </div>
               <h3>{step.title}</h3>
               <p>{step.text}</p>
             </article>

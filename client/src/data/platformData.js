@@ -280,7 +280,9 @@ export const advancedFeatures = [
   { title: "Real-time vet chat", icon: MessageCircle, detail: "Message veterinarians after booking or accepted requests." },
   { title: "Emergency SOS", icon: Activity, detail: "Send urgent location and pet profile to nearby providers." },
   { title: "Diet recommendation", icon: FileText, detail: "Suggest food plans based on breed, age, weight, and risks." },
-  { title: "Secure payments", icon: CreditCard, detail: "Checkout-ready payment flow with order and fraud checks." }
+  { title: "Secure payments", icon: CreditCard, detail: "Checkout-ready payment flow with order and fraud checks." },
+  { title: "Smart reminders", icon: Bell, detail: "Keep vaccinations, bookings, and follow-ups on schedule." },
+  { title: "Nearby providers", icon: MapPinned, detail: "Find trusted vets, groomers, and shops around you fast." }
 ];
 
 export const databaseTables = [

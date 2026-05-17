@@ -163,9 +163,8 @@ export default function Layout() {
                 <span className="brand-mark"><PawPrint size={18} /></span>
                 <span>Pet Care</span>
               </div>
-              <p>
-                A polished pet care platform for owners, clinics, shops, and groomers with one responsive interface.
-                Manage health, commerce, adoption, and communication from one connected workspace.
+              <p className="footer-description">
+                Daily pet care for owners, clinics, shops, and groomers in one connected, easy-to-use platform.
               </p>
               <div className="footer-badges">
                 <span>Role based access</span>
@@ -173,33 +172,26 @@ export default function Layout() {
                 <span>Responsive UI</span>
               </div>
             </div>
-            <div className="footer-column">
+            <div className="footer-column footer-column-links">
               <h3>Explore</h3>
               <nav className="footer-links" aria-label="Footer navigation">
                 {publicNavItems.map((item) => (
                   <Link key={item.to} to={item.to}>{item.label}</Link>
                 ))}
+              </nav>
+              <nav className="footer-links footer-links-single" aria-label="Footer account links">
                 <Link to="/login">Login</Link>
                 <Link to="/register">Register</Link>
               </nav>
             </div>
-            <div className="footer-column">
+            <div className="footer-column footer-column-support">
               <h3>Support</h3>
               <div className="footer-utility">
-                <p>Email: support@petcare.demo</p>
-                <p>Phone: +94 77 000 1000</p>
-                <p>Hours: Mon - Fri, 8:00 AM - 6:00 PM</p>
+                <p><strong>Email:</strong> support@petcare.demo</p>
+                <p><strong>Phone:</strong> +94 77 000 1000</p>
+                <p><strong>Hours:</strong> Mon - Fri, 8:00 AM - 6:00 PM</p>
                 <Link to="/contact" className="topbar-cta">Contact support</Link>
               </div>
-            </div>
-            <div className="footer-utility">
-              <h3>Workflows</h3>
-              <p>Need help choosing a service or role? Start at contact and we’ll route you to the right workflow.</p>
-              <ul className="footer-workflow-list">
-                <li>Adoption request and approval flow</li>
-                <li>Vet patient records and follow-ups</li>
-                <li>Marketplace checkout and order tracking</li>
-              </ul>
             </div>
           </div>
           <div className="footer-word">Pet<span>Care</span></div>
