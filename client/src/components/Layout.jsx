@@ -15,10 +15,10 @@ export default function Layout() {
 
   const publicNavItems = [
     { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
     { to: "/market", label: "Shop" },
     { to: "/adoption", label: "Adoption" },
     { to: "/blogs", label: "Blogs" },
+    { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" }
   ];
 

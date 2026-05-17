@@ -19,12 +19,6 @@ const careImage = "https://images.unsplash.com/photo-1552053831-71594a27632d?aut
 const vetImage = "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=900&q=85";
 const adoptionImage = "https://images.unsplash.com/photo-1558944351-cd8a1e12e9f7?auto=format&fit=crop&w=900&q=85";
 
-const heroStats = [
-  { value: "24/7", label: "Access" },
-  { value: "13+", label: "Modules" },
-  { value: "5", label: "Roles" }
-];
-
 const values = [
   {
     title: "Responsive by default",
@@ -157,14 +151,6 @@ export default function Home() {
               </a>
             )}
           </div>
-          <div className="hero-stats">
-            {heroStats.map((item) => (
-              <article className="hero-stat" key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </article>
-            ))}
-          </div>
         </div>
 
         <div className="hero-visual" aria-label="Pet Care platform preview">
@@ -189,23 +175,38 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section section-story">
         <div className="page-intro story-grid">
           <div className="story-copy">
             <p className="eyebrow">About the platform</p>
-            <h2>Everything your team needs, arranged into one joyful interface.</h2>
+            <div className="story-intro">
+              <span className="story-pill">A calmer workflow</span>
+              <h2>One friendly place for care, shopping, and daily tasks.</h2>
+            </div>
             <p>
-              The redesign brings the app closer to the attached reference: a blue framed shell, a white canvas, rounded cards, and pet imagery that makes the platform feel approachable.
+              The platform keeps the important parts close together so people can move from one task to the next without feeling lost.
             </p>
             <div className="feature-chip-row">
-              <span className="feature-chip">Responsive layout</span>
-              <span className="feature-chip">Role-based screens</span>
-              <span className="feature-chip">Soft visual language</span>
+              <span className="feature-chip">Easy to learn</span>
+              <span className="feature-chip">Less screen hopping</span>
+              <span className="feature-chip">Built for real routines</span>
             </div>
-            <div className="story-metrics">
-              <article className="metric-card"><strong>24/7</strong><span>Platform access</span></article>
-              <article className="metric-card"><strong>13+</strong><span>Connected modules</span></article>
-              <article className="metric-card"><strong>5</strong><span>User types</span></article>
+            <div className="story-metrics story-metrics-friendly">
+              <article className="metric-card story-metric-card">
+                <span className="metric-label">Always ready</span>
+                <strong>24/7</strong>
+                <p>Use the platform whenever care needs attention.</p>
+              </article>
+              <article className="metric-card story-metric-card">
+                <span className="metric-label">All in one place</span>
+                <strong>13+</strong>
+                <p>Find modules, tools, and updates without switching apps.</p>
+              </article>
+              <article className="metric-card story-metric-card">
+                <span className="metric-label">Built for everyone</span>
+                <strong>5</strong>
+                <p>Different roles stay supported with clear, simple routes.</p>
+              </article>
             </div>
           </div>
           <img className="story-image" src={careImage} alt="Pet health care workspace" onError={handleImageError} />
