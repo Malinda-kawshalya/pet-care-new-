@@ -60,6 +60,8 @@ const menuItems = {
     { icon: Package, label: "Products", to: "/dashboard/admin?section=products" },
     { icon: FileText, label: "Blogs", to: "/dashboard/admin?section=blogs" },
     { icon: Heart, label: "Adoptions", to: "/dashboard/admin?section=adoptions" },
+    { icon: Stethoscope, label: "Health Recording", to: "/dashboard/admin?section=health" },
+    { icon: MessageSquare, label: "Messages", to: "/dashboard/admin?section=messages" },
     { icon: BarChart3, label: "Analytics", to: "/dashboard/admin?section=analytics" }
   ]
 };

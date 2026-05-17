@@ -70,6 +70,49 @@ input, select, textarea {
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(231, 228, 238, 0.8);
 }
+
+/* Floating header when user scrolls */
+.topbar.floating {
+  top: 12px; /* create a small gap so the blue page border shows */
+  border-radius: 12px;
+  padding: 12px clamp(18px, 4vw, 72px);
+  box-shadow: 0 22px 50px rgba(10, 40, 80, 0.16);
+  background: rgba(255,255,255,0.96);
+  transition: all 0.25s ease;
+  z-index: 2100;
+}
+
+/* Scroll to top button */
+.scroll-to-top {
+  position: fixed;
+  right: 22px;
+  bottom: 28px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(14, 165, 233, 0.95);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(14,165,233,0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 2200;
+}
+
+.scroll-to-top.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-to-top:focus {
+  outline: 2px solid rgba(255,255,255,0.9);
+}
 .brand {
   display: inline-flex;
   align-items: center;

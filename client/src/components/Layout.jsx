@@ -11,6 +11,8 @@ export default function Layout() {
   const location = useLocation();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isFloating, setIsFloating] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const isDashboardRoute = location.pathname.startsWith("/dashboard");
 
   const publicNavItems = [
@@ -47,11 +49,23 @@ export default function Layout() {
 
     document.addEventListener("mousedown", handleDocumentClick);
     document.addEventListener("keydown", handleEscape);
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      setIsFloating(y > 40);
+      setShowScrollTop(y > 400);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       document.removeEventListener("mousedown", handleDocumentClick);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="app-shell">
@@ -62,7 +76,7 @@ export default function Layout() {
         <span className="shell-decor-paw right-b"><PawPrint size={40} /></span>
       </div>
 
-      <header className="topbar">
+      <header className={`topbar ${isFloating ? 'floating' : ''}`}>
         <Link to="/" className="brand" aria-label="Pet Care home">
           <span className="brand-mark"><PawPrint size={18} /></span>
           <span>Pet Care</span>
@@ -151,9 +165,23 @@ export default function Layout() {
         </div>
       </header>
 
+      {/* Spacer prevents layout jump when header becomes position:fixed */}
+      {isFloating && <div className="topbar-spacer" aria-hidden="true" />}
+
       <main>
         <Outlet />
       </main>
+
+      <button
+        className={`scroll-to-top ${showScrollTop ? 'show' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        title="Scroll to top"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="18 15 12 9 6 15"/>
+        </svg>
+      </button>
 
       {!isDashboardRoute && (
         <footer className="footer">

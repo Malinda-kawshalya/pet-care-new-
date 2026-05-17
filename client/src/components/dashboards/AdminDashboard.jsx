@@ -26,6 +26,8 @@ const sections = [
   { key: "products", label: "Products", icon: Package },
   { key: "blogs", label: "Blogs", icon: FileText },
   { key: "adoptions", label: "Adoptions", icon: Heart },
+  { key: "health", label: "Health Recording", icon: Heart },
+  { key: "messages", label: "Messages", icon: Mail },
   { key: "contacts", label: "Contacts", icon: Mail },
   { key: "analytics", label: "Analytics & Reports", icon: BarChart3 }
 ];
@@ -35,7 +37,9 @@ const defaultForms = {
   appointment: { pet: "", owner: "", provider: "", serviceType: "vet", scheduledAt: "", status: "pending", location: "", notes: "" },
   product: { seller: "", name: "", category: "", price: "", stock: "", description: "", approvalStatus: "pending", isActive: true },
   blog: { author: "", title: "", body: "", tags: "", status: "published" },
-  adoption: { pet: "", postedBy: "", title: "", description: "", adoptionFee: "", location: "", status: "pendingApproval" }
+  adoption: { pet: "", postedBy: "", title: "", description: "", adoptionFee: "", location: "", status: "pendingApproval" },
+  health: { pet: "", recordType: "vaccination", notes: "", recordDate: "", provider: "", status: "active" },
+  message: { sender: "", recipient: "", subject: "", body: "", status: "unread" }
 };
 
 export default function AdminDashboard() {
@@ -55,6 +59,8 @@ export default function AdminDashboard() {
   const [blogs, setBlogs] = useState([]);
   const [adoptions, setAdoptions] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [healthRecordings, setHealthRecordings] = useState([]);
+  const [messages, setMessages] = useState([]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -81,6 +87,8 @@ export default function AdminDashboard() {
     if (active === "products") loadProducts();
     if (active === "blogs") loadBlogs();
     if (active === "adoptions") loadAdoptions();
+    if (active === "health") loadHealthRecordings();
+    if (active === "messages") loadMessages();
     if (active === "contacts") loadContacts();
     if (active === "analytics") loadAnalyticsAndReport();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,6 +153,20 @@ export default function AdminDashboard() {
     });
   }
 
+  async function loadHealthRecordings() {
+    await run(async () => {
+      const res = await api.get("/admin/health-records", { params: { q: search } });
+      setHealthRecordings(res.data.items || []);
+    });
+  }
+
+  async function loadMessages() {
+    await run(async () => {
+      const res = await api.get("/admin/messages", { params: { q: search } });
+      setMessages(res.data.items || []);
+    });
+  }
+
   async function loadContacts() {
     await run(async () => {
       const res = await api.get("/admin/contact-inquiries", { params: { q: search } });
@@ -170,9 +192,11 @@ export default function AdminDashboard() {
       products,
       blogs,
       adoptions,
+      health: healthRecordings,
+      messages,
       contacts
     };
-  }, [users, appointments, products, blogs, adoptions, contacts]);
+  }, [users, appointments, products, blogs, adoptions, healthRecordings, messages, contacts]);
 
   function openCreate(type) {
     setFormType(type);
@@ -234,6 +258,25 @@ export default function AdminDashboard() {
         adoptionFee: item.adoptionFee || "",
         location: item.location || "",
         status: item.status || "pendingApproval"
+      });
+    }
+    if (type === "health") {
+      setForm({
+        pet: item.pet?._id || item.pet || "",
+        recordType: item.recordType || "",
+        notes: item.notes || "",
+        recordDate: item.recordDate ? item.recordDate.split("T")[0] : "",
+        provider: item.provider || "",
+        status: item.status || "completed"
+      });
+    }
+    if (type === "message") {
+      setForm({
+        sender: item.sender?._id || item.sender || "",
+        recipient: item.recipient?._id || item.recipient || "",
+        subject: item.subject || "",
+        body: item.body || "",
+        status: item.status || "unread"
       });
     }
     setEditItem(item);
@@ -320,6 +363,32 @@ export default function AdminDashboard() {
         await loadAdoptions();
       }
 
+      if (formType === "health") {
+        const payload = {
+          ...form,
+          recordDate: new Date(form.recordDate).toISOString()
+        };
+        if (isEdit) {
+          await api.put(`/admin/health-records/${editItem._id}`, payload);
+          flash("Health record updated");
+        } else {
+          await api.post("/admin/health-records", payload);
+          flash("Health record created");
+        }
+        await loadHealthRecordings();
+      }
+
+      if (formType === "message") {
+        if (isEdit) {
+          await api.put(`/admin/messages/${editItem._id}`, form);
+          flash("Message updated");
+        } else {
+          await api.post("/admin/messages", form);
+          flash("Message created");
+        }
+        await loadMessages();
+      }
+
       setShowCreate(false);
       setEditItem(null);
     });
@@ -346,6 +415,14 @@ export default function AdminDashboard() {
       if (type === "adoptions") {
         await api.delete(`/admin/adoptions/${id}`);
         await loadAdoptions();
+      }
+      if (type === "health") {
+        await api.delete(`/admin/health-records/${id}`);
+        await loadHealthRecordings();
+      }
+      if (type === "messages") {
+        await api.delete(`/admin/messages/${id}`);
+        await loadMessages();
       }
       flash("Deleted successfully");
     });
@@ -493,6 +570,16 @@ export default function AdminDashboard() {
                       <th>Title</th><th>Pet</th><th>Posted By</th><th>Status</th><th>Actions</th>
                     </>
                   )}
+                  {active === "health" && (
+                    <>
+                      <th>Pet</th><th>Record Type</th><th>Provider</th><th>Date</th><th>Status</th><th>Actions</th>
+                    </>
+                  )}
+                  {active === "messages" && (
+                    <>
+                      <th>From</th><th>To</th><th>Subject</th><th>Status</th><th>Actions</th>
+                    </>
+                  )}
                   {active === "contacts" && (
                     <>
                       <th>Name</th><th>Email</th><th>Subject</th><th>Role</th><th>Status</th><th>Actions</th>
@@ -576,6 +663,33 @@ export default function AdminDashboard() {
                           <button onClick={() => moderate("adoption", item._id, { status: "closed" })}><Ban size={15} /></button>
                           <button onClick={() => openEdit("adoption", item)}><Pencil size={15} /></button>
                           <button onClick={() => removeItem("adoptions", item._id)}><Trash2 size={15} /></button>
+                        </td>
+                      </>
+                    )}
+
+                    {active === "health" && (
+                      <>
+                        <td>{item.pet?.name || "-"}</td>
+                        <td>{item.recordType}</td>
+                        <td>{item.provider}</td>
+                        <td>{item.recordDate ? new Date(item.recordDate).toLocaleDateString() : "-"}</td>
+                        <td>{item.status}</td>
+                        <td className="actions">
+                          <button onClick={() => openEdit("health", item)}><Pencil size={15} /></button>
+                          <button onClick={() => removeItem("health", item._id)}><Trash2 size={15} /></button>
+                        </td>
+                      </>
+                    )}
+
+                    {active === "messages" && (
+                      <>
+                        <td>{item.sender?.name || "-"}</td>
+                        <td>{item.recipient?.name || "-"}</td>
+                        <td>{item.subject}</td>
+                        <td>{item.status}</td>
+                        <td className="actions">
+                          <button onClick={() => openEdit("message", item)}><Pencil size={15} /></button>
+                          <button onClick={() => removeItem("messages", item._id)}><Trash2 size={15} /></button>
                         </td>
                       </>
                     )}

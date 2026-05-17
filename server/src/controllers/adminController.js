@@ -6,6 +6,8 @@ import Blog from "../models/Blog.js";
 import AdoptionPost from "../models/AdoptionPost.js";
 import Order from "../models/Order.js";
 import ContactInquiry from "../models/ContactInquiry.js";
+import MedicalRecord from "../models/MedicalRecord.js";
+import Message from "../models/Message.js";
 
 const userSelect = "-password -verificationToken -resetPasswordToken";
 
@@ -608,6 +610,141 @@ export async function listContactInquiries(req, res, next) {
     });
 
     res.json({ items: normalized });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listHealthRecords(req, res, next) {
+  try {
+    const { q = "" } = req.query;
+    const items = await MedicalRecord.find()
+      .populate("pet", "name species owner")
+      .populate("veterinarian", "name email")
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    const normalized = items.filter((item) => {
+      if (!q) return true;
+      const search = q.toLowerCase();
+      return [item.pet?.name, item.diagnosis, item.treatment, item.veterinarian?.name]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(search));
+    });
+
+    res.json({ items: normalized });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createHealthRecord(req, res, next) {
+  try {
+    const item = await MedicalRecord.create(req.body);
+    const hydrated = await MedicalRecord.findById(item._id)
+      .populate("pet", "name species owner")
+      .populate("veterinarian", "name email");
+    res.status(201).json({ item: hydrated });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateHealthRecord(req, res, next) {
+  try {
+    const item = await MedicalRecord.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    })
+      .populate("pet", "name species owner")
+      .populate("veterinarian", "name email");
+    if (!item) {
+      res.status(404);
+      throw new Error("Health record not found");
+    }
+    res.json({ item });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteHealthRecord(req, res, next) {
+  try {
+    const item = await MedicalRecord.findByIdAndDelete(req.params.id);
+    if (!item) {
+      res.status(404);
+      throw new Error("Health record not found");
+    }
+    res.json({ message: "Health record deleted", id: req.params.id });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listMessages(req, res, next) {
+  try {
+    const { status, q = "" } = req.query;
+    const filters = {};
+    if (status) filters.status = status;
+
+    const items = await Message.find(filters)
+      .populate("sender", "name email role")
+      .populate("recipient", "name email role")
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    const normalized = items.filter((item) => {
+      if (!q) return true;
+      const search = q.toLowerCase();
+      return [item.sender?.name, item.recipient?.name, item.subject, item.body]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(search));
+    });
+
+    res.json({ items: normalized });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createMessage(req, res, next) {
+  try {
+    const item = await Message.create(req.body);
+    const hydrated = await Message.findById(item._id)
+      .populate("sender", "name email role")
+      .populate("recipient", "name email role");
+    res.status(201).json({ item: hydrated });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateMessage(req, res, next) {
+  try {
+    const item = await Message.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    })
+      .populate("sender", "name email role")
+      .populate("recipient", "name email role");
+    if (!item) {
+      res.status(404);
+      throw new Error("Message not found");
+    }
+    res.json({ item });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteMessage(req, res, next) {
+  try {
+    const item = await Message.findByIdAndDelete(req.params.id);
+    if (!item) {
+      res.status(404);
+      throw new Error("Message not found");
+    }
+    res.json({ message: "Message deleted", id: req.params.id });
   } catch (error) {
     next(error);
   }
