@@ -16,7 +16,7 @@ const emptyPetForm = {
   images: []
 };
 
-export default function AdoptionForm() {
+export default function AdoptionForm({ embedded = false }) {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [pets, setPets] = useState([]);
@@ -27,6 +27,7 @@ export default function AdoptionForm() {
   const [message, setMessage] = useState("");
   const [busyKey, setBusyKey] = useState("");
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState("");
 
   const load = async () => {
     try {
@@ -110,18 +111,26 @@ export default function AdoptionForm() {
         throw new Error("Please select or create a pet for this listing.");
       }
 
-      await api.post("/adoptions", {
+      const payload = {
         ...form,
         pet: petId,
         adoptionFee: form.adoptionFee === "" ? 0 : Number(form.adoptionFee)
-      });
+      };
+
+      if (editingId) {
+        await api.put(`/adoptions/${editingId}`, payload);
+      } else {
+        await api.post("/adoptions", payload);
+      }
 
       setForm(emptyForm);
+      setEditingId("");
       setPetForm(emptyPetForm);
-      setMessage("Adoption listing created and submitted for review.");
+      setCreatePetForListing(false);
+      setMessage(editingId ? "Adoption listing updated." : "Adoption listing created and submitted for review.");
       await load();
     } catch (submitError) {
-      setError(submitError.response?.data?.message || submitError.message || "Failed to create adoption listing.");
+      setError(submitError.response?.data?.message || submitError.message || "Failed to save adoption listing.");
     }
   };
 
@@ -133,6 +142,71 @@ export default function AdoptionForm() {
   }, [items, userId]);
 
   const isOwnerOfListing = (item) => String(item.postedBy?._id || item.postedBy) === String(userId);
+
+  const statusLabel = (status) => {
+    const labels = {
+      open: "Open",
+      pendingApproval: "Pending approval",
+      adopted: "Adopted",
+      closed: "Closed",
+      pending: "Pending",
+      approved: "Approved",
+      rejected: "Rejected"
+    };
+    return labels[status] || status || "Unknown";
+  };
+
+  const statusTone = (status) => {
+    if (status === "open" || status === "approved") return "open";
+    if (status === "pendingApproval" || status === "pending") return "pending";
+    return "closed";
+  };
+
+  const requestSummary = (item) => {
+    const requests = item.requests || [];
+    return {
+      total: requests.length,
+      pending: requests.filter((request) => request.status === "pending").length,
+      approved: requests.filter((request) => request.status === "approved").length,
+      rejected: requests.filter((request) => request.status === "rejected").length
+    };
+  };
+
+  const startEdit = (item) => {
+    setEditingId(item._id);
+    setCreatePetForListing(false);
+    setForm({
+      pet: item.pet?._id || item.pet || "",
+      title: item.title || "",
+      description: item.description || "",
+      adoptionFee: item.adoptionFee ?? "",
+      location: item.location || ""
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId("");
+    setForm(emptyForm);
+    setCreatePetForListing(!pets.length);
+  };
+
+  const deleteListing = async (item) => {
+    if (!window.confirm(`Delete adoption post "${item.title}"?`)) return;
+    setBusyKey(`delete-${item._id}`);
+    setError("");
+
+    try {
+      await api.delete(`/adoptions/${item._id}`);
+      setMessage("Adoption listing deleted.");
+      if (editingId === item._id) cancelEdit();
+      await load();
+    } catch (deleteError) {
+      setError(deleteError.response?.data?.message || "Failed to delete adoption listing.");
+    } finally {
+      setBusyKey("");
+    }
+  };
 
   const respondToRequest = async (itemId, requestId, status) => {
     const action = status === "approved" ? "approve" : "decline";
@@ -154,21 +228,41 @@ export default function AdoptionForm() {
   };
 
   const renderRequests = (item) => {
-    if (!isOwnerOfListing(item) || !item.requests?.length) return null;
+    if (!isOwnerOfListing(item)) return null;
+    if (!item.requests?.length) {
+      return (
+        <div className="request-list">
+          <h4>Requester details</h4>
+          <p className="adoption-muted-note">No adoption requests yet.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="request-list">
-        <h4>Adoption requests</h4>
+        <h4>Requester details</h4>
         {item.requests.map((request) => (
           <div key={request._id} className="request-item">
             <div className="request-item-body">
-              <strong>{request.applicantName || request.user?.name || "Requester"}</strong>
-              <p>{request.applicantEmail || request.user?.email || "No email provided"}</p>
-              <p>{request.applicantPhone || request.user?.phone || "No phone provided"}</p>
-              {request.applicantAddress && <p>{request.applicantAddress}</p>}
-              {request.homeType && <p>Home type: {request.homeType}</p>}
-              {request.experience && <p>Experience: {request.experience}</p>}
-              <p>{request.message || "No message"}</p>
-              <p>Status: {request.status}</p>
+              <div className="request-item-header">
+                <strong>{request.applicantName || request.user?.name || "Requester"}</strong>
+                <span className={`adoption-status-badge ${statusTone(request.status)}`}>
+                  {statusLabel(request.status)}
+                </span>
+              </div>
+              <div className="request-detail-grid">
+                <span>Email</span>
+                <strong>{request.applicantEmail || request.user?.email || "No email provided"}</strong>
+                <span>Phone</span>
+                <strong>{request.applicantPhone || request.user?.phone || "No phone provided"}</strong>
+                <span>Address</span>
+                <strong>{request.applicantAddress || request.user?.address || "No address provided"}</strong>
+                <span>Home type</span>
+                <strong>{request.homeType || "Not provided"}</strong>
+                <span>Experience</span>
+                <strong>{request.experience || "Not provided"}</strong>
+              </div>
+              <p><strong>Message:</strong> {request.message || "No message"}</p>
               <div className="request-item-actions">
                 <button
                   type="button"
@@ -176,7 +270,7 @@ export default function AdoptionForm() {
                   onClick={() => respondToRequest(item._id, request._id, "approved")}
                   disabled={busyKey === `${item._id}-${request._id}-approved` || request.status !== "pending"}
                 >
-                  Approve
+                  Approve request
                 </button>
                 <button
                   type="button"
@@ -184,7 +278,7 @@ export default function AdoptionForm() {
                   onClick={() => respondToRequest(item._id, request._id, "rejected")}
                   disabled={busyKey === `${item._id}-${request._id}-rejected` || request.status !== "pending"}
                 >
-                  Decline
+                  Decline request
                 </button>
               </div>
             </div>
@@ -194,14 +288,12 @@ export default function AdoptionForm() {
     );
   };
 
-  return (
-    <div className="dashboard-with-sidebar">
-      <DashboardSidebar />
-      <div className="dashboard-container">
+  const content = (
+      <div className={embedded ? "admin-main-modern" : "dashboard-container"}>
         <div className="module-detail-hero">
           <div>
             <p className="eyebrow">Adoption form</p>
-            <h1>Create adoption listings</h1>
+            <h1>{editingId ? "Edit adoption listing" : "Create adoption listings"}</h1>
             <p>Publish a pet for adoption from your dashboard and review any requests on your own listings.</p>
           </div>
         </div>
@@ -213,18 +305,18 @@ export default function AdoptionForm() {
           <div className="adoption-form-wrap">
             <form className="module-card adoption-form-card" onSubmit={submit}>
               <div className="adoption-form-head">
-                <h2>Create listing</h2>
+                <h2>{editingId ? "Update listing" : "Create listing"}</h2>
                 <p>Post a pet with clear details so adopters can decide quickly.</p>
               </div>
 
-              <label className="adoption-check-toggle">
+              {!editingId && <label className="adoption-check-toggle">
                 <input
                   type="checkbox"
                   checked={createPetForListing}
                   onChange={(event) => setCreatePetForListing(event.target.checked)}
                 />
                 Create a new pet for this listing
-              </label>
+              </label>}
 
               {!createPetForListing && (
                 <select value={form.pet} onChange={(e) => setForm({ ...form, pet: e.target.value })} required>
@@ -308,42 +400,95 @@ export default function AdoptionForm() {
               <textarea placeholder="Description" rows="4" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <input placeholder="Adoption fee" type="number" value={form.adoptionFee} onChange={(e) => setForm({ ...form, adoptionFee: e.target.value })} />
               <input placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-              <button className="primary-button adoption-submit" type="submit">Post adoption</button>
+              <div className="inline-actions">
+                <button className="primary-button adoption-submit" type="submit">
+                  {editingId ? "Update adoption" : "Post adoption"}
+                </button>
+                {editingId && (
+                  <button className="ghost-button" type="button" onClick={cancelEdit}>
+                    Cancel edit
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
-          {myListings.length > 0 && (
-            <div className="adoption-list-wrap">
-              <div className="module-detail-hero adoption-my-listings-hero">
-                <div>
-                  <p className="eyebrow">My listings</p>
-                  <h2>Review adoption requests</h2>
-                  <p>These posts were created by you, so you can monitor incoming requests here.</p>
-                </div>
-              </div>
-              <div className="adoption-list-grid">
-                {myListings.map((item) => (
-                  <article key={item._id} className="module-card adoption-list-card">
-                    <div className="adoption-list-card-head">
-                      <img
-                        src={getUploadUrl(item?.pet?.images?.[0] || item?.images?.[0] || item?.photo, "https://images.unsplash.com/photo-1615751072497-5f5169febe17?auto=format&fit=crop&w=640&q=85")}
-                        alt={item.pet?.name || item.title}
-                        className="adoption-list-image"
-                      />
-                      <div>
-                        <h3>{item.title}</h3>
-                        <p>{item.description}</p>
-                        <p>{item.location || "No location"} • {item.status} • Fee: ${item.adoptionFee || 0}</p>
-                      </div>
-                    </div>
-                    {renderRequests(item)}
-                  </article>
-                ))}
+          <div className="adoption-list-wrap">
+            <div className="module-detail-hero adoption-my-listings-hero">
+              <div>
+                <p className="eyebrow">My listings</p>
+                <h2>Manage adoption posts</h2>
+                <p>View post status, requester details, update listings, and delete adoption posts you created.</p>
               </div>
             </div>
-          )}
+            {myListings.length === 0 ? (
+              <div className="module-card adoption-empty-state">
+                <h3>No adoption posts yet</h3>
+                <p>Create an adoption listing to see edit, delete, request status, and requester details here.</p>
+              </div>
+            ) : (
+              <div className="adoption-list-grid">
+                {myListings.map((item) => {
+                  const summary = requestSummary(item);
+                  return (
+                    <article key={item._id} className="module-card adoption-list-card">
+                      <div className="adoption-list-card-head">
+                        <img
+                          src={getUploadUrl(item?.pet?.images?.[0] || item?.images?.[0] || item?.photo, "https://images.unsplash.com/photo-1615751072497-5f5169febe17?auto=format&fit=crop&w=640&q=85")}
+                          alt={item.pet?.name || item.title}
+                          className="adoption-list-image"
+                        />
+                        <div className="adoption-owner-listing-body">
+                          <div className="adoption-list-topline">
+                            <h3>{item.title}</h3>
+                            <span className={`adoption-status-badge ${statusTone(item.status)}`}>
+                              {statusLabel(item.status)}
+                            </span>
+                          </div>
+                          <p className="adoption-list-description">{item.description || "No description provided."}</p>
+                          <div className="adoption-owner-meta">
+                            <span>Pet: <strong>{item.pet?.name || "Selected pet"}</strong></span>
+                            <span>Location: <strong>{item.location || "No location"}</strong></span>
+                            <span>Fee: <strong>${item.adoptionFee || 0}</strong></span>
+                          </div>
+                          <div className="adoption-request-summary">
+                            <span>Requested: <strong>{summary.total}</strong></span>
+                            <span>Pending: <strong>{summary.pending}</strong></span>
+                            <span>Approved: <strong>{summary.approved}</strong></span>
+                            <span>Rejected: <strong>{summary.rejected}</strong></span>
+                          </div>
+                          <div className="inline-actions adoption-owner-actions">
+                            <button type="button" className="primary-button compact" onClick={() => startEdit(item)}>
+                              Edit adoption
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-button compact"
+                              onClick={() => deleteListing(item)}
+                              disabled={busyKey === `delete-${item._id}`}
+                            >
+                              Delete adoption
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      {renderRequests(item)}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <div className="dashboard-with-sidebar">
+      <DashboardSidebar />
+      {content}
     </div>
   );
 }

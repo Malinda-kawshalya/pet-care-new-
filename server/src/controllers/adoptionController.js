@@ -74,6 +74,68 @@ export async function createAdoption(req, res, next) {
   }
 }
 
+export async function updateAdoption(req, res, next) {
+  try {
+    const post = await AdoptionPost.findById(req.params.id);
+    if (!post) {
+      res.status(404);
+      throw new Error("Adoption post not found");
+    }
+    if (!(await canManagePost(post, req.user))) {
+      res.status(403);
+      throw new Error("You can only update your own adoption posts");
+    }
+
+    const nextPetId = req.body.pet || post.pet;
+    const petDoc = await Pet.findById(nextPetId);
+    if (!petDoc) {
+      res.status(404);
+      throw new Error("Pet not found");
+    }
+    if (String(petDoc.owner) !== String(req.user._id) && req.user.role !== "admin") {
+      res.status(403);
+      throw new Error("You can only use your own pet for adoption");
+    }
+
+    post.pet = nextPetId;
+    post.title = req.body.title ?? post.title;
+    post.description = req.body.description ?? post.description;
+    post.adoptionFee = req.body.adoptionFee ?? post.adoptionFee;
+    post.location = req.body.location ?? post.location;
+    if (req.user.role === "admin" && req.body.status) {
+      post.status = req.body.status;
+    }
+    await post.save();
+
+    const item = await AdoptionPost.findById(post._id)
+      .populate("pet", "name species breed images location vaccinationStatus")
+      .populate("postedBy", "name email role")
+      .populate("requests.user", "name email phone address role");
+    res.json({ item });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteAdoption(req, res, next) {
+  try {
+    const post = await AdoptionPost.findById(req.params.id);
+    if (!post) {
+      res.status(404);
+      throw new Error("Adoption post not found");
+    }
+    if (!(await canManagePost(post, req.user))) {
+      res.status(403);
+      throw new Error("You can only delete your own adoption posts");
+    }
+
+    await post.deleteOne();
+    res.json({ message: "Adoption post deleted", id: req.params.id });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function requestAdoption(req, res, next) {
   try {
     const {
@@ -192,6 +254,8 @@ export async function contactAdoptionOwner(req, res, next) {
 export default {
   listAdoptions,
   createAdoption,
+  updateAdoption,
+  deleteAdoption,
   requestAdoption,
   respondAdoptionRequest,
   contactAdoptionOwner

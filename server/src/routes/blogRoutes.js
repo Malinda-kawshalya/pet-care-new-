@@ -4,6 +4,19 @@ import { protect, authorize, optionalAuth } from "../middleware/authMiddleware.j
 
 const router = express.Router();
 
+function canManageBlog(blog, user) {
+  return user?.role === "admin" || String(blog.author) === String(user?._id);
+}
+
+function blogPayload(body) {
+  return {
+    title: body.title,
+    body: body.body,
+    tags: Array.isArray(body.tags) ? body.tags : [],
+    image: body.image
+  };
+}
+
 // Public listing: show published posts to unauthenticated users.
 router.get("/", optionalAuth, async (req, res, next) => {
   try {
@@ -36,12 +49,12 @@ router.get("/:id", optionalAuth, async (req, res, next) => {
   }
 });
 
-router.post("/", protect, authorize("admin"), async (req, res, next) => {
+router.post("/", protect, authorize("admin", "petOwner"), async (req, res, next) => {
   try {
     const item = await Blog.create({
-      ...req.body,
+      ...blogPayload(req.body),
       author: req.user._id,
-      status: req.body.status || "published"
+      status: req.user.role === "admin" ? req.body.status || "published" : "published"
     });
     const hydrated = await Blog.findById(item._id).populate("author", "name role");
     res.status(201).json({ item: hydrated });
@@ -50,10 +63,25 @@ router.post("/", protect, authorize("admin"), async (req, res, next) => {
   }
 });
 
-router.put("/:id", protect, authorize("admin"), async (req, res, next) => {
+router.put("/:id", protect, async (req, res, next) => {
   try {
-    const item = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-      .populate("author", "name role");
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      res.status(404);
+      throw new Error("Blog not found");
+    }
+    if (!canManageBlog(blog, req.user)) {
+      res.status(403);
+      throw new Error("You can only edit your own blog posts");
+    }
+
+    Object.assign(blog, blogPayload(req.body));
+    if (req.user.role === "admin" && req.body.status) {
+      blog.status = req.body.status;
+    }
+    await blog.save();
+
+    const item = await Blog.findById(blog._id).populate("author", "name role");
     if (!item) {
       res.status(404);
       throw new Error("Blog not found");
@@ -64,13 +92,19 @@ router.put("/:id", protect, authorize("admin"), async (req, res, next) => {
   }
 });
 
-router.delete("/:id", protect, authorize("admin"), async (req, res, next) => {
+router.delete("/:id", protect, async (req, res, next) => {
   try {
-    const item = await Blog.findByIdAndDelete(req.params.id);
-    if (!item) {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
       res.status(404);
       throw new Error("Blog not found");
     }
+    if (!canManageBlog(blog, req.user)) {
+      res.status(403);
+      throw new Error("You can only delete your own blog posts");
+    }
+
+    await blog.deleteOne();
     res.json({ message: "Blog deleted" });
   } catch (error) {
     next(error);

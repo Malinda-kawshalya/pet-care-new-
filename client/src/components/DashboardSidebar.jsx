@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   PawPrint,
@@ -7,7 +7,6 @@ import {
   Users,
   ShoppingBag,
   MessageSquare,
-  Zap,
   Heart as HeartIcon,
   Stethoscope,
   Scissors,
@@ -22,16 +21,34 @@ import {
 import { useAuth, useUserRole } from "../hooks/useAuth.js";
 
 const menuItems = {
-  petOwner: [
-    { icon: PawPrint, label: "My Pets", to: "/pets" },
-    { icon: Heart, label: "Health Records", to: "/medical-records" },
-    { icon: Clock, label: "Appointments", to: "/appointments" },
-    { icon: Users, label: "Community", to: "/community" },
-    { icon: HeartIcon, label: "Matchmaking", to: "/matchmaking" },
-    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" },
-    { icon: MessageSquare, label: "Messages", to: "/messages" },
-    { icon: Zap, label: "AI Assistant", to: "/ai" }
-  ],
+  petOwner: {
+    groups: [
+      {
+        id: "pet-care",
+        title: "Pet care",
+        items: [
+          { icon: PawPrint, label: "My Pets", to: "/dashboard/petowner?section=pets" },
+          { icon: Heart, label: "Health Records", to: "/dashboard/petowner?section=health-records" },
+          { icon: Clock, label: "Appointments", to: "/dashboard/petowner?section=appointments" }
+        ]
+      },
+      {
+        id: "social",
+        title: "Social",
+        items: [
+          { icon: Users, label: "Community", to: "/dashboard/petowner?section=community" },
+          { icon: HeartIcon, label: "Matchmaking", to: "/dashboard/petowner?section=matchmaking" }
+        ]
+      },
+      {
+        id: "adoption",
+        title: "Adoption",
+        items: [
+          { icon: ShoppingBag, label: "Adoption", to: "/dashboard/petowner?section=adoption" }
+        ]
+      }
+    ]
+  },
   veterinarian: [
     { icon: BarChart3, label: "Overview", to: "/dashboard/vet" },
     { icon: Clock, label: "Appointments", to: "/dashboard/vet?section=appointments" },
@@ -72,8 +89,10 @@ export default function DashboardSidebar() {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState({});
 
   const currentMenuItems = menuItems[userRole] || menuItems.petOwner;
+  const isGroupedMenu = Boolean(currentMenuItems?.groups);
   const location = useLocation();
 
   const isActiveItem = (item) => {
@@ -95,6 +114,20 @@ export default function DashboardSidebar() {
   };
 
   const closeMobile = () => setIsMobileOpen(false);
+
+  const flattenedMenuItems = useMemo(() => {
+    if (!isGroupedMenu) return currentMenuItems;
+    return currentMenuItems.groups.flatMap((group) => group.items);
+  }, [currentMenuItems, isGroupedMenu]);
+
+  useEffect(() => {
+    if (!isGroupedMenu) return;
+    const initialGroups = {};
+    currentMenuItems.groups.forEach((group) => {
+      initialGroups[group.id] = true;
+    });
+    setOpenGroups(initialGroups);
+  }, [currentMenuItems, isGroupedMenu, userRole]);
 
   return (
     <>
@@ -130,18 +163,54 @@ export default function DashboardSidebar() {
         </div>
 
         <nav className="sidebar-nav">
-          {currentMenuItems.map((item) => (
-            <NavLink
-              key={`${item.to}-${item.label}`}
-              to={item.to}
-              className={() => `sidebar-nav-item ${isActiveItem(item) ? "active" : ""}`}
-              title={item.label}
-              onClick={closeMobile}
-            >
-              <item.icon size={18} />
-              {isExpanded && <span>{item.label}</span>}
-            </NavLink>
-          ))}
+          {isGroupedMenu && isExpanded ? (
+            currentMenuItems.groups.map((group) => (
+              <div className="sidebar-group" key={group.id}>
+                <button
+                  className={`sidebar-group-toggle ${openGroups[group.id] ? "open" : ""}`}
+                  type="button"
+                  onClick={() =>
+                    setOpenGroups((prev) => ({
+                      ...prev,
+                      [group.id]: !prev[group.id]
+                    }))
+                  }
+                >
+                  <span>{group.title}</span>
+                  <ChevronDown size={16} />
+                </button>
+                {openGroups[group.id] && (
+                  <div className="sidebar-group-items">
+                    {group.items.map((item) => (
+                      <NavLink
+                        key={`${item.to}-${item.label}`}
+                        to={item.to}
+                        className={() => `sidebar-nav-item ${isActiveItem(item) ? "active" : ""}`}
+                        title={item.label}
+                        onClick={closeMobile}
+                      >
+                        <item.icon size={18} />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            flattenedMenuItems.map((item) => (
+              <NavLink
+                key={`${item.to}-${item.label}`}
+                to={item.to}
+                className={() => `sidebar-nav-item ${isActiveItem(item) ? "active" : ""}`}
+                title={item.label}
+                onClick={closeMobile}
+              >
+                <item.icon size={18} />
+                {isExpanded && <span>{item.label}</span>}
+              </NavLink>
+            ))
+          )}
         </nav>
 
         <div className="sidebar-footer">

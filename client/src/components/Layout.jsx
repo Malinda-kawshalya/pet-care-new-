@@ -194,11 +194,6 @@ export default function Layout() {
               <p className="footer-description">
                 Daily pet care for owners, clinics, shops, and groomers in one connected, easy-to-use platform.
               </p>
-              <div className="footer-badges">
-                <span>Role based access</span>
-                <span>Secure login</span>
-                <span>Responsive UI</span>
-              </div>
             </div>
             <div className="footer-column footer-column-links">
               <h3>Explore</h3>

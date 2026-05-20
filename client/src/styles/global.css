@@ -2132,6 +2132,48 @@ input, select, textarea {
   overflow-y: auto;
 }
 
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.sidebar-group-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.sidebar-group-toggle.open svg {
+  transform: rotate(180deg);
+}
+
+.sidebar-group-toggle:hover {
+  color: var(--ink);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.sidebar-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 4px;
+}
+
 .sidebar-nav-item {
   display: flex;
   align-items: center;

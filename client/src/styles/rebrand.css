@@ -1749,6 +1749,46 @@ main { display: block; }
   gap: 14px;
 }
 
+.adoption-owner-listing-body {
+  display: grid;
+  gap: 12px;
+}
+
+.adoption-owner-meta,
+.adoption-request-summary,
+.request-detail-grid {
+  display: grid;
+  gap: 8px 14px;
+}
+
+.adoption-owner-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  color: var(--shell-muted);
+  font-size: 0.92rem;
+}
+
+.adoption-request-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.adoption-request-summary span {
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #f8fbff;
+  color: var(--shell-muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.adoption-request-summary strong,
+.adoption-owner-meta strong {
+  color: var(--shell-ink);
+}
+
+.adoption-owner-actions {
+  margin-top: 2px;
+}
+
 .adoption-list-image-wrap {
   position: relative;
   overflow: hidden;
@@ -1932,7 +1972,33 @@ main { display: block; }
 
 .request-item-body {
   display: grid;
-  gap: 2px;
+  gap: 10px;
+}
+
+.request-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.request-detail-grid {
+  grid-template-columns: minmax(92px, 0.35fr) minmax(0, 1fr);
+  padding: 10px;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.request-detail-grid span {
+  color: var(--shell-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.request-detail-grid strong {
+  color: var(--shell-ink);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .request-item-actions {
@@ -1942,15 +2008,53 @@ main { display: block; }
 }
 
 .adoption-status-badge.open {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  width: max-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
   color: #0f8e61;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .adoption-status-badge.pending {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  width: max-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
   color: #8a5a08;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .adoption-status-badge.closed {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  width: max-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.1);
   color: #9d2d27;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.adoption-muted-note {
+  margin: 0;
+  color: var(--shell-muted);
 }
 
 .adoption-card-location {
