@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Clock3, PawPrint, Play, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Clock3, PawPrint, Play, Scissors, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ModuleCard from "../components/ModuleCard.jsx";
 import ProductCard from "../components/ProductCard.jsx";
@@ -18,6 +18,7 @@ const heroDog = "https://images.unsplash.com/photo-1517841905240-472988babdf9?au
 const careImage = "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=85";
 const vetImage = "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=900&q=85";
 const adoptionImage = "https://images.unsplash.com/photo-1558944351-cd8a1e12e9f7?auto=format&fit=crop&w=900&q=85";
+const groomingImage = "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=1200&q=85";
 
 const values = [
   {
@@ -64,6 +65,8 @@ export default function Home() {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [adoptionItems, setAdoptionItems] = useState([]);
   const [loadingAdoptions, setLoadingAdoptions] = useState(false);
+  const [groomerServices, setGroomerServices] = useState([]);
+  const [loadingGroomerServices, setLoadingGroomerServices] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -77,6 +80,8 @@ export default function Home() {
     const image = post?.pet?.images?.[0] || post?.images?.[0] || post?.photo;
     return getUploadUrl(image, adoptionImage);
   };
+
+  const resolveServiceImage = (service) => getUploadUrl(service?.image, groomingImage);
 
   const addToast = (message, type = 'success', duration = 4000) => {
     const id = Date.now();
@@ -111,6 +116,19 @@ export default function Home() {
     }
 
     loadFeaturedProducts();
+
+    (async function loadGroomerServices() {
+      setLoadingGroomerServices(true);
+      try {
+        const { data } = await api.get('/groomer-services', { params: { limit: 4 } });
+        if (active) setGroomerServices(data.items || []);
+      } catch (err) {
+        // ignore homepage preview failures
+      } finally {
+        if (active) setLoadingGroomerServices(false);
+      }
+    })();
+
     // load recent adoption posts for homepage preview
     (async function loadAdoptions() {
       setLoadingAdoptions(true);
@@ -291,6 +309,42 @@ export default function Home() {
               product={product}
               onAdd={handleAddToCart}
             />
+          ))}
+        </div>
+      </section>
+
+      <section className="section groomer-services-home">
+        <SectionHeader
+          eyebrow="Grooming services"
+          title="Book care from trusted groomers"
+          text="Explore active grooming services published by groomers, with pricing, duration, and service-area details."
+          align="center"
+        />
+        <div className="home-groomer-service-grid">
+          {loadingGroomerServices && <p>Loading grooming services...</p>}
+          {!loadingGroomerServices && groomerServices.length === 0 && <p>No grooming services listed yet.</p>}
+          {groomerServices.map((service) => (
+            <article key={service._id} className="home-groomer-service-card">
+              <div className="home-groomer-service-media">
+                <img src={resolveServiceImage(service)} alt={service.name} onError={handleImageError} />
+                <span><Scissors size={14} /> {service.category || "Grooming"}</span>
+              </div>
+              <div className="home-groomer-service-copy">
+                <div className="home-groomer-service-topline">
+                  <strong>{formatLKR(Number(service.price || 0))}</strong>
+                  <span>{service.durationMinutes || 60} min</span>
+                </div>
+                <h3>{service.name}</h3>
+                <p>{service.description || "Professional grooming service for pets."}</p>
+                <div className="home-groomer-provider">
+                  <span>{service.groomer?.providerProfile?.businessName || service.groomer?.name || "Groomer"}</span>
+                  <small>{service.groomer?.providerProfile?.serviceArea || service.groomer?.address || "Service area available on request"}</small>
+                </div>
+                <a href="/appointments" className="primary-button">
+                  Book service <ArrowRight size={16} />
+                </a>
+              </div>
+            </article>
           ))}
         </div>
       </section>
