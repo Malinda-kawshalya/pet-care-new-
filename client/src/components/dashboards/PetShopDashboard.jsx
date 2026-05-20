@@ -446,9 +446,7 @@ const PetShopDashboard = () => {
             <h2>Inventory</h2>
             <p className="widget-subtitle">{dashboard.inventory.length} products in your catalog</p>
           </div>
-          <button className="btn-small" type="button" onClick={() => goToSection('add-product')}>
-            <Plus size={15} /> Add
-          </button>
+          {/* Add product button removed per request */}
         </div>
         {loading ? (
           <p>Loading inventory...</p>
@@ -457,9 +455,9 @@ const PetShopDashboard = () => {
             <Package size={24} />,
             'No products yet',
             'Add your first product so customers can start ordering.',
-            <button className="btn-primary" type="button" onClick={() => goToSection('add-product')}>Add product</button>
+            null
           )
-        ) : (
+            ) : (
           <div className="inventory-list shop-list">
             {items.map((product) => (
               <div key={product._id} className="inventory-item shop-inventory-item">
@@ -565,9 +563,6 @@ const PetShopDashboard = () => {
             <p>{pageCopy.description}</p>
           </div>
           <div className="dashboard-actions">
-            <button className="btn-primary" type="button" onClick={() => goToSection('add-product')}>
-              <Plus size={16} /> Add product
-            </button>
             <button className="btn-small" onClick={loadDashboard} disabled={loading} type="button">
               <RefreshCcw size={16} /> Refresh
             </button>
