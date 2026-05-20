@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, CircleAlert, Eye, Heart, MessageCircle, PlusCircle, Send, ShieldCheck } from "lucide-react";
+import { CircleAlert, Eye, Heart, MessageCircle, PlusCircle, Send, ShieldCheck } from "lucide-react";
 import api from "../services/api.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from "../utils/media.js";
 
 const emptyForm = { title: "", body: "", tags: "", status: "published" };
-
-const heroStats = [
-  { value: "Weekly", label: "New reads" },
-  { value: "Guides", label: "Expert tips" },
-  { value: "Stories", label: "Community updates" }
-];
 
 function buildExcerpt(body = "", maxLength = 190) {
   const text = String(body).replace(/\s+/g, " ").trim();
@@ -47,7 +41,8 @@ export default function BlogsPage() {
   }
 
   const featuredBlog = useMemo(() => blogs[0] || null, [blogs]);
-  const visibleBlogs = useMemo(() => blogs.slice(1), [blogs]);
+  const sideBlogs = useMemo(() => blogs.slice(1, 4), [blogs]);
+  const visibleBlogs = useMemo(() => blogs.slice(4), [blogs]);
 
   const handleImageError = (event) => {
     if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
@@ -79,31 +74,71 @@ export default function BlogsPage() {
 
   return (
     <section className="section blog-page">
-      <div className="blog-hero module-detail-hero">
-        <div className="blog-hero-copy">
-          <p className="eyebrow">Blogs</p>
-          <h1>Pet care stories, guides, and platform updates</h1>
-          <p>
-            Read editorial posts, practical care advice, and updates from the team in a layout designed to feel polished and easy to scan.
-          </p>
-          <div className="hero-stats blog-hero-stats">
-            {heroStats.map((item) => (
-              <article className="hero-stat blog-stat" key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </article>
-            ))}
-          </div>
-        </div>
+      <div className="blog-page-header">
+        <p className="eyebrow">Blogs</p>
+        <h1>Recent blog posts</h1>
+        <p>Read editorial stories, care guides, and platform updates in a clean magazine-style layout.</p>
+      </div>
 
-        <div className="blog-hero-panel">
-          <span className="blog-hero-badge">Fresh reads</span>
-          <h2>{featuredBlog ? featuredBlog.title : "No posts yet"}</h2>
-          <p>
-            {featuredBlog
-              ? buildExcerpt(featuredBlog.body, 140)
-              : "The latest post will appear here once the editorial feed is populated."}
-          </p>
+      <div className="blog-showcase">
+        {featuredBlog ? (
+          <article className="blog-featured-card blog-featured-hero">
+            <div className="blog-featured-image-wrap">
+              <img
+                src={getUploadUrl(featuredBlog.image, "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=85")}
+                alt={featuredBlog.title}
+                className="blog-featured-image"
+                onError={handleImageError}
+              />
+              <span className={`status-pill ${featuredBlog.status}`}>{featuredBlog.status}</span>
+            </div>
+            <div className="blog-featured-body">
+              <div className="blog-card-topline">
+                <span className="blog-author">{featuredBlog.author?.name || "Admin"}</span>
+                <span className="blog-date">{new Date(featuredBlog.createdAt).toLocaleDateString()}</span>
+              </div>
+              <h2>{featuredBlog.title}</h2>
+              <p className="blog-excerpt">{buildExcerpt(featuredBlog.body, 220)}</p>
+              <div className="tag-list blog-tag-list">
+                {(featuredBlog.tags || []).map((tag) => <span key={`${featuredBlog._id}-${tag}`}>{tag}</span>)}
+              </div>
+            </div>
+          </article>
+        ) : (
+          <article className="blog-featured-card blog-featured-hero empty">
+            <div className="blog-featured-body">
+              <p className="eyebrow">Recent blog posts</p>
+              <h2>No posts yet</h2>
+              <p className="blog-excerpt">The first post will appear here once the editorial feed is populated.</p>
+            </div>
+          </article>
+        )}
+
+        <div className="blog-side-list">
+          {sideBlogs.map((blog) => (
+            <article key={blog._id} className="blog-side-card">
+              <div className="blog-side-image-wrap">
+                <img
+                  src={getUploadUrl(blog.image, "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=85")}
+                  alt={blog.title}
+                  className="blog-side-image"
+                  onError={handleImageError}
+                />
+              </div>
+              <div className="blog-side-body">
+                <div className="blog-card-topline">
+                  <span className="blog-author">{blog.author?.name || "Admin"}</span>
+                  <span className="blog-date">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                </div>
+                <h3>{blog.title}</h3>
+                <p>{buildExcerpt(blog.body, 110)}</p>
+                <div className="tag-list blog-tag-list">
+                  {(blog.tags || []).map((tag) => <span key={`${blog._id}-${tag}`}>{tag}</span>)}
+                </div>
+              </div>
+            </article>
+          ))}
+          {!sideBlogs.length && featuredBlog && <p className="blog-empty-note">More posts will appear here soon.</p>}
         </div>
       </div>
 
@@ -112,43 +147,10 @@ export default function BlogsPage() {
 
       <div className={`blog-layout ${isAdmin ? "blog-layout-admin" : ""}`}>
         <div className="blog-feed-column">
-          {featuredBlog && (
-            <article className="blog-featured-card">
-              <div className="blog-featured-image-wrap">
-                <img
-                  src={getUploadUrl(featuredBlog.image, "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=85")}
-                  alt={featuredBlog.title}
-                  className="blog-featured-image"
-                  onError={handleImageError}
-                />
-                <div className="blog-featured-overlay">
-                  <span className={`status-pill ${featuredBlog.status}`}>{featuredBlog.status}</span>
-                  <div className="blog-meta-line">
-                    <span><Calendar size={15} /> {new Date(featuredBlog.createdAt).toLocaleDateString()}</span>
-                    <span><Heart size={15} /> {featuredBlog.likes?.length || 0}</span>
-                    <span><MessageCircle size={15} /> {featuredBlog.comments?.length || 0}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="blog-featured-body">
-                <div className="blog-card-topline">
-                  <p className="eyebrow">Featured article</p>
-                  <span className="blog-author">{featuredBlog.author?.name || "Admin"}</span>
-                </div>
-                <h2>{featuredBlog.title}</h2>
-                <p className="blog-excerpt">{buildExcerpt(featuredBlog.body, 240)}</p>
-                <div className="tag-list blog-tag-list">
-                  {(featuredBlog.tags || []).map((tag) => <span key={`${featuredBlog._id}-${tag}`}>{tag}</span>)}
-                </div>
-              </div>
-            </article>
-          )}
-
           <div className="blog-grid">
             {loading && visibleBlogs.length === 0 && <p>Loading blogs...</p>}
             {visibleBlogs.map((blog) => (
-              <article key={blog._id} className="blog-card">
+              <article key={blog._id} className="blog-card blog-card-compact">
                 <div className="blog-card-image-wrap">
                   <img
                     src={getUploadUrl(blog.image, "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1000&q=85")}
@@ -164,7 +166,7 @@ export default function BlogsPage() {
                     <span className="blog-date">{new Date(blog.createdAt).toLocaleDateString()}</span>
                   </div>
                   <h3>{blog.title}</h3>
-                  <p>{buildExcerpt(blog.body, 150)}</p>
+                  <p>{buildExcerpt(blog.body, 130)}</p>
                   <div className="tag-list blog-tag-list">
                     {(blog.tags || []).map((tag) => <span key={`${blog._id}-${tag}`}>{tag}</span>)}
                   </div>
@@ -176,7 +178,7 @@ export default function BlogsPage() {
                 </div>
               </article>
             ))}
-            {!loading && visibleBlogs.length === 0 && <p>No blogs published yet.</p>}
+            {!loading && visibleBlogs.length === 0 && <p className="blog-empty-note">No blogs published yet.</p>}
           </div>
         </div>
 

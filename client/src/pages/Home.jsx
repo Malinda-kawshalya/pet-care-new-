@@ -294,13 +294,6 @@ export default function Home() {
           title="Pet shop products in a cleaner layout"
           text="Premium items, live inventory, and quick add-to-cart actions stay easy to scan on any screen."
         />
-        <div className="category-pills">
-          {["All", "Dog", "Cat", "Health devices", "Low stock"].map((item, index) => (
-            <button key={item} className={index === 0 ? "active" : ""} type="button">
-              {item}
-            </button>
-          ))}
-        </div>
         <div className="product-grid">
           {loadingProducts && <p>Loading products...</p>}
           {!loadingProducts && featuredProducts.map((product) => (

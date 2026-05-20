@@ -7,6 +7,7 @@ import DashboardSidebar from '../DashboardSidebar.jsx';
 import AppointmentBookingModal from '../AppointmentBookingModal.jsx';
 import HealthRecordModal from '../HealthRecordModal.jsx';
 import CommunityBlogSection from '../CommunityBlogSection.jsx';
+import MatchmakingWorkspace from '../MatchmakingWorkspace.jsx';
 import AdoptionForm from '../../pages/AdoptionForm.jsx';
 import '../../styles/admin.css';
 import './Dashboard.css';
@@ -369,17 +370,7 @@ const PetOwnerDashboard = () => {
   );
 
   const renderMatchmakingSection = () => (
-    <div className="admin-main-modern">
-      <div className="admin-main-header">
-        <div>
-          <h1>Matchmaking</h1>
-          <p>Find potential matches for your pets</p>
-        </div>
-      </div>
-      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-        <p>Matchmaking features coming soon. Discover compatible pets for breeding or companionship.</p>
-      </div>
-    </div>
+    <MatchmakingWorkspace embedded />
   );
 
   const renderAdoptionSection = () => (

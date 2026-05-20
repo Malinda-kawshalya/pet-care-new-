@@ -46,30 +46,50 @@ export default function ContactPage() {
 
   return (
     <section className="section contact-page">
-      <div className="page-intro contact-layout">
-        <div className="contact-copy">
-          <p className="eyebrow">Contact us</p>
-          <h1 className="page-title">Let's talk about your pet care workflow.</h1>
-          <p className="page-subtitle">
-            Whether you need onboarding help, role access support, or a walkthrough of the platform, this contact page gives you a clear next step.
-          </p>
-          <div className="contact-info-grid">
-            {contactCards.map((item) => {
-              const Icon = item.icon;
-              return (
-                <article className="contact-card" key={item.title}>
-                  <div className="contact-icon"><Icon size={20} /></div>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
-                </article>
-              );
-            })}
+      <div className="contact-page-header">
+        <p className="eyebrow">Contact us</p>
+        <h1 className="page-title">Let's talk about your pet care workflow.</h1>
+        <p className="page-subtitle">
+          Whether you need onboarding help, role access support, or a walkthrough of the platform, this page keeps the next step simple.
+        </p>
+      </div>
+
+      <div className="contact-layout">
+        <aside className="contact-summary-panel">
+          <div className="contact-summary-card">
+            <div className="contact-summary-head">
+              <span className="contact-summary-badge"><Sparkles size={14} /> Support</span>
+              <h2>Fast, direct contact for every role</h2>
+              <p>Use the details below for quick support, then send the form if you need a follow-up or a platform walkthrough.</p>
+            </div>
+
+            <div className="contact-summary-list">
+              {contactCards.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <article className="contact-summary-item" key={item.title}>
+                    <div className="contact-summary-icon"><Icon size={18} /></div>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.text}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="contact-summary-foot">
+              <div>
+                <Clock3 size={14} />
+                <span>Mon - Fri, 9:00 AM - 6:00 PM</span>
+              </div>
+              <div>
+                <Sparkles size={14} />
+                <span>Typical reply within one business day</span>
+              </div>
+            </div>
           </div>
-          <div className="feature-chip-row">
-            <span className="feature-chip"><Sparkles size={14} /> Quick response</span>
-            <span className="feature-chip"><Clock3 size={14} /> Mon - Fri, 9 to 6</span>
-          </div>
-        </div>
+        </aside>
 
         <article className="auth-form-panel contact-form-panel">
           <div className="auth-panel-head">
