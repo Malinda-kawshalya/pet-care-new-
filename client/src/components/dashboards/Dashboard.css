@@ -574,6 +574,189 @@
   box-shadow: 0 16px 32px rgba(59, 130, 246, 0.16);
 }
 
+/* Pet shop dashboard */
+.shop-dashboard .dashboard-hero {
+  align-items: center;
+}
+
+.shop-dashboard-grid {
+  grid-template-columns: 1fr;
+}
+
+.shop-stats {
+  grid-template-columns: repeat(3, minmax(150px, 0.78fr)) minmax(360px, 1.66fr);
+}
+
+.shop-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.shop-stats .shop-stat-card {
+  min-width: 0;
+  min-height: 112px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.shop-stats button.shop-stat-card {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.shop-stat-icon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.shop-stat-copy {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.shop-stat-label {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.shop-stat-copy strong {
+  min-width: 0;
+  color: #2c3e50;
+  font-size: clamp(1.9rem, 3.2vw, 2.55rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.shop-stat-copy .shop-stat-money {
+  font-size: clamp(1.45rem, 2.25vw, 2.15rem);
+  white-space: nowrap;
+}
+
+.shop-form-panel {
+  max-width: 920px;
+}
+
+.shop-submit-button,
+.shop-dashboard .dashboard-actions .btn-primary,
+.shop-dashboard .dashboard-actions .btn-small,
+.shop-dashboard .widget-header .btn-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shop-list {
+  gap: 12px;
+}
+
+.shop-order-row,
+.shop-inventory-item,
+.shop-stock-alert {
+  align-items: center;
+  gap: 16px;
+}
+
+.shop-row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.shop-product-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-product-thumb {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.shop-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shop-order-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  border-left: 0;
+}
+
+.shop-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 34px 18px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.shop-empty-state h3 {
+  margin: 0;
+  color: var(--ink);
+}
+
+.shop-empty-state p {
+  max-width: 420px;
+  margin: 0;
+}
+
+.shop-empty-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.shop-view-all {
+  justify-self: start;
+}
+
+.status.low-stock {
+  background: rgba(245, 158, 11, 0.14);
+  color: #92400e;
+}
+
+.status.in-stock {
+  background: rgba(34, 197, 94, 0.14);
+  color: #166534;
+}
+
 /* Veterinarian Dashboard */
 .vet-dashboard-grid {
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
@@ -1122,6 +1305,14 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+  .shop-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shop-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
@@ -1136,6 +1327,19 @@
 }
 
 @media (max-width: 768px) {
+  .shop-dashboard .dashboard-hero {
+    align-items: flex-start;
+  }
+
+  .shop-order-item {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-product-main,
+  .shop-row-actions {
+    width: 100%;
+  }
+
   .dashboard-container {
     padding: 1rem;
   }
@@ -1194,6 +1398,14 @@
 }
 
 @media (max-width: 480px) {
+  .shop-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-stats .shop-stat-card {
+    min-height: 96px;
+  }
+
   .stats-section {
     grid-template-columns: 1fr;
   }

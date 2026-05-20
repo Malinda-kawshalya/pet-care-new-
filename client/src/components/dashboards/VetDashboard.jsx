@@ -1,9 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { CalendarClock, ClipboardPlus, HeartPulse, MessageCircle, UserRound } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import api from "../../services/api.js";
 import DashboardSidebar from "../DashboardSidebar.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
+
+const dashboardSections = {
+  overview: {
+    eyebrow: "Veterinarian workspace",
+    title: "Veterinarian Dashboard",
+    description: "Track provider appointments, patient context, records, and communication from one place."
+  },
+  appointments: {
+    eyebrow: "Appointments",
+    title: "Appointments",
+    description: "Review today's schedule and upcoming visits without leaving the veterinarian dashboard."
+  },
+  patients: {
+    eyebrow: "Patients",
+    title: "Patients",
+    description: "Browse owners, pets, vaccination status, and the latest care context."
+  },
+  records: {
+    eyebrow: "Medical records",
+    title: "Medical Records",
+    description: "Review recent records and add new care notes for your patients."
+  }
+};
+
+const sectionKeys = new Set(Object.keys(dashboardSections));
 
 function toDate(value) {
   const parsed = value ? new Date(value) : null;
@@ -28,6 +53,7 @@ function inNextSevenDays(value) {
 
 export default function VetDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [records, setRecords] = useState([]);
@@ -40,6 +66,10 @@ export default function VetDashboard() {
   const [recordSubmitting, setRecordSubmitting] = useState(false);
 
   const userId = user?._id || user?.id;
+  const sectionParam = new URLSearchParams(location.search).get("section");
+  const activeSection = sectionParam && sectionKeys.has(sectionParam) ? sectionParam : "overview";
+  const pageCopy = dashboardSections[activeSection];
+  const isOverview = activeSection === "overview";
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -66,19 +96,6 @@ export default function VetDashboard() {
     loadDashboard();
   }, []);
 
-  const location = useLocation();
-
-  useEffect(() => {
-    const section = new URLSearchParams(location.search).get("section");
-    if (section) {
-      // allow DOM to render
-      setTimeout(() => {
-        const el = document.getElementById(section);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 120);
-    }
-  }, [location.search]);
-
   const summary = useMemo(() => {
     const todayAppointments = appointments.filter((item) => isToday(item.scheduledAt));
     const patientIds = new Set(pets.map((item) => String(item._id)));
@@ -92,7 +109,7 @@ export default function VetDashboard() {
       recordsCount: records.length,
       unreadMessages
     };
-  }, [appointments, records, threads, userId]);
+  }, [appointments, records, threads, pets, userId]);
 
   const todaySchedule = useMemo(() => {
     return appointments
@@ -197,182 +214,214 @@ export default function VetDashboard() {
     }
   };
 
+  const renderStats = () => (
+    <div className="stats-section">
+      <div className="stat-card">
+        <h3>{loading ? "..." : summary.todayAppointments}</h3>
+        <p>Appointments today</p>
+      </div>
+      <div className="stat-card">
+        <h3>{loading ? "..." : summary.activePatients}</h3>
+        <p>Active patients</p>
+      </div>
+      <div className="stat-card">
+        <h3>{loading ? "..." : summary.recordsCount}</h3>
+        <p>Total records</p>
+      </div>
+      <div className="stat-card">
+        <h3>{loading ? "..." : summary.unreadMessages}</h3>
+        <p>Unread messages</p>
+      </div>
+    </div>
+  );
+
+  const renderAppointments = () => (
+    <>
+      <div className="widget" id="appointments">
+        <div className="widget-header">
+          <h2>Today schedule</h2>
+          <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
+        </div>
+        <div className="schedule-list">
+          {!loading && todaySchedule.length === 0 && <p>No appointments scheduled for today.</p>}
+          {todaySchedule.map((appointment) => (
+            <div key={appointment._id} className="schedule-item">
+              <div className="appointment-details">
+                <h3>{appointment.pet?.name || "Pet"}</h3>
+                <p>{new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <p>{appointment.owner?.name || "Owner"} - {appointment.serviceType}</p>
+              </div>
+              <span className={`status ${appointment.status}`}>{appointment.status}</span>
+              <div className="appointment-actions">
+                <button className="btn-small" type="button" onClick={() => updateAppointment(appointment._id, "confirmed")}>Confirm</button>
+                <button className="btn-small" type="button" onClick={() => updateAppointment(appointment._id, "completed")}>Complete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="widget" id="upcoming">
+        <div className="widget-header">
+          <h2>Upcoming appointments</h2>
+          <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
+        </div>
+        <div className="upcoming-list">
+          {!loading && upcomingAppointments.length === 0 && <p>No upcoming appointments in the next 7 days.</p>}
+          {upcomingAppointments.map((appointment) => (
+            <div key={appointment._id} className="upcoming-item">
+              <div className="appointment-info">
+                <h3>{appointment.pet?.name || "Pet"}</h3>
+                <p>{new Date(appointment.scheduledAt).toLocaleDateString()} at {new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <p>{appointment.owner?.name || "Owner"}</p>
+              </div>
+              <span className={`status ${appointment.status}`}>{appointment.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderPatients = () => (
+    <div className="widget" id="patients">
+      <div className="widget-header">
+        <h2>Patients</h2>
+        <Link className="link" to="/pets">Open pets</Link>
+      </div>
+      <div className="patients-list" style={{ display: "grid", gap: 16 }}>
+        {!loading && patients.length === 0 && <p>No patient records available yet.</p>}
+        {patients.map((owner) => (
+          <article key={owner.ownerId} className="patient-card" style={{ display: "grid", gap: 12, padding: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+              <div>
+                <h3 style={{ margin: 0 }}>{owner.ownerName}</h3>
+                <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{owner.ownerEmail || "No email"}</p>
+              </div>
+              <span className="status approved">{owner.pets.length} pets</span>
+            </div>
+            <div style={{ display: "grid", gap: 10 }}>
+              {owner.pets.map((pet) => (
+                <div
+                  key={pet.petId}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: 12,
+                    borderRadius: 14,
+                    background: "#f8fafc",
+                    border: "1px solid rgba(148, 163, 184, 0.16)"
+                  }}
+                >
+                  <div>
+                    <h4 style={{ margin: 0 }}>{pet.petName}</h4>
+                    <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{pet.breed} - {pet.species}</p>
+                    <p style={{ margin: "4px 0 0", color: "var(--shell-muted)", fontSize: 13 }}>
+                      Latest record: {pet.latestRecord?.diagnosis || pet.latestRecord?.type || "None yet"}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "flex-end" }}>
+                    <button className="btn-small" type="button" onClick={() => navigate(`/medical-records?petId=${pet.petId}`)}>
+                      View records
+                    </button>
+                    <button className="btn-small" type="button" onClick={() => openRecordComposer(pet)}>
+                      Add record
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderRecords = () => (
+    <div className="widget" id="records">
+      <div className="widget-header">
+        <h2>Recent medical records</h2>
+        <Link className="btn-small" to="/medical-records">Add record</Link>
+      </div>
+      <div className="records-list">
+        {!loading && recentRecords.length === 0 && <p>No records available.</p>}
+        {recentRecords.map((record) => (
+          <div key={record._id} className="record-item">
+            <div className="record-info">
+              <h3>{record.diagnosis || record.type || "Medical record"}</h3>
+              <p>{record.pet?.name || "Pet"}</p>
+              <p className="note">{record.vetNotes || record.notes || record.treatment || "No notes added."}</p>
+            </div>
+            <span className="date">{new Date(record.visitDate || record.createdAt).toLocaleDateString()}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderMessages = () => (
+    <div className="widget" id="messages">
+      <div className="widget-header">
+        <h2>Messages inbox</h2>
+        <Link className="link" to="/messages">Open all</Link>
+      </div>
+      <div className="inbox-list">
+        {!loading && inbox.length === 0 && <p>No messages.</p>}
+        {inbox.map((thread) => (
+          <div key={thread._id} className="message-item">
+            <div className="message-info">
+              <h3>{thread.sender?.name || "Sender"}</h3>
+              <p>{thread.lastMessage || "Click to view conversation."}</p>
+            </div>
+            <span className="timestamp">{new Date(thread.createdAt).toLocaleDateString()}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderDashboardContent = () => {
+    if (activeSection === "appointments") return renderAppointments();
+    if (activeSection === "patients") return renderPatients();
+    if (activeSection === "records") return renderRecords();
+
+    return (
+      <>
+        {renderStats()}
+        {renderAppointments()}
+        {renderPatients()}
+        {renderRecords()}
+        {renderMessages()}
+      </>
+    );
+  };
+
   return (
     <div className="dashboard-with-sidebar">
       <DashboardSidebar />
       <div className="dashboard-container">
         <div className="dashboard-hero">
           <div>
-            <p className="eyebrow">Veterinarian workspace</p>
-            <h1>Veterinarian Dashboard</h1>
-            <p>Track provider appointments, patient context, records, and communication from one place.</p>
+            <p className="eyebrow">{pageCopy.eyebrow}</p>
+            <h1>{pageCopy.title}</h1>
+            <p>{pageCopy.description}</p>
           </div>
-          <div className="dashboard-actions">
-            <button className="btn-primary" type="button" onClick={() => navigate("/appointments")}>
-              <CalendarClock size={16} /> Open appointments
-            </button>
-            <Link className="btn-small" to="/medical-records">Medical records</Link>
-          </div>
+          {isOverview && (
+            <div className="dashboard-actions">
+              <button className="btn-primary" type="button" onClick={() => navigate("/dashboard/vet?section=appointments")}>
+                <CalendarClock size={16} /> Open appointments
+              </button>
+              <Link className="btn-small" to="/dashboard/vet?section=records">Medical records</Link>
+            </div>
+          )}
         </div>
 
         {error && <div className="form-alert error">{error}</div>}
 
         <div className="dashboard-grid">
-          <div className="stats-section">
-            <div className="stat-card">
-              <h3>{loading ? "..." : summary.todayAppointments}</h3>
-              <p>Appointments today</p>
-            </div>
-            <div className="stat-card">
-              <h3>{loading ? "..." : summary.activePatients}</h3>
-              <p>Active patients</p>
-            </div>
-            <div className="stat-card">
-              <h3>{loading ? "..." : summary.recordsCount}</h3>
-              <p>Total records</p>
-            </div>
-            <div className="stat-card">
-              <h3>{loading ? "..." : summary.unreadMessages}</h3>
-              <p>Unread messages</p>
-            </div>
-          </div>
-
-          <div className="widget" id="appointments">
-            <div className="widget-header">
-              <h2>Today schedule</h2>
-              <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
-            </div>
-            <div className="schedule-list">
-              {!loading && todaySchedule.length === 0 && <p>No appointments scheduled for today.</p>}
-              {todaySchedule.map((appointment) => (
-                <div key={appointment._id} className="schedule-item">
-                  <div className="appointment-details">
-                    <h3>{appointment.pet?.name || "Pet"}</h3>
-                    <p>{new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                    <p>{appointment.owner?.name || "Owner"} • {appointment.serviceType}</p>
-                  </div>
-                  <span className={`status ${appointment.status}`}>{appointment.status}</span>
-                  <div className="appointment-actions">
-                    <button className="btn-small" type="button" onClick={() => updateAppointment(appointment._id, "confirmed")}>Confirm</button>
-                    <button className="btn-small" type="button" onClick={() => updateAppointment(appointment._id, "completed")}>Complete</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="widget" id="patients">
-            <div className="widget-header">
-              <h2>Patients</h2>
-              <Link className="link" to="/pets">Open pets</Link>
-            </div>
-            <div className="patients-list" style={{ display: "grid", gap: 16 }}>
-              {!loading && patients.length === 0 && <p>No patient records available yet.</p>}
-              {patients.map((owner) => (
-                <article key={owner.ownerId} className="patient-card" style={{ display: "grid", gap: 12, padding: 18 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-                    <div>
-                      <h3 style={{ margin: 0 }}>{owner.ownerName}</h3>
-                      <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{owner.ownerEmail || "No email"}</p>
-                    </div>
-                    <span className="status approved">{owner.pets.length} pets</span>
-                  </div>
-                  <div style={{ display: "grid", gap: 10 }}>
-                    {owner.pets.map((pet) => (
-                      <div
-                        key={pet.petId}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 12,
-                          padding: 12,
-                          borderRadius: 14,
-                          background: "#f8fafc",
-                          border: "1px solid rgba(148, 163, 184, 0.16)"
-                        }}
-                      >
-                        <div>
-                          <h4 style={{ margin: 0 }}>{pet.petName}</h4>
-                          <p style={{ margin: "4px 0 0", color: "var(--shell-muted)" }}>{pet.breed} • {pet.species}</p>
-                          <p style={{ margin: "4px 0 0", color: "var(--shell-muted)", fontSize: 13 }}>
-                            Latest record: {pet.latestRecord?.diagnosis || pet.latestRecord?.type || "None yet"}
-                          </p>
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "flex-end" }}>
-                          <button className="btn-small" type="button" onClick={() => navigate(`/medical-records?petId=${pet.petId}`)}>
-                            View records
-                          </button>
-                          <button className="btn-small" type="button" onClick={() => openRecordComposer(pet)}>
-                            Add record
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="widget" id="records">
-            <div className="widget-header">
-              <h2>Recent medical records</h2>
-              <Link className="btn-small" to="/medical-records">Add record</Link>
-            </div>
-            <div className="records-list">
-              {!loading && recentRecords.length === 0 && <p>No records available.</p>}
-              {recentRecords.map((record) => (
-                <div key={record._id} className="record-item">
-                  <div className="record-info">
-                    <h3>{record.type}</h3>
-                    <p>{record.pet?.name || "Pet"}</p>
-                    <p className="note">{record.notes || "No notes added."}</p>
-                  </div>
-                  <span className="date">{new Date(record.visitDate || record.createdAt).toLocaleDateString()}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="widget" id="messages">
-            <div className="widget-header">
-              <h2>Messages inbox</h2>
-              <Link className="link" to="/messages">Open all</Link>
-            </div>
-            <div className="inbox-list">
-              {!loading && inbox.length === 0 && <p>No messages.</p>}
-              {inbox.map((thread) => (
-                <div key={thread._id} className="message-item">
-                  <div className="message-info">
-                    <h3>{thread.sender?.name || "Sender"}</h3>
-                    <p>{thread.lastMessage || "Click to view conversation."}</p>
-                  </div>
-                  <span className="timestamp">{new Date(thread.createdAt).toLocaleDateString()}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="widget" id="upcoming">
-            <div className="widget-header">
-              <h2>Upcoming appointments</h2>
-              <button className="btn-small" type="button" onClick={loadDashboard}>Refresh</button>
-            </div>
-            <div className="upcoming-list">
-              {!loading && upcomingAppointments.length === 0 && <p>No upcoming appointments in the next 7 days.</p>}
-              {upcomingAppointments.map((appointment) => (
-                <div key={appointment._id} className="upcoming-item">
-                  <div className="appointment-info">
-                    <h3>{appointment.pet?.name || "Pet"}</h3>
-                    <p>{new Date(appointment.scheduledAt).toLocaleDateString()} at {new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                    <p>{appointment.owner?.name || "Owner"}</p>
-                  </div>
-                  <span className={`status ${appointment.status}`}>{appointment.status}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderDashboardContent()}
         </div>
 
         {recordTarget && (

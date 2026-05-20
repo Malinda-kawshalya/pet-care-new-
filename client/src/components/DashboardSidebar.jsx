@@ -53,16 +53,15 @@ const menuItems = {
     { icon: BarChart3, label: "Overview", to: "/dashboard/vet" },
     { icon: Clock, label: "Appointments", to: "/dashboard/vet?section=appointments" },
     { icon: Stethoscope, label: "Medical Records", to: "/dashboard/vet?section=records" },
-    { icon: PawPrint, label: "Patients", to: "/dashboard/vet?section=patients" },
-    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
+    { icon: PawPrint, label: "Patients", to: "/dashboard/vet?section=patients" }
   ],
   petShop: [
-    { icon: PawPrint, label: "My Pets", to: "/pets" },
-    { icon: ShoppingBag, label: "Marketplace", to: "/modules/marketplace" },
-    { icon: Package, label: "My Products", to: "/community" },
-    { icon: Clock, label: "Orders", to: "/orders" },
-    { icon: MessageSquare, label: "Messages", to: "/messages" },
-    { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
+    { icon: BarChart3, label: "Overview", to: "/dashboard/petshop" },
+    { icon: Package, label: "Add Product", to: "/dashboard/petshop?section=add-product" },
+    { icon: ShoppingBag, label: "Inventory", to: "/dashboard/petshop?section=inventory" },
+    { icon: Clock, label: "COD Requests", to: "/dashboard/petshop?section=cod" },
+    { icon: FileText, label: "Orders", to: "/dashboard/petshop?section=orders" },
+    { icon: Package, label: "Low Stock", to: "/dashboard/petshop?section=low-stock" }
   ],
   groomer: [
     { icon: Clock, label: "Appointments", to: "/appointments" },
@@ -104,7 +103,7 @@ export default function DashboardSidebar() {
       if (section) return section === currentSection;
     }
     // fallback to pathname compare
-    return location.pathname === pathOnly;
+    return location.pathname === pathOnly && !new URLSearchParams(location.search).get("section");
   };
 
   const handleLogout = () => {
