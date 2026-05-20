@@ -65,8 +65,9 @@ const menuItems = {
     { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
   ],
   groomer: [
-    { icon: Clock, label: "Appointments", to: "/appointments" },
-    { icon: Scissors, label: "Services", to: "/community" },
+    { icon: BarChart3, label: "Overview", to: "/dashboard/groomer?section=overview" },
+    { icon: Clock, label: "Appointments", to: "/dashboard/groomer?section=appointments" },
+    { icon: Scissors, label: "Services", to: "/dashboard/groomer?section=services" },
     { icon: MessageSquare, label: "Messages", to: "/messages" },
     { icon: ShoppingBag, label: "Adoption", to: "/dashboard/adoption" }
   ],

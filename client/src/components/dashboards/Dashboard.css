@@ -863,6 +863,112 @@
   font-size: 1.1rem;
 }
 
+.groomer-services-widget {
+  display: grid;
+  gap: 1rem;
+}
+
+.groomer-business-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.1));
+  color: #475569;
+}
+
+.groomer-business-strip strong {
+  color: #0f172a;
+}
+
+.groomer-service-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.groomer-service-form input,
+.groomer-service-form textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.groomer-service-form textarea {
+  resize: vertical;
+}
+
+.groomer-service-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 46px;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #475569;
+  font-weight: 700;
+}
+
+.groomer-service-toggle input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.groomer-service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.groomer-service-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.07);
+}
+
+.groomer-service-card-top,
+.groomer-service-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.groomer-service-card h3 {
+  margin: 0.75rem 0 0.35rem;
+  color: #0f172a;
+}
+
+.groomer-service-card p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.groomer-service-meta {
+  margin-top: 0.85rem;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .groomer-service-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Pet Actions */
 .pet-actions,
 .patient-actions,
