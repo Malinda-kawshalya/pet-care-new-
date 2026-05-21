@@ -87,7 +87,7 @@ export default function Orders() {
         <ul className="orders-list-clean">
           {orders.map((order) => (
             <li key={order._id}>
-              <Link to={`/orders/${order._id}`}>{order._id}</Link> - {order.orderStatus} - {order.paymentMethod === 'cod' ? 'COD' : 'Card'} - {formatCurrency(order.total)}
+              <Link to={`/orders/${order._id}`}>{order._id}</Link> - {order.orderStatus} - {order.paymentMethod === 'cod' ? 'COD' : 'Card'} - {formatLKR(order.total)}
             </li>
           ))}
         </ul>

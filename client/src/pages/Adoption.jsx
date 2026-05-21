@@ -4,6 +4,7 @@ import { CircleAlert } from "lucide-react";
 import api from "../services/api.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { getUploadUrl } from "../utils/media.js";
+import { formatLKR } from "../utils/currency.js";
 
 const initialFilters = {
   q: "",
@@ -237,7 +238,7 @@ export default function Adoption() {
               <h3>{item.title}</h3>
 
               <div className="product-card-footer">
-                <span className="product-card-price">${Number(item.adoptionFee || 0).toFixed(0)}</span>
+                <span className="product-card-price">{formatLKR(Number(item.adoptionFee || 0))}</span>
                 <span className="adoption-card-location">{item.location || "No location"}</span>
               </div>
 

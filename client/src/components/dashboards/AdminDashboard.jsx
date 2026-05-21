@@ -17,6 +17,7 @@ import {
 import { useLocation } from "react-router-dom";
 import api from "../../services/api.js";
 import DashboardSidebar from "../DashboardSidebar.jsx";
+import { formatLKR } from "../../utils/currency.js";
 import "../../styles/admin.css";
 
 const sections = [
@@ -582,7 +583,7 @@ export default function AdminDashboard() {
                   )}
                   {active === "contacts" && (
                     <>
-                      <th>Name</th><th>Email</th><th>Subject</th><th>Role</th><th>Status</th><th>Actions</th>
+                      <th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Phone</th><th>Role</th><th>Status</th><th>Created</th>
                     </>
                   )}
                 </tr>
@@ -625,7 +626,7 @@ export default function AdminDashboard() {
                       <>
                         <td>{item.name}</td>
                         <td>{item.seller?.name || "-"}</td>
-                        <td>${item.price}</td>
+                        <td>{formatLKR(item.price)}</td>
                         <td>{item.approvalStatus || "pending"}</td>
                         <td>{item.isActive ? "yes" : "no"}</td>
                         <td className="actions">
@@ -699,11 +700,11 @@ export default function AdminDashboard() {
                         <td>{item.name}</td>
                         <td>{item.email}</td>
                         <td>{item.subject}</td>
+                        <td>{item.message}</td>
+                        <td>{item.phone || "-"}</td>
                         <td>{item.role || "-"}</td>
                         <td>{item.status}</td>
-                        <td className="actions">
-                          <span className="table-pill">New</span>
-                        </td>
+                        <td>{item.createdAt ? new Date(item.createdAt).toLocaleString() : "-"}</td>
                       </>
                     )}
                   </tr>
@@ -722,7 +723,7 @@ export default function AdminDashboard() {
                 <p>Use these charts to track growth, moderation load, and support demand from one view.</p>
               </div>
               <div className="analytics-summary-grid">
-                <div><span>Revenue</span><strong>${report?.revenue || 0}</strong></div>
+                <div><span>Revenue</span><strong>{formatLKR(report?.revenue || 0)}</strong></div>
                 <div><span>Contacts</span><strong>{report?.totals?.contacts || 0}</strong></div>
                 <div><span>Orders</span><strong>{report?.totals?.orders || 0}</strong></div>
                 <div><span>Appointments</span><strong>{report?.totals?.appointments || 0}</strong></div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '../services/api.js';
 import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
 import PetForm from '../components/PetForm.jsx';
@@ -13,6 +13,7 @@ export default function PetProfiles() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(false);
+  const createPetFormRef = useRef(null);
   const navigate = useNavigate();
 
   const load = async () => {
@@ -40,6 +41,14 @@ export default function PetProfiles() {
   useEffect(() => {
     load();
   }, []);
+
+  const openCreatePetForm = () => {
+    setEditing(null);
+    setCreating(true);
+    window.requestAnimationFrame(() => {
+      createPetFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   const handleSaved = () => {
     setCreating(false);
@@ -81,7 +90,7 @@ export default function PetProfiles() {
             Keep pet profiles organized with photos, vaccination status, health notes, and quick edit actions.
           </p>
           <div className="hero-actions">
-            <button className="primary-button" onClick={() => setCreating(true)} type="button">
+            <button className="primary-button" onClick={openCreatePetForm} type="button">
               <Plus size={18} /> Add pet
             </button>
             <button className="ghost-button" onClick={() => navigate('/modules/health')} type="button">
@@ -96,7 +105,7 @@ export default function PetProfiles() {
       </section>
 
       {creating && (
-        <div className="page-card pet-form-shell">
+        <div className="page-card pet-form-shell" ref={createPetFormRef} style={{ scrollMarginTop: '120px' }}>
           <div className="pet-form-head">
             <h2>Add new pet</h2>
             <button className="ghost-button compact" type="button" onClick={() => setCreating(false)}>Close</button>
@@ -165,7 +174,7 @@ export default function PetProfiles() {
             <p>
               Start managing your pets today. Add photos, health information, vaccination records, and more.
             </p>
-            <button onClick={() => setCreating(true)} className="primary-button" type="button">
+            <button onClick={openCreatePetForm} className="primary-button" type="button">
               <Plus size={20} /> Add your first pet
             </button>
           </div>

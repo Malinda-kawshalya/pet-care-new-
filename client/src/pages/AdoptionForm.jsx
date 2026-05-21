@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../services/api.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { getUploadUrl } from "../utils/media.js";
+import { formatLKR } from "../utils/currency.js";
 import DashboardSidebar from "../components/DashboardSidebar.jsx";
 
 const emptyForm = { pet: "", title: "", description: "", adoptionFee: "", location: "" };
@@ -449,7 +450,7 @@ export default function AdoptionForm({ embedded = false }) {
                           <div className="adoption-owner-meta">
                             <span>Pet: <strong>{item.pet?.name || "Selected pet"}</strong></span>
                             <span>Location: <strong>{item.location || "No location"}</strong></span>
-                            <span>Fee: <strong>${item.adoptionFee || 0}</strong></span>
+                            <span>Fee: <strong>{formatLKR(item.adoptionFee)}</strong></span>
                           </div>
                           <div className="adoption-request-summary">
                             <span>Requested: <strong>{summary.total}</strong></span>

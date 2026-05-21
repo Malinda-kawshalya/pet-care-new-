@@ -27,17 +27,21 @@ export default function ContactPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
     setError("");
+    setSent(false);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
 
     try {
       await api.post("/contact", payload);
       setSent(true);
-      event.currentTarget.reset();
+      setError("");
+      form.reset();
     } catch (submitError) {
+      setSent(false);
       setError(submitError.response?.data?.message || "Unable to send your message right now.");
     } finally {
       setLoading(false);
@@ -94,7 +98,7 @@ export default function ContactPage() {
         <article className="auth-form-panel contact-form-panel">
           <div className="auth-panel-head">
             <h2>Send a message</h2>
-            <p>We’ll respond with the right next step for your role or service question.</p>
+            <p>We'll respond with the right next step for your role or service question.</p>
           </div>
 
           {sent && <div className="form-alert success">Thanks. Your message was sent successfully.</div>}

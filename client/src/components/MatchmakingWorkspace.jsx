@@ -246,13 +246,13 @@ export default function MatchmakingWorkspace({ embedded = false }) {
                     <div>{request.message || "Match request"}</div>
                     <small>{request.applicantEmail || request.requesterPet?.owner?.email || ""}</small>
                   </div>
-                  {requestTab === "inbox" ? (
+                  {requestTab === "inbox" && request.status === "pending" ? (
                     <div className="button-row">
                       <button className="ghost-button" type="button" onClick={() => respond(request._id, "accepted")} disabled={loading}>Accept</button>
                       <button className="danger-button" type="button" onClick={() => respond(request._id, "rejected")} disabled={loading}>Reject</button>
                     </div>
                   ) : (
-                    <span className="request-status">{request.status}</span>
+                    <span className={`request-status ${request.status || "pending"}`}>{request.status || "pending"}</span>
                   )}
                 </div>
               ))

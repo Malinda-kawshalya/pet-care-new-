@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api.js';
 import { useCart } from '../contexts/CartContext.jsx';
+import CartModal from '../components/CartModal.jsx';
 import { DEFAULT_IMAGE_FALLBACK, getUploadUrl } from '../utils/media.js';
+import { formatLKR } from '../utils/currency.js';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { addItem } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { addItem, cart, updateQty, removeItem } = useCart();
 
   const handleImageError = (event) => {
     if (event.currentTarget.src !== DEFAULT_IMAGE_FALLBACK) {
@@ -43,13 +46,29 @@ export default function ProductDetail() {
           <p className="eyebrow">Product detail</p>
           <h1>{product.name}</h1>
           <p className="muted-text">{product.brand} • {product.category}</p>
-          <h2>${product.price.toFixed(2)}</h2>
+          <h2>{formatLKR(product.price)}</h2>
           <p>{product.description}</p>
           <div className="button-row">
-            <button className="primary-button" onClick={() => addItem(product, 1)}>Add to cart</button>
+            <button
+              className="primary-button"
+              onClick={() => {
+                addItem(product, 1);
+                setIsCartOpen(true);
+              }}
+              type="button"
+            >
+              Add to cart
+            </button>
           </div>
         </div>
       </div>
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        updateQty={updateQty}
+        removeItem={removeItem}
+      />
     </section>
   );
 }

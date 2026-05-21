@@ -22,6 +22,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import DashboardSidebar from '../DashboardSidebar.jsx';
+import { formatLKR } from '../../utils/currency.js';
 import './Dashboard.css';
 
 const todayAppointmentsSeed = [
@@ -49,9 +50,9 @@ const upcomingAppointments = [
 ];
 
 const services = [
-  { label: 'Regular Checkup', price: '$50', icon: Stethoscope },
-  { label: 'Vaccination', price: '$30', icon: Syringe },
-  { label: 'Dental Cleaning', price: '$150', icon: ClipboardPlus }
+  { label: 'Regular Checkup', price: formatLKR(50), icon: Stethoscope },
+  { label: 'Vaccination', price: formatLKR(30), icon: Syringe },
+  { label: 'Dental Cleaning', price: formatLKR(150), icon: ClipboardPlus }
 ];
 
 const quickActions = [
