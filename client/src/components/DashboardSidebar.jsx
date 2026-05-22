@@ -6,6 +6,7 @@ import {
   Clock,
   Users,
   ShoppingBag,
+  ShoppingCart,
   MessageSquare,
   Heart as HeartIcon,
   Stethoscope,
@@ -42,8 +43,9 @@ const menuItems = {
       },
       {
         id: "adoption",
-        title: "Adoption",
+        title: "Shop",
         items: [
+          { icon: ShoppingCart, label: "Bought Products", to: "/dashboard/petowner?section=bought-products" },
           { icon: ShoppingBag, label: "Adoption", to: "/dashboard/petowner?section=adoption" }
         ]
       }
@@ -58,6 +60,7 @@ const menuItems = {
   petShop: [
     { icon: BarChart3, label: "Overview", to: "/dashboard/petshop" },
     { icon: Package, label: "Add Product", to: "/dashboard/petshop?section=add-product" },
+    { icon: ShoppingCart, label: "Buy Product", to: "/dashboard/petshop?section=buy-products" },
     { icon: ShoppingBag, label: "Inventory", to: "/dashboard/petshop?section=inventory" },
     { icon: Clock, label: "COD Requests", to: "/dashboard/petshop?section=cod" },
     { icon: FileText, label: "Orders", to: "/dashboard/petshop?section=orders" },

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Menu, PawPrint, Search, ShoppingCart, UserRound } from "lucide-react";
 import { useAuth, useUserRole } from "../hooks/useAuth";
 import { getDashboardPath } from "../utils/roleHelper";
+import petLogo from "../images/pet.png";
 
 export default function Layout() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -78,7 +79,9 @@ export default function Layout() {
 
       <header className={`topbar ${isFloating ? 'floating' : ''}`}>
         <Link to="/" className="brand" aria-label="Pet Care home">
-          <span className="brand-mark"><PawPrint size={18} /></span>
+          <span className="brand-mark brand-image-mark">
+            <img src={petLogo} alt="" />
+          </span>
           <span>Pet Care</span>
         </Link>
 
@@ -188,7 +191,9 @@ export default function Layout() {
           <div className="footer-grid">
             <div className="footer-brand">
               <div className="brand">
-                <span className="brand-mark"><PawPrint size={18} /></span>
+                <span className="brand-mark brand-image-mark">
+                  <img src={petLogo} alt="" />
+                </span>
                 <span>Pet Care</span>
               </div>
               <p className="footer-description">

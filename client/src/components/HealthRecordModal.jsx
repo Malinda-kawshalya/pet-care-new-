@@ -221,11 +221,9 @@ export default function HealthRecordModal({ isOpen, onClose, pets, onSuccess }) 
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>
                 Record Type *
               </label>
-              <input
-                type="text"
+              <select
                 value={form.recordType}
                 onChange={(e) => setForm({ ...form, recordType: e.target.value })}
-                placeholder="e.g. Vaccination, Checkup"
                 required
                 style={{
                   width: '100%',
@@ -236,7 +234,14 @@ export default function HealthRecordModal({ isOpen, onClose, pets, onSuccess }) 
                   fontFamily: 'inherit',
                   boxSizing: 'border-box'
                 }}
-              />
+              >
+                <option value="">Select record type</option>
+                <option value="vaccination">Vaccination</option>
+                <option value="checkup">Checkup</option>
+                <option value="treatment">Treatment</option>
+                <option value="surgery">Surgery</option>
+                <option value="other">Other</option>
+              </select>
             </div>
 
             {/* Date Field */}
@@ -301,8 +306,7 @@ export default function HealthRecordModal({ isOpen, onClose, pets, onSuccess }) 
                 }}
               >
                 <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
+                <option value="inactive">Inactive</option>
                 <option value="archived">Archived</option>
               </select>
             </div>

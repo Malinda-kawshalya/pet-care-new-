@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Package, Plus, RefreshCcw, ShoppingBag, Trash2, WalletCards } from 'lucide-react';
+import { CheckCircle2, Eye, MapPin, Package, Plus, RefreshCcw, ShoppingBag, ShoppingCart, Trash2, User, WalletCards } from 'lucide-react';
 import api from '../../services/api.js';
 import DashboardSidebar from '../DashboardSidebar.jsx';
 import { formatLKR } from '../../utils/currency.js';
+import { getUploadUrl } from '../../utils/media.js';
 import './Dashboard.css';
 
 const shopSections = [
   { key: 'overview' },
   { key: 'add-product' },
+  { key: 'buy-products' },
   { key: 'inventory' },
   { key: 'cod' },
   { key: 'orders' },
@@ -25,6 +27,11 @@ const shopCopy = {
     eyebrow: 'Catalog',
     title: 'Add Product',
     description: 'Create a new marketplace listing with price, stock, threshold, and product image.'
+  },
+  'buy-products': {
+    eyebrow: 'Customer purchases',
+    title: 'Buy Product Details',
+    description: 'Review bought products, pending COD products, customer delivery details, and payment status.'
   },
   inventory: {
     eyebrow: 'Inventory',
@@ -61,6 +68,35 @@ function orderProductNames(order) {
     .join(', ') || 'No items';
 }
 
+function orderShortId(order) {
+  return `#${String(order?._id || '').slice(-8).toUpperCase() || 'ORDER'}`;
+}
+
+function formatDate(value) {
+  if (!value) return 'Not available';
+  return new Intl.DateTimeFormat('en-LK', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(value));
+}
+
+function paymentLabel(order) {
+  if (order.paymentMethod === 'cod') return 'Cash on delivery';
+  if (order.paymentMethod === 'card') return order.paymentLast4 ? `Card ending ${order.paymentLast4}` : 'Card';
+  return order.paymentMethod || 'Payment';
+}
+
+function productImage(product) {
+  return product?.images?.[0] ? getUploadUrl(product.images[0], '') : '';
+}
+
+function totalOrderQuantity(order) {
+  return order.items?.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0) || 0;
+}
+
 function resetProductForm() {
   return {
     name: '',
@@ -90,6 +126,7 @@ const PetShopDashboard = () => {
   const [status, setStatus] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   async function loadDashboard() {
     setLoading(true);
@@ -123,6 +160,24 @@ const PetShopDashboard = () => {
   const lowStockItems = useMemo(() => (
     dashboard.inventory.filter((item) => item.stock <= item.lowStockThreshold)
   ), [dashboard.inventory]);
+
+  const pendingBuyOrders = useMemo(() => (
+    dashboard.orders.filter((order) =>
+      order.paymentStatus === 'pending' ||
+      order.orderStatus === 'placed'
+    )
+  ), [dashboard.orders]);
+
+  const completedBuyOrders = useMemo(() => (
+    dashboard.orders.filter((order) =>
+      order.paymentStatus !== 'pending' &&
+      order.orderStatus !== 'placed'
+    )
+  ), [dashboard.orders]);
+
+  const orderedProductCount = useMemo(() => (
+    dashboard.orders.reduce((sum, order) => sum + totalOrderQuantity(order), 0)
+  ), [dashboard.orders]);
 
   const recentOrders = useMemo(() => dashboard.orders.slice(0, 8), [dashboard.orders]);
   const inventoryPreview = useMemo(() => dashboard.inventory.slice(0, 8), [dashboard.inventory]);
@@ -292,6 +347,13 @@ const PetShopDashboard = () => {
           <strong>{loading ? '...' : dashboard.summary.orders || 0}</strong>
         </span>
       </button>
+      <button className="stat-card shop-stat-card" type="button" onClick={() => goToSection('buy-products')}>
+        <span className="shop-stat-icon"><ShoppingCart size={18} /></span>
+        <span className="shop-stat-copy">
+          <span className="shop-stat-label">Bought products</span>
+          <strong>{loading ? '...' : orderedProductCount}</strong>
+        </span>
+      </button>
       <div className="stat-card shop-stat-card">
         <span className="shop-stat-icon"><CheckCircle2 size={18} /></span>
         <span className="shop-stat-copy">
@@ -436,6 +498,113 @@ const PetShopDashboard = () => {
     </div>
   );
 
+  const renderBuyOrderCard = (order, tone = 'default') => {
+    const canApproveCod = order.paymentMethod === 'cod' && order.paymentStatus === 'pending' && order.orderStatus === 'placed';
+
+    return (
+      <div key={order._id} className={`shop-buy-card ${tone}`}>
+        <div className="shop-buy-card-main">
+          <div className="shop-buy-icon">
+            <ShoppingCart size={20} />
+          </div>
+          <div className="order-info">
+            <div className="shop-buy-title-row">
+              <h3>{orderShortId(order)} - {customerName(order.user)}</h3>
+              <span className={`status ${order.orderStatus || 'placed'}`}>{order.orderStatus || 'placed'}</span>
+            </div>
+            <p>{orderProductNames(order)}</p>
+            <p>{totalOrderQuantity(order)} products - {paymentLabel(order)} - {formatLKR(order.total)}</p>
+            <p>{formatDate(order.createdAt)}</p>
+          </div>
+        </div>
+        <div className="product-actions shop-row-actions">
+          <button className="btn-small" type="button" onClick={() => setSelectedOrder(order)}>
+            <Eye size={14} /> Details
+          </button>
+          {canApproveCod && (
+            <>
+              <button className="btn-approve" disabled={updatingId === order._id} onClick={() => decideOrder(order._id, 'approve')} type="button">
+                Approve
+              </button>
+              <button className="btn-reject" disabled={updatingId === order._id} onClick={() => decideOrder(order._id, 'reject')} type="button">
+                Reject
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderBuyProducts = () => (
+    <>
+      <div className="stats-section shop-buy-stats">
+        <div className="stat-card shop-stat-card">
+          <span className="shop-stat-icon"><ShoppingCart size={18} /></span>
+          <span className="shop-stat-copy">
+            <span className="shop-stat-label">All bought products</span>
+            <strong>{loading ? '...' : orderedProductCount}</strong>
+          </span>
+        </div>
+        <div className="stat-card shop-stat-card highlight">
+          <span className="shop-stat-icon"><WalletCards size={18} /></span>
+          <span className="shop-stat-copy">
+            <span className="shop-stat-label">Pending products</span>
+            <strong>{loading ? '...' : pendingBuyOrders.length}</strong>
+          </span>
+        </div>
+        <div className="stat-card shop-stat-card">
+          <span className="shop-stat-icon"><CheckCircle2 size={18} /></span>
+          <span className="shop-stat-copy">
+            <span className="shop-stat-label">Processed orders</span>
+            <strong>{loading ? '...' : completedBuyOrders.length}</strong>
+          </span>
+        </div>
+      </div>
+
+      <div className="shop-buy-grid">
+        <div className="widget">
+          <div className="widget-header">
+            <div>
+              <h2>Pending Products</h2>
+              <p className="widget-subtitle">COD or placed orders waiting for shop action.</p>
+            </div>
+            <button className="btn-small" onClick={loadDashboard} disabled={loading} type="button">
+              <RefreshCcw size={15} /> Refresh
+            </button>
+          </div>
+          {loading ? (
+            <p>Loading pending products...</p>
+          ) : pendingBuyOrders.length === 0 ? (
+            renderEmptyState(<CheckCircle2 size={24} />, 'No pending products', 'All customer purchases are already being processed.')
+          ) : (
+            <div className="shop-buy-list">
+              {pendingBuyOrders.map((order) => renderBuyOrderCard(order, 'pending'))}
+            </div>
+          )}
+        </div>
+
+        <div className="widget">
+          <div className="widget-header">
+            <div>
+              <h2>Buy Product Details</h2>
+              <p className="widget-subtitle">All bought products with customer, status, and payment details.</p>
+            </div>
+          </div>
+          {loading ? (
+            <p>Loading bought products...</p>
+          ) : dashboard.orders.length === 0 ? (
+            renderEmptyState(<ShoppingBag size={24} />, 'No bought products yet', 'Customer purchases will appear here after checkout.')
+          ) : (
+            <div className="shop-buy-list">
+              {dashboard.orders.map((order) => renderBuyOrderCard(order))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
   const renderInventory = (compact = false) => {
     const items = compact ? inventoryPreview.slice(0, 5) : dashboard.inventory;
 
@@ -463,7 +632,7 @@ const PetShopDashboard = () => {
               <div key={product._id} className="inventory-item shop-inventory-item">
                 <div className="shop-product-main">
                   <div className="shop-product-thumb">
-                    {product.image ? <img src={product.image} alt={product.name} /> : <Package size={20} />}
+                    {productImage(product) ? <img src={productImage(product)} alt={product.name} /> : <Package size={20} />}
                   </div>
                   <div className="order-info">
                     <h3>{product.name}</h3>
@@ -545,6 +714,7 @@ const PetShopDashboard = () => {
 
   const renderContent = () => {
     if (activeSection === 'add-product') return renderProductForm();
+    if (activeSection === 'buy-products') return renderBuyProducts();
     if (activeSection === 'inventory') return renderInventory();
     if (activeSection === 'cod') return renderCodRequests();
     if (activeSection === 'orders') return renderRecentOrders();
@@ -575,6 +745,109 @@ const PetShopDashboard = () => {
         <div className="dashboard-grid shop-dashboard-grid">
           {renderContent()}
         </div>
+
+        {selectedOrder && (
+          <div className="dashboard-modal-backdrop">
+            <div className="dashboard-modal-panel shop-order-detail-modal">
+              <div className="shop-detail-header">
+                <div>
+                  <p className="eyebrow">Buy product details</p>
+                  <h2>{orderShortId(selectedOrder)}</h2>
+                  <p>{formatDate(selectedOrder.createdAt)}</p>
+                </div>
+                <span className={`status ${selectedOrder.orderStatus || 'placed'}`}>{selectedOrder.orderStatus || 'placed'}</span>
+              </div>
+
+              <div className="shop-detail-summary">
+                <div>
+                  <User size={16} />
+                  <span>{customerName(selectedOrder.user)}</span>
+                </div>
+                <div>
+                  <WalletCards size={16} />
+                  <span>{paymentLabel(selectedOrder)} - {selectedOrder.paymentStatus || 'pending'}</span>
+                </div>
+                <div>
+                  <MapPin size={16} />
+                  <span>{selectedOrder.shippingAddress || 'No shipping address provided'}</span>
+                </div>
+              </div>
+
+              <div className="shop-detail-section">
+                <h3>Customer Details</h3>
+                <div className="shop-detail-fields">
+                  <span>Name</span>
+                  <strong>{selectedOrder.shippingName || customerName(selectedOrder.user)}</strong>
+                  <span>Email</span>
+                  <strong>{selectedOrder.shippingEmail || selectedOrder.user?.email || 'Not available'}</strong>
+                  <span>Phone</span>
+                  <strong>{selectedOrder.shippingPhone || 'Not available'}</strong>
+                  <span>Tracking</span>
+                  <strong>{selectedOrder.trackingNumber || 'Not assigned'}</strong>
+                </div>
+              </div>
+
+              <div className="shop-detail-section">
+                <h3>Products</h3>
+                <div className="shop-detail-items">
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item._id || item.product?._id} className="shop-detail-item">
+                      <div className="shop-product-thumb">
+                        {productImage(item.product) ? <img src={productImage(item.product)} alt={item.product?.name || 'Product'} /> : <Package size={18} />}
+                      </div>
+                      <div>
+                        <strong>{item.product?.name || 'Product'}</strong>
+                        <span>{item.product?.category || 'Uncategorized'} - Qty {item.quantity}</span>
+                      </div>
+                      <strong>{formatLKR((item.price || 0) * (item.quantity || 1))}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="shop-detail-total">
+                <span>Total</span>
+                <strong>{formatLKR(selectedOrder.total)}</strong>
+              </div>
+
+              <div className="modal-actions">
+                {selectedOrder.paymentMethod === 'cod' && selectedOrder.paymentStatus === 'pending' && selectedOrder.orderStatus === 'placed' ? (
+                  <>
+                    <button
+                      className="btn-approve"
+                      disabled={updatingId === selectedOrder._id}
+                      onClick={async () => {
+                        await decideOrder(selectedOrder._id, 'approve');
+                        setSelectedOrder(null);
+                      }}
+                      type="button"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="btn-reject"
+                      disabled={updatingId === selectedOrder._id}
+                      onClick={async () => {
+                        await decideOrder(selectedOrder._id, 'reject');
+                        setSelectedOrder(null);
+                      }}
+                      type="button"
+                    >
+                      Reject
+                    </button>
+                  </>
+                ) : (
+                  <button className="btn-primary" type="button" onClick={() => setSelectedOrder(null)}>
+                    Done
+                  </button>
+                )}
+                <button className="btn-small" type="button" onClick={() => setSelectedOrder(null)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showEditModal && editingProduct && (
           <div className="dashboard-modal-backdrop">

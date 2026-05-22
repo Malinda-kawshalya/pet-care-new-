@@ -12,18 +12,41 @@ export async function listRecords(req, res, next) {
       const pets = await Pet.find({ owner: req.user._id }).select('_id');
       filters.pet = { $in: pets.map(p => p._id) };
     }
-    const items = await MedicalRecord.find(filters).populate('pet').populate('veterinarian', 'name');
+    const items = await MedicalRecord.find(filters).populate('pet').populate('veterinarian', 'name').populate('createdBy', 'name email role');
     res.json({ items });
   } catch (err) { next(err); }
 }
 
 export async function createRecord(req, res, next) {
   try {
-    // Only veterinarians or admins can create medical records
-    if (!(req.user.role === 'veterinarian' || req.user.role === 'admin')) {
-      res.status(403); throw new Error('Only veterinarians can create records');
+    const pet = await Pet.findById(req.body.pet);
+    if (!pet) {
+      res.status(404); throw new Error('Pet not found');
     }
-    const payload = { ...req.body, veterinarian: req.user._id };
+
+    const isVetOrAdmin = req.user.role === 'veterinarian' || req.user.role === 'admin';
+    const isPetOwner = String(pet.owner) === String(req.user._id);
+
+    if (!isVetOrAdmin && !isPetOwner) {
+      res.status(403); throw new Error('Not allowed to create records for this pet');
+    }
+
+    const payload = {
+      ...req.body,
+      createdBy: req.user._id,
+      createdByRole: req.user.role
+    };
+
+    if (isVetOrAdmin) {
+      payload.veterinarian = req.user._id;
+    } else {
+      delete payload.veterinarian;
+      delete payload.vetNotes;
+      delete payload.diagnosis;
+      delete payload.treatment;
+      delete payload.prescriptions;
+    }
+
     const item = await MedicalRecord.create(payload);
     res.status(201).json({ item });
   } catch (err) { next(err); }

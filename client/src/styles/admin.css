@@ -335,7 +335,7 @@
 
 .health-records-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -354,6 +354,14 @@
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
   display: grid;
   gap: 14px;
+}
+
+.health-record-card.vet-record-card {
+  border-left: 4px solid #2563eb;
+}
+
+.health-record-card.owner-record-card {
+  border-left: 4px solid #0e7f73;
 }
 
 .health-record-card-top {
@@ -435,6 +443,58 @@
   margin: 0;
   color: #4f6f6a;
   line-height: 1.55;
+}
+
+.health-record-section {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.health-record-section strong {
+  font-size: 0.86rem;
+}
+
+.health-record-section p {
+  margin: 0;
+  color: #385955;
+}
+
+.health-record-section span {
+  font-weight: 800;
+  color: #143733;
+}
+
+.health-record-section.owner-note {
+  background: rgba(14, 127, 115, 0.08);
+  border: 1px solid rgba(14, 127, 115, 0.16);
+}
+
+.health-record-section.owner-note strong {
+  color: #0e7f73;
+}
+
+.health-record-section.vet-note {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+.health-record-section.vet-note strong {
+  color: #1d4ed8;
+}
+
+@media (max-width: 980px) {
+  .health-records-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .health-records-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 .analytics-summary-grid span,

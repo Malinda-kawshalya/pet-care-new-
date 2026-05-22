@@ -62,7 +62,7 @@ export default function VetDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recordTarget, setRecordTarget] = useState(null);
-  const [recordForm, setRecordForm] = useState({ pet: "", diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
+  const [recordForm, setRecordForm] = useState({ owner: "", pet: "", diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
   const [recordSubmitting, setRecordSubmitting] = useState(false);
 
   const userId = user?._id || user?.id;
@@ -144,6 +144,7 @@ export default function VetDashboard() {
       }
 
       ownerMap.get(ownerId).pets.push({
+        ownerId,
         petId: String(pet._id),
         petName: pet.name || "Pet",
         species: pet.species || "-",
@@ -155,6 +156,19 @@ export default function VetDashboard() {
 
     return Array.from(ownerMap.values()).sort((a, b) => a.ownerName.localeCompare(b.ownerName));
   }, [pets, records]);
+
+  const ownerOptions = useMemo(() => (
+    patients.map((owner) => ({
+      ownerId: owner.ownerId,
+      ownerName: owner.ownerName,
+      ownerEmail: owner.ownerEmail
+    }))
+  ), [patients]);
+
+  const selectedOwnerPets = useMemo(() => {
+    if (!recordForm.owner) return [];
+    return patients.find((owner) => owner.ownerId === recordForm.owner)?.pets || [];
+  }, [patients, recordForm.owner]);
 
   const recentRecords = useMemo(() => {
     return [...records]
@@ -178,13 +192,25 @@ export default function VetDashboard() {
     }
   };
 
-  const openRecordComposer = (pet) => {
-    setRecordTarget(pet);
-    setRecordForm({ pet: pet.petId, diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
+  const openRecordComposer = (pet = null) => {
+    setRecordTarget(pet || { petName: "" });
+    setRecordForm({
+      owner: pet?.ownerId || "",
+      pet: pet?.petId || "",
+      diagnosis: "",
+      treatment: "",
+      prescriptions: "",
+      vetNotes: ""
+    });
   };
 
   const closeRecordComposer = () => {
     setRecordTarget(null);
+    setRecordForm({ owner: "", pet: "", diagnosis: "", treatment: "", prescriptions: "", vetNotes: "" });
+  };
+
+  const updateRecordOwner = (ownerId) => {
+    setRecordForm((current) => ({ ...current, owner: ownerId, pet: "" }));
   };
 
   const submitRecord = async (event) => {
@@ -343,7 +369,9 @@ export default function VetDashboard() {
     <div className="widget" id="records">
       <div className="widget-header">
         <h2>Recent medical records</h2>
-        <Link className="btn-small" to="/medical-records">Add record</Link>
+        <button className="btn-small" type="button" onClick={() => openRecordComposer()}>
+          Add record
+        </button>
       </div>
       <div className="records-list">
         {!loading && recentRecords.length === 0 && <p>No records available.</p>}
@@ -430,13 +458,45 @@ export default function VetDashboard() {
               <div className="request-modal-header">
                 <div>
                   <p className="eyebrow">Medical record</p>
-                  <h2 id="record-composer-title">Add record for {recordTarget.petName}</h2>
+                  <h2 id="record-composer-title">
+                    {recordForm.pet ? `Add record for ${selectedOwnerPets.find((pet) => pet.petId === recordForm.pet)?.petName || "pet"}` : "Add medical record"}
+                  </h2>
                 </div>
                 <button className="ghost-button compact" type="button" onClick={closeRecordComposer}>Close</button>
               </div>
 
               <form className="request-modal-form" onSubmit={submitRecord}>
-                <input value={recordForm.pet} readOnly />
+                <label className="form-group">
+                  <span>Pet owner name</span>
+                  <select
+                    value={recordForm.owner}
+                    onChange={(event) => updateRecordOwner(event.target.value)}
+                    required
+                  >
+                    <option value="">Select pet owner</option>
+                    {ownerOptions.map((owner) => (
+                      <option key={owner.ownerId} value={owner.ownerId}>
+                        {owner.ownerName}{owner.ownerEmail ? ` (${owner.ownerEmail})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="form-group">
+                  <span>Pet name</span>
+                  <select
+                    value={recordForm.pet}
+                    onChange={(event) => setRecordForm({ ...recordForm, pet: event.target.value })}
+                    required
+                    disabled={!recordForm.owner}
+                  >
+                    <option value="">{recordForm.owner ? "Select pet name" : "Select owner first"}</option>
+                    {selectedOwnerPets.map((pet) => (
+                      <option key={pet.petId} value={pet.petId}>
+                        {pet.petName} - {pet.breed} ({pet.species})
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <input
                   placeholder="Diagnosis"
                   value={recordForm.diagnosis}

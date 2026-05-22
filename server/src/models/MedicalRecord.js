@@ -4,6 +4,8 @@ const medicalRecordSchema = new mongoose.Schema(
   {
     pet: { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true },
     veterinarian: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdByRole: { type: String, enum: ["petOwner", "veterinarian", "admin"] },
     provider: String,
     recordType: { type: String, enum: ["vaccination", "checkup", "treatment", "surgery", "other"], default: "checkup" },
     visitDate: { type: Date, default: Date.now },

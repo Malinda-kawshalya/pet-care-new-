@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList, Heart, Clock, Users, ShoppingBag, RefreshCcw, Edit, Trash2 } from 'lucide-react';
+import { CalendarClock, ShieldCheck, PawPrint, UserRoundCog, RotateCcw, HeartPulse, ClipboardList, Heart, Clock, Users, ShoppingBag, RefreshCcw, Edit, Trash2, ShoppingCart, Package, Eye, Truck, WalletCards } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import DashboardSidebar from '../DashboardSidebar.jsx';
@@ -9,6 +9,8 @@ import HealthRecordModal from '../HealthRecordModal.jsx';
 import CommunityBlogSection from '../CommunityBlogSection.jsx';
 import MatchmakingWorkspace from '../MatchmakingWorkspace.jsx';
 import AdoptionForm from '../../pages/AdoptionForm.jsx';
+import { formatLKR } from '../../utils/currency.js';
+import { getUploadUrl } from '../../utils/media.js';
 import '../../styles/admin.css';
 import './Dashboard.css';
 
@@ -18,6 +20,7 @@ const sections = [
   { key: "appointments", label: "Appointments", icon: Clock },
   { key: "community", label: "Community", icon: Users },
   { key: "matchmaking", label: "Matchmaking", icon: Heart },
+  { key: "bought-products", label: "Bought Products", icon: ShoppingCart },
   { key: "adoption", label: "Adoption", icon: ShoppingBag }
 ];
 
@@ -34,8 +37,10 @@ const PetOwnerDashboard = () => {
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
+  const [orders, setOrders] = useState([]);
   
   const [selectedPet, setSelectedPet] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
@@ -54,6 +59,7 @@ const PetOwnerDashboard = () => {
       loadPets();
     }
     if (active === "appointments") loadAppointments();
+    if (active === "bought-products") loadOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
   async function run(action) {
@@ -79,11 +85,67 @@ const PetOwnerDashboard = () => {
     return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString();
   }
 
+  function formatDateTime(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return new Intl.DateTimeFormat('en-LK', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+
+  function orderShortId(order) {
+    return `#${String(order?._id || '').slice(-8).toUpperCase() || 'ORDER'}`;
+  }
+
+  function paymentLabel(order) {
+    if (order.paymentMethod === 'cod') return 'Cash on delivery';
+    if (order.paymentMethod === 'card') return order.paymentLast4 ? `Card ending ${order.paymentLast4}` : 'Card';
+    return order.paymentMethod || 'Payment';
+  }
+
+  function productImage(product) {
+    return product?.images?.[0] ? getUploadUrl(product.images[0], '') : '';
+  }
+
+  function orderProductNames(order) {
+    return order.items
+      ?.map((item) => `${item.product?.name || 'Product'} x ${item.quantity}`)
+      .join(', ') || 'No products';
+  }
+
+  function totalOrderQuantity(order) {
+    return order.items?.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0) || 0;
+  }
+
   function getRecordTone(status) {
     const normalized = (status || '').toLowerCase();
     if (normalized === 'active' || normalized === 'ok' || normalized === 'completed') return 'ok';
     if (normalized === 'due' || normalized === 'due-soon' || normalized === 'pending' || normalized === 'upcoming') return 'warn';
     return 'neutral';
+  }
+
+  function isVetRecord(record) {
+    return Boolean(
+      record.createdByRole === 'veterinarian' ||
+      record.veterinarian ||
+      record.vetNotes ||
+      record.diagnosis ||
+      record.treatment ||
+      record.prescriptions?.length
+    );
+  }
+
+  function recordSourceLabel(record) {
+    return isVetRecord(record) ? 'Veterinarian added notes' : 'Pet owner added record';
+  }
+
+  function recordDateValue(record) {
+    return record.recordDate || record.visitDate || record.createdAt;
   }
 
   async function loadPets() {
@@ -104,6 +166,13 @@ const PetOwnerDashboard = () => {
     await run(async () => {
       const res = await api.get("/medical-records");
       setMedicalRecords(res.data.items || res.data || []);
+    });
+  }
+
+  async function loadOrders() {
+    await run(async () => {
+      const res = await api.get("/market/orders");
+      setOrders(res.data.items || []);
     });
   }
 
@@ -275,6 +344,10 @@ const PetOwnerDashboard = () => {
           <span>Due Soon</span>
           <strong>{medicalRecords.filter((record) => getRecordTone(record.status) === 'warn').length}</strong>
         </div>
+        <div className="report-stat">
+          <span>Vet Notes</span>
+          <strong>{medicalRecords.filter((record) => isVetRecord(record)).length}</strong>
+        </div>
       </div>
 
       {error && <div className="admin-alert error">{error}</div>}
@@ -288,14 +361,15 @@ const PetOwnerDashboard = () => {
         <div className="health-records-grid">
           {medicalRecords
             .slice()
-            .sort((left, right) => new Date(right.recordDate || 0) - new Date(left.recordDate || 0))
+            .sort((left, right) => new Date(recordDateValue(right) || 0) - new Date(recordDateValue(left) || 0))
             .map((record) => {
               const tone = getRecordTone(record.status);
+              const vetRecord = isVetRecord(record);
               return (
-                <article className="health-record-card" key={record._id}>
+                <article className={`health-record-card ${vetRecord ? 'vet-record-card' : 'owner-record-card'}`} key={record._id}>
                   <div className="health-record-card-top">
                     <div>
-                      <p className="health-record-label">Pet</p>
+                      <p className="health-record-label">{recordSourceLabel(record)}</p>
                       <h3>{record.pet?.name || 'Unknown pet'}</h3>
                     </div>
                     <span className={`health-record-status ${tone}`}>{record.status || 'active'}</span>
@@ -303,11 +377,29 @@ const PetOwnerDashboard = () => {
 
                   <div className="health-record-meta">
                     <div><strong>Record Type</strong><span>{record.recordType || '-'}</span></div>
-                    <div><strong>Date</strong><span>{formatDate(record.recordDate)}</span></div>
-                    <div><strong>Provider</strong><span>{record.provider || '-'}</span></div>
+                    <div><strong>Date</strong><span>{formatDate(recordDateValue(record))}</span></div>
+                    <div>
+                      <strong>{vetRecord ? 'Veterinarian' : 'Provider'}</strong>
+                      <span>{record.veterinarian?.name || record.provider || '-'}</span>
+                    </div>
                   </div>
 
-                  {record.notes && <p className="health-record-notes">{record.notes}</p>}
+                  {record.notes && (
+                    <div className="health-record-section owner-note">
+                      <strong>Pet owner record</strong>
+                      <p>{record.notes}</p>
+                    </div>
+                  )}
+
+                  {(record.vetNotes || record.diagnosis || record.treatment || record.prescriptions?.length > 0) && (
+                    <div className="health-record-section vet-note">
+                      <strong>Veterinarian notes</strong>
+                      {record.diagnosis && <p><span>Diagnosis:</span> {record.diagnosis}</p>}
+                      {record.treatment && <p><span>Treatment:</span> {record.treatment}</p>}
+                      {record.prescriptions?.length > 0 && <p><span>Prescriptions:</span> {record.prescriptions.join(', ')}</p>}
+                      {record.vetNotes && <p><span>Notes:</span> {record.vetNotes}</p>}
+                    </div>
+                  )}
                 </article>
               );
             })}
@@ -365,6 +457,184 @@ const PetOwnerDashboard = () => {
     </div>
   );
 
+  const renderBoughtProductsSection = () => {
+    const boughtProductCount = orders.reduce((sum, order) => sum + totalOrderQuantity(order), 0);
+    const pendingOrders = orders.filter((order) => order.paymentStatus === 'pending' || order.orderStatus === 'placed');
+    const deliveredOrders = orders.filter((order) => order.orderStatus === 'delivered');
+
+    return (
+      <div className="admin-main-modern">
+        <div className="admin-main-header">
+          <div>
+            <h1>Bought Products</h1>
+            <p>View products you bought from pet shops, delivery status, and payment details.</p>
+          </div>
+          <div className="admin-main-actions">
+            <button className="admin-btn secondary" onClick={loadOrders} disabled={loading} type="button">
+              <RefreshCcw size={16} /> Refresh
+            </button>
+            <button className="admin-btn primary" onClick={() => navigate('/market')} type="button">
+              <ShoppingCart size={16} /> Shop More
+            </button>
+          </div>
+        </div>
+
+        {error && <div className="admin-alert error">{error}</div>}
+
+        <div className="owner-buy-summary">
+          <div className="owner-buy-stat">
+            <ShoppingCart size={20} />
+            <span>Bought Products</span>
+            <strong>{loading ? '...' : boughtProductCount}</strong>
+          </div>
+          <div className="owner-buy-stat">
+            <Clock size={20} />
+            <span>Pending Orders</span>
+            <strong>{loading ? '...' : pendingOrders.length}</strong>
+          </div>
+          <div className="owner-buy-stat">
+            <Truck size={20} />
+            <span>Delivered</span>
+            <strong>{loading ? '...' : deliveredOrders.length}</strong>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="report-note">Loading bought products...</div>
+        ) : orders.length === 0 ? (
+          <div className="owner-buy-empty">
+            <Package size={46} />
+            <h3>No bought products yet</h3>
+            <p>Products you buy from the marketplace will appear here with status and delivery details.</p>
+            <button className="admin-btn primary" onClick={() => navigate('/market')} type="button">
+              <ShoppingCart size={16} /> Go to Shop
+            </button>
+          </div>
+        ) : (
+          <div className="owner-buy-list">
+            {orders.map((order) => (
+              <article className="owner-buy-card" key={order._id}>
+                <div className="owner-buy-card-top">
+                  <div>
+                    <p className="owner-buy-label">{orderShortId(order)}</p>
+                    <h3>{orderProductNames(order)}</h3>
+                    <span>{formatDateTime(order.createdAt)}</span>
+                  </div>
+                  <span className={`status ${order.orderStatus || 'placed'}`}>{order.orderStatus || 'placed'}</span>
+                </div>
+
+                <div className="owner-buy-products">
+                  {order.items?.slice(0, 3).map((item) => (
+                    <div className="owner-buy-product" key={item._id || item.product?._id}>
+                      <div className="shop-product-thumb">
+                        {productImage(item.product) ? <img src={productImage(item.product)} alt={item.product?.name || 'Product'} /> : <Package size={18} />}
+                      </div>
+                      <div>
+                        <strong>{item.product?.name || 'Product'}</strong>
+                        <span>Qty {item.quantity} - {formatLKR(item.price || 0)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="owner-buy-meta">
+                  <span><WalletCards size={15} /> {paymentLabel(order)} - {order.paymentStatus || 'pending'}</span>
+                  <strong>{formatLKR(order.total)}</strong>
+                </div>
+
+                {order.paymentMethod === 'cod' && order.orderStatus === 'placed' && (
+                  <div className="owner-buy-pending-note">Waiting for shop approval.</div>
+                )}
+
+                <div className="pet-card-actions">
+                  <button className="primary-button compact" onClick={() => setSelectedOrder(order)} type="button">
+                    <Eye size={16} /> View Details
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {selectedOrder && (
+          <div className="dashboard-modal-backdrop">
+            <div className="dashboard-modal-panel owner-order-detail-modal">
+              <div className="shop-detail-header">
+                <div>
+                  <p className="eyebrow">Bought product details</p>
+                  <h2>{orderShortId(selectedOrder)}</h2>
+                  <p>{formatDateTime(selectedOrder.createdAt)}</p>
+                </div>
+                <span className={`status ${selectedOrder.orderStatus || 'placed'}`}>{selectedOrder.orderStatus || 'placed'}</span>
+              </div>
+
+              <div className="shop-detail-summary">
+                <div>
+                  <Truck size={16} />
+                  <span>{selectedOrder.shippingAddress || 'No shipping address provided'}</span>
+                </div>
+                <div>
+                  <WalletCards size={16} />
+                  <span>{paymentLabel(selectedOrder)} - {selectedOrder.paymentStatus || 'pending'}</span>
+                </div>
+                <div>
+                  <Package size={16} />
+                  <span>{totalOrderQuantity(selectedOrder)} products</span>
+                </div>
+              </div>
+
+              <div className="shop-detail-section">
+                <h3>Products</h3>
+                <div className="shop-detail-items">
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item._id || item.product?._id} className="shop-detail-item">
+                      <div className="shop-product-thumb">
+                        {productImage(item.product) ? <img src={productImage(item.product)} alt={item.product?.name || 'Product'} /> : <Package size={18} />}
+                      </div>
+                      <div>
+                        <strong>{item.product?.name || 'Product'}</strong>
+                        <span>{item.product?.category || 'Uncategorized'} - Qty {item.quantity}</span>
+                      </div>
+                      <strong>{formatLKR((item.price || 0) * (item.quantity || 1))}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="shop-detail-section">
+                <h3>Delivery Details</h3>
+                <div className="shop-detail-fields">
+                  <span>Name</span>
+                  <strong>{selectedOrder.shippingName || user?.name || 'Not available'}</strong>
+                  <span>Email</span>
+                  <strong>{selectedOrder.shippingEmail || user?.email || 'Not available'}</strong>
+                  <span>Phone</span>
+                  <strong>{selectedOrder.shippingPhone || 'Not available'}</strong>
+                  <span>Tracking</span>
+                  <strong>{selectedOrder.trackingNumber || 'Not assigned'}</strong>
+                </div>
+              </div>
+
+              <div className="shop-detail-total">
+                <span>Total</span>
+                <strong>{formatLKR(selectedOrder.total)}</strong>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-primary" type="button" onClick={() => setSelectedOrder(null)}>
+                  Done
+                </button>
+                <button className="btn-small" type="button" onClick={() => setSelectedOrder(null)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderCommunitySection = () => (
     <CommunityBlogSection />
   );
@@ -385,6 +655,8 @@ const PetOwnerDashboard = () => {
         return renderHealthRecordsSection();
       case "appointments":
         return renderAppointmentsSection();
+      case "bought-products":
+        return renderBoughtProductsSection();
       case "community":
         return renderCommunitySection();
       case "matchmaking":

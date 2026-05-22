@@ -26,28 +26,48 @@ function slotToDateTime(slotValue) {
 
 export default function AppointmentBookingModal({ isOpen, onClose, pets, onSuccess }) {
   const [providers, setProviders] = useState([]);
-  const [form, setForm] = useState({ petName: "", provider: "", scheduledAt: "" });
+  const [form, setForm] = useState({ petName: "", serviceType: "", provider: "", scheduledAt: "" });
   const [loading, setLoading] = useState(false);
+  const [providersLoading, setProvidersLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      loadProviders();
-      setForm({ petName: "", provider: "", scheduledAt: "" });
+      setProviders([]);
+      setForm({ petName: "", serviceType: "", provider: "", scheduledAt: "" });
       setError("");
       setSuccess("");
     }
   }, [isOpen]);
 
-  const loadProviders = async () => {
+  useEffect(() => {
+    if (!isOpen || !form.serviceType) return;
+    loadProviders(form.serviceType);
+  }, [isOpen, form.serviceType]);
+
+  const loadProviders = async (serviceType) => {
+    setProvidersLoading(true);
     try {
-      const resp = await api.get("/appointments/providers?serviceType=vet");
+      const resp = await api.get(`/appointments/providers?serviceType=${serviceType}`);
       setProviders(resp.data.items || []);
     } catch (err) {
       console.error("Failed to load providers:", err);
+      setProviders([]);
+    } finally {
+      setProvidersLoading(false);
     }
   };
+
+  const updateServiceType = (serviceType) => {
+    setForm((current) => ({ ...current, serviceType, provider: "" }));
+    setProviders([]);
+  };
+
+  const providerTypeLabel = form.serviceType === "grooming" ? "Groomer" : "Veterinarian";
+  const providerPlaceholder = form.serviceType
+    ? `Select a ${providerTypeLabel.toLowerCase()}`
+    : "Select appointment type first";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,12 +86,13 @@ export default function AppointmentBookingModal({ isOpen, onClose, pets, onSucce
       await api.post("/appointments", {
         pet: selectedPet._id,
         provider: form.provider,
-        serviceType: "vet",
+        serviceType: form.serviceType,
         scheduledAt: slotToDateTime(form.scheduledAt)
       });
 
       setSuccess("Appointment booked successfully!");
-      setForm({ petName: "", provider: "", scheduledAt: "" });
+      setForm({ petName: "", serviceType: "", provider: "", scheduledAt: "" });
+      setProviders([]);
       
       setTimeout(() => {
         onSuccess?.();
@@ -149,7 +170,7 @@ export default function AppointmentBookingModal({ isOpen, onClose, pets, onSucce
         >
           <div>
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Book Appointment</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#666' }}>Schedule a vet visit for your pet</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#666' }}>Select a veterinarian or groomer, then choose the provider name.</p>
           </div>
           <button
             onClick={onClose}
@@ -227,14 +248,14 @@ export default function AppointmentBookingModal({ isOpen, onClose, pets, onSucce
               </datalist>
             </div>
 
-            {/* Veterinarian Field */}
+            {/* Appointment Type Field */}
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>
-                Veterinarian *
+                Appointment Type *
               </label>
               <select
-                value={form.provider}
-                onChange={(e) => setForm({ ...form, provider: e.target.value })}
+                value={form.serviceType}
+                onChange={(e) => updateServiceType(e.target.value)}
                 required
                 style={{
                   width: '100%',
@@ -245,7 +266,32 @@ export default function AppointmentBookingModal({ isOpen, onClose, pets, onSucce
                   fontFamily: 'inherit'
                 }}
               >
-                <option value="">Select a veterinarian</option>
+                <option value="">Select veterinarian or groomer</option>
+                <option value="vet">Veterinarian</option>
+                <option value="grooming">Groomer</option>
+              </select>
+            </div>
+
+            {/* Provider Field */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '14px' }}>
+                {providerTypeLabel} Name *
+              </label>
+              <select
+                value={form.provider}
+                onChange={(e) => setForm({ ...form, provider: e.target.value })}
+                required
+                disabled={!form.serviceType || providersLoading}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit'
+                }}
+              >
+                <option value="">{providersLoading ? "Loading providers..." : providerPlaceholder}</option>
                 {providers.map((provider) => (
                   <option key={provider._id} value={provider._id}>
                     {provider.name}
